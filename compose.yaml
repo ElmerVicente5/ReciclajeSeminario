@@ -1,0 +1,12 @@
+services: 
+  backend:
+    command:  npm run dev
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    volumes:
+      - ./Backend:/app
