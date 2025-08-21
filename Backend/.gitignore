@@ -24,3 +24,5 @@ out/
 # Configuraciones de IDE
 .vscode/
 
+
+/src/generated/prisma
