@@ -1,0 +1,50 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap");
+:root {
+  /* Colores principales de botes */
+  --color-bin-black: #181818; /* Basura no reciclable */
+  --color-bin-blue: #1464ff; /* Reciclable */
+  --color-bin-green: #1bb934; /* Orgánico */
+  /* Colores de apoyo */
+  --color-support-yellow: #ffe600; /* Atención, revisión */
+  --color-support-red: #e53935; /* Error, prohibido */
+  --color-support-celeste: #7fdcff; /* Resaltado suave */
+  --color-support-gray: #f5f6fa; /* Fondo principal, cards */
+  /* Colores de texto e íconos */
+  --color-text-white: #fff;
+  --color-text-black: #181818;
+  --color-text-dark: #213547;
+  --color-text-gray: #6c757d;
+
+  /* Colores globales de fondo */
+  --color-bg: #242424;
+  --color-bg-light: #ffffff;
+
+  /* Colores de enlaces */
+  --color-link: #646cff;
+  --color-link-hover: #535bf2;
+
+  /* Colores de botones */
+  --color-btn-bg: #1a1a1a;
+  --color-btn-hover: #646cff;
+  --color-btn-bg-light: #f9f9f9;
+  /* Tipografías recomendadas */
+  --font-family-base: "Inter", "Roboto", Arial, sans-serif;
+  --font-family-title: "Poppins", "Montserrat", Arial, sans-serif;
+  /* Pesos tipográficos */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  /* Tamaños para web (px) */
+  --font-size-h1: 32px;
+  --font-size-h2: 28px;
+  --font-size-h3: 22px;
+  --font-size-p: 16px;
+  --font-size-small: 13px;
+  --font-size-button: 16px;
+  /* Espaciados y bordes */
+  --border-radius: 12px;
+  --box-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Otros */
+  --transition-fast: 0.2s;
+  --line-height-base: 1.5;
+}
