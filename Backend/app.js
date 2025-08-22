@@ -11,11 +11,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'x-api-key']
 }));
 
-app.use('/api', router);
+
  
 app.use(express.json());
 const port = process.env.PORT || 8000;
-
+app.use('/api', router);
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {

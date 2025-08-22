@@ -26,3 +26,5 @@ out/
 
 
 /src/generated/prisma
+
+/src/generated
