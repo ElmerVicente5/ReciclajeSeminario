@@ -8,4 +8,7 @@ RUN npm install
 
 COPY . .
 
+# correr el cliente de prisma
+RUN npx prisma generate
+
 EXPOSE 8000
