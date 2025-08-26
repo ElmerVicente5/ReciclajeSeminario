@@ -1,0 +1,207 @@
+.dashboardContainer {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f4f6;
+}
+
+.sidebar {
+  width: 70px;
+  background: #222e3a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  position: relative;
+  z-index: 10;
+}
+.logo {
+  font-size: 2rem;
+  color: #16a34a;
+  margin-bottom: 32px;
+}
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* Botón de salir arriba a la derecha */
+  .logoutContainer {
+    position: absolute;
+    top: 32px;
+    right: 40px;
+    z-index: 10;
+  }
+  .logoutButton {
+    background: var(--color-danger, #ef4444);
+    color: var(--color-on-danger, #fff);
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .logoutButton:hover {
+    background: var(--color-danger-hover, #dc2626);
+  }
+}
+.menuItem {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.menuItem:hover {
+  background: #16a34a22;
+}
+.mainContent {
+  flex: 1;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+}
+.title {
+  font-size: 2rem;
+  color: #222e3a;
+  margin-bottom: 32px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 180px);
+  gap: 24px;
+}
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.cardIcon {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+.cardValue {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #16a34a;
+}
+.cardLabel {
+  font-size: 1rem;
+  color: #222e3a;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+.cardFull {
+  grid-column: 1 / 3;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+  margin-top: 12px;
+}
+.bar {
+  width: 18px;
+  background: #2563eb;
+  border-radius: 4px 4px 0 0;
+}
+.progressGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.progressLabel {
+  font-size: 0.95rem;
+  color: #222e3a;
+}
+.progressBar {
+  height: 10px;
+  background: #16a34a;
+  border-radius: 5px;
+  margin-bottom: 4px;
+}
+.map {
+  position: relative;
+  width: 100%;
+  height: auto;
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .map {
+    min-height: 120px;
+    max-height: 180px;
+    margin-bottom: 70px; /* espacio para el navbar */
+    box-shadow: 0 -4px 16px #0002;
+    padding-bottom: 20px; /* extra espacio para evitar superposición */
+  }
+  .card:last-child {
+    margin-bottom: 90px; /* asegura que el mapa nunca se monte sobre el navbar */
+  }
+  .mainContent {
+    padding-bottom: 120px; /* reserva aún más espacio para el navbar y scroll */
+  }
+}
+.mapPin {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #16a34a;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+@media (max-width: 900px) {
+  .dashboardContainer {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100vw;
+    height: 60px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    top: auto;
+    padding: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 8px #0001;
+  }
+  .logo {
+    display: none;
+  }
+  .menu {
+    flex-direction: row;
+    gap: 32px;
+  }
+  .mainContent {
+    padding-bottom: 80px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+  .cardFull {
+    grid-column: auto;
+  }
+}

@@ -1,0 +1,6 @@
+/* Estilos para el mapa leaflet */
+.map {
+  height: 150px;
+  width: 100%;
+  border-radius: 8px;
+}

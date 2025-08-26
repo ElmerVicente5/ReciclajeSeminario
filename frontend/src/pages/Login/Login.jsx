@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../../components/Auth/LoginForm";
+import styles from "./Login.module.css";
 
 export default function Login() {
   const [success, setSuccess] = useState(false);
@@ -17,21 +18,10 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f3f4f6" }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
+    <div className={styles.loginBg}>
+      <div className={styles.loginContainer}>
         {success && (
-          <div style={{
-            background: "#16a34a",
-            color: "#fff",
-            borderRadius: 8,
-            padding: "1rem",
-            marginBottom: 16,
-            textAlign: "center",
-            fontWeight: 500,
-            fontSize: "1.1rem"
-          }}>
-            ¡Inicio de sesión exitoso!
-          </div>
+          <div className={styles.loginSuccess}>¡Inicio de sesión exitoso!</div>
         )}
         <LoginForm onLogin={handleLogin} />
       </div>

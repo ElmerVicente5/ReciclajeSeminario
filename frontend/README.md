@@ -1,5 +1,30 @@
 # Proyecto Inicial - Seminario 2025
 
+## Instalación de dependencias principales
+
+Ejecuta este comando para instalar todas las librerías necesarias:
+
+```bash
+npm install
+```
+
+Dependencias clave utilizadas en el proyecto:
+
+- **React**: ^18.2.0 o superior
+- **React DOM**: ^18.2.0 o superior
+- **React Router DOM**: ^6.14.2 o superior
+- **Bootstrap**: solo para responsividad
+- **react-icons**: iconos universales y consistentes
+- **chart.js** y **react-chartjs-2**: para gráficos profesionales
+
+Si necesitas instalar alguna dependencia manualmente:
+
+```bash
+npm install react-icons chart.js react-chartjs-2
+```
+
+> Mantén tus dependencias actualizadas y revisa este README para nuevas librerías que se agreguen al proyecto.
+
 NOTA: para revisar el proyecto "asegurate de haber instalado las dependencias npm install" seguido npm run dev
 
 > ⚠️ **Este proyecto es un borrador inicial.**
