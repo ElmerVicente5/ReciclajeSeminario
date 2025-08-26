@@ -4,6 +4,16 @@ NOTA: para revisar el proyecto "asegurate de haber instalado las dependencias np
 
 > ⚠️ **Este proyecto es un borrador inicial.**
 
+## Login: funcionalidades y mejoras (agosto 2025)
+
+- Validación de formato de correo electrónico antes de enviar.
+- Mensajes de error claros y personalizados (correo inválido, campo vacío, credenciales incorrectas).
+- Botón “Ingresar” deshabilitado y con texto “Ingresando...” mientras está cargando.
+- Navegación por teclado estándar (Tab y Shift+Tab) entre campos y botones.
+- Tooltips: al pasar el mouse sobre los campos de correo y contraseña aparece el mensaje “Completa este campo”.
+- Botón para mostrar/ocultar la contraseña.
+- Modal para recuperación de contraseña con validaciones y mensajes.
+
 ## Estado actual
 
 - Estructura base creada con Vite + React.
