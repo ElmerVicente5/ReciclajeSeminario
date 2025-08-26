@@ -5,6 +5,7 @@ import cors from 'cors';
 const app = express();
 import {router} from './src/routes/route.js';
 import { initializeDatabase} from './src/config/db.js';
+import { specs, swaggerUi } from './src/config/swagger.config.js';
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -15,6 +16,7 @@ app.use(cors({
  
 app.use(express.json());
 const port = process.env.PORT || 8000;
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api', router);
 initializeDatabase()
   .then(() => {
