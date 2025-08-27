@@ -53,8 +53,8 @@ export default function Dashboard() {
       <DashboardSidebar />
       <main className={styles.mainContent}>
         <h1 className={styles.title}>Panel Municipal</h1>
-        <div className={styles.grid}>
-          <div className={styles.card}>
+        <div className={`row ${styles.grid}`}>
+          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
             <div className={styles.cardIcon}>
               <FaTrashAlt size={28} color={iconGreen} />
             </div>
@@ -63,7 +63,7 @@ export default function Dashboard() {
               <div className={styles.cardLabel}>Clasificaciones</div>
             </div>
           </div>
-          <div className={styles.card}>
+          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
             <div className={styles.cardIcon}>
               <FaChartLine size={28} color={iconBlue} />
             </div>
@@ -72,7 +72,7 @@ export default function Dashboard() {
               <div className={styles.cardLabel}>Participación</div>
             </div>
           </div>
-          <div className={styles.cardFull}>
+          <div className={`col-12 col-lg-8 mb-4 ${styles.cardFull}`}>
             <div className={styles.cardLabel}>Clasificaciones por Día</div>
             <div style={{ height: 180 }}>
               <Bar
@@ -127,7 +127,7 @@ export default function Dashboard() {
               />
             </div>
           </div>
-          <div className={styles.card}>
+          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
             <div className={styles.cardLabel}>Residuos Comunes</div>
             <div className={styles.progressGroup}>
               <div className={styles.progressLabel}>Vidito</div>
@@ -147,7 +147,7 @@ export default function Dashboard() {
               ></div>
             </div>
           </div>
-          <div className={styles.card}>
+          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
             <div className={styles.cardLabel}>Puntos de Acopio</div>
             <div className={styles.map}>
               <MapLeaflet />

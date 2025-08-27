@@ -19,8 +19,12 @@
   margin-bottom: 24px;
 }
 .logoImg {
-  width: 160px;
-  height: 130px;
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+  aspect-ratio: 16/13;
+  object-fit: contain;
+  display: block;
 }
 .logoText {
   font-weight: 500;
@@ -57,27 +61,54 @@
 }
 @media (max-width: 900px) {
   .sidebar {
-    width: 100vw !important;
-    min-width: unset;
-    max-width: unset;
-    height: 60px;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
     position: fixed;
     left: 0;
+    top: 0;
     bottom: 0;
-    top: auto;
-    padding: 0;
+    width: 70px;
+    min-width: 70px;
+    max-width: 90px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 16px 0;
     z-index: 100;
-    box-shadow: 0 -2px 8px var(--box-shadow-card, #0001);
+    box-shadow: 2px 0 8px var(--box-shadow-card, #0001);
     transition: width 0.2s;
+    background: var(--color-bin-green, #1bb934);
   }
   .logoGroup {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .logoImg {
+    width: 48px;
+    max-width: 64px;
+    height: auto;
+    aspect-ratio: 1/1;
+    object-fit: contain;
+    display: block;
+  }
+  .logoText {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
   }
   .menu {
-    flex-direction: row;
-    gap: 32px;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+  }
+  .menuItem {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+    justify-content: center;
+  }
+  .menuIcon {
+    font-size: 1em;
+    margin-right: 0;
+    margin-bottom: 2px;
   }
 }

@@ -34,9 +34,12 @@ export default function RegisterModal({ open, onClose }) {
       return;
     }
     // Contraseña: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
     if (!passwordRegex.test(password)) {
-      setError("La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.");
+      setError(
+        "La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.",
+      );
       return;
     }
     if (password !== confirmPassword) {
@@ -53,68 +56,87 @@ export default function RegisterModal({ open, onClose }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose}>&times;</button>
+        <button className={styles.closeBtn} onClick={onClose}>
+          &times;
+        </button>
         <h2 className={styles.title}>Registro</h2>
         {success ? (
           <div className={styles.successMsg}>¡Registro exitoso!</div>
         ) : (
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.inputGroup}>
-              <input
-                type="text"
-                placeholder="Nombre completo"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoFocus
-              />
+          <form className={`container ${styles.form}`} onSubmit={handleSubmit}>
+            <div className="row mb-3">
+              <div className="col-12">
+                <input
+                  type="text"
+                  placeholder="Nombre completo"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoFocus
+                />
+              </div>
             </div>
-            <div className={styles.inputGroup}>
-              <input
-                type="email"
-                placeholder="Correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <div className="row mb-3">
+              <div className="col-12">
+                <input
+                  type="email"
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
             </div>
-            <div className={styles.inputGroup} style={{ position: "relative" }}>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={styles.passwordInput}
-                style={{ width: "100%" }}
-              />
-              <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}>
+            <div className="row mb-3" style={{ position: "relative" }}>
+              <div className="col-12">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={styles.passwordInput}
+                  style={{ width: "100%" }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    right: 16,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className={styles.showPasswordBtn}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                </span>
+              </div>
+            </div>
+            <div className="row mb-3" style={{ position: "relative" }}>
+              <div className="col-12">
+                <input
+                  placeholder="Confirmar contraseña"
+                  className={styles.confirmPasswordInput}
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className={styles.showPasswordBtn}
+                  className={styles.confirmShowPasswordBtn}
                   tabIndex={-1}
+                  onClick={() => setShowConfirm((v) => !v)}
                 >
-                  {showPassword ? "Ocultar" : "Mostrar"}
+                  {showConfirm ? "Ocultar" : "Mostrar"}
                 </button>
-              </span>
-            </div>
-            <div className={styles.inputGroup} style={{ position: "relative" }}>
-              <input
-                placeholder="Confirmar contraseña"
-                className={styles.confirmPasswordInput}
-                type={showConfirm ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className={styles.confirmShowPasswordBtn}
-                tabIndex={-1}
-                onClick={() => setShowConfirm((v) => !v)}
-              >
-                {showConfirm ? "Ocultar" : "Mostrar"}
-              </button>
+              </div>
             </div>
             {error && <div className={styles.error}>{error}</div>}
-            <button className={styles.button} type="submit">Registrarse</button>
+            <button className={styles.button} type="submit">
+              Registrarse
+            </button>
           </form>
         )}
       </div>

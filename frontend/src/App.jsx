@@ -6,6 +6,7 @@ import PrivateRoute from "./components/Auth/PrivateRoute";
 import NotFound from "./pages/NotFound";
 import MapLeafletPage from "./pages/MapLeaflet/MapLeafletPage";
 import DashboardSidebar from "./pages/Dashboard/DashboardSidebar";
+import Calendar from "./pages/Calendar/Calendar";
 
 function App() {
   // Layout que incluye el sidebar/navbar
@@ -18,7 +19,16 @@ function App() {
       }}
     >
       <DashboardSidebar />
-      <main style={{ flex: 1 }}>{children}</main>
+      <div
+        style={{
+          flex: 1,
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 
@@ -37,6 +47,14 @@ function App() {
         />
         <Route path="/" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
+        <Route
+          path="/calendario"
+          element={
+            <Layout>
+              <Calendar />
+            </Layout>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
