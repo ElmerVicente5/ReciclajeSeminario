@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useLogin } from "../../hooks/useLogin";
 import styles from "./LoginForm.module.css";
+
 import RecoverPasswordModal from "./RecoverPasswordModal";
+import RegisterModal from "./RegisterModal";
 
 export default function LoginForm({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -10,6 +12,7 @@ export default function LoginForm({ onLogin }) {
   const [showRecover, setShowRecover] = useState(false);
   const { login, loading, error } = useLogin();
   const [localError, setLocalError] = useState("");
+  const [showRegister, setShowRegister] = useState(false);
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -61,7 +64,7 @@ export default function LoginForm({ onLogin }) {
           <div className={styles.label}>
             <strong>Contraseña</strong>
           </div>
-          <div className={styles.passwordWrapper}>
+          <div style={{ position: "relative" }}>
             <input
               type={showPassword ? "text" : "password"}
               value={password}
@@ -69,12 +72,14 @@ export default function LoginForm({ onLogin }) {
               className={styles.passwordInput}
               placeholder="Contraseña"
               title="Completa este campo"
+              style={{ width: "100%", paddingRight: 80 }}
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className={styles.showPasswordBtn}
               tabIndex={-1}
+              style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}
             >
               {showPassword ? "Ocultar" : "Mostrar"}
             </button>
@@ -96,9 +101,22 @@ export default function LoginForm({ onLogin }) {
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
+      <div style={{ textAlign: "center", marginTop: 12 }}>
+        <button
+          type="button"
+          style={{ color: "#2563eb", fontSize: 13, textDecoration: "underline", cursor: "pointer", background: "none", border: "none", padding: 0, marginRight: 8 }}
+          onClick={() => setShowRegister(true)}
+        >
+          ¿No tienes cuenta? Regístrate
+        </button>
+      </div>
       <RecoverPasswordModal
         open={showRecover}
         onClose={() => setShowRecover(false)}
+      />
+      <RegisterModal
+        open={showRegister}
+        onClose={() => setShowRegister(false)}
       />
     </>
   );

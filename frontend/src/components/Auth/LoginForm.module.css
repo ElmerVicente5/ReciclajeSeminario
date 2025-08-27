@@ -1,3 +1,80 @@
+.confirmPasswordInput {
+  padding-right: 90px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  padding-left: 0.7rem;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  width: 110%;
+}
+.confirmPasswordInput::placeholder {
+  font-size: 0.97rem;
+}
+.confirmShowPasswordBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 2;
+  width: 55px;
+  min-width: 55px;
+  text-align: right;
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  padding: 0 4px 0 4px;
+}
+/* Para alinear label y botón mostrar/ocultar en registro */
+
+.inputGroup {
+  position: relative;
+}
+/* Estilos para el modal de registro */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px #0002;
+  padding: 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 400px;
+  position: relative;
+}
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+}
+.successMsg {
+  background: #16a34a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
 /* Estilos para el formulario de login */
 .form {
   background: #fff;
@@ -27,19 +104,26 @@
   align-items: center;
 }
 .passwordInput {
-  padding-right: 70px;
+  padding-right: 130px;
+  box-sizing: border-box;
 }
 .showPasswordBtn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: #2563eb;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  z-index: 2;
+  width: 100px;
+  min-width: 100px;
+  text-align: right;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  padding: 0 8px 0 8px;
 }
 .recoverWrapper {
   text-align: right;
