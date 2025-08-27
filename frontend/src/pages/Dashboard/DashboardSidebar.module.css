@@ -1,0 +1,83 @@
+.sidebar {
+  width: 180px;
+  min-width: 140px;
+  max-width: 220px;
+  transition: width 0.2s;
+  background: #074f12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  position: relative;
+  z-index: 10;
+  font-size: 12px;
+}
+.logoGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.logoImg {
+  width: 160px;
+  height: 130px;
+}
+.logoText {
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: var(--color-text-dark, #213547);
+}
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.menuItem {
+  background: none;
+  border: none;
+  color: var(--color-text-white, #fff);
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+.menuItem:hover {
+  background: rgba(27, 185, 52, 0.13);
+  color: var(--color-bin-blue, #1464ff);
+}
+.menuIcon {
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100vw !important;
+    min-width: unset;
+    max-width: unset;
+    height: 60px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    top: auto;
+    padding: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 8px var(--box-shadow-card, #0001);
+    transition: width 0.2s;
+  }
+  .logoGroup {
+    display: none;
+  }
+  .menu {
+    flex-direction: row;
+    gap: 32px;
+  }
+}

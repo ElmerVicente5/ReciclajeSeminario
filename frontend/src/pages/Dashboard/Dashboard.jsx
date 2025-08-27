@@ -1,15 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Dashboard.module.css";
-import {
-  FaRecycle,
-  FaUser,
-  FaHome,
-  FaTrashAlt,
-  FaChartLine,
-} from "react-icons/fa";
+import { FaTrashAlt, FaChartLine } from "react-icons/fa";
 import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
-import { FiLogOut } from "react-icons/fi";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -20,6 +13,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import DashboardSidebar from "./DashboardSidebar";
 
 ChartJS.register(
   CategoryScale,
@@ -31,42 +25,38 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  // Helper para obtener color CSS variable
+  const getCssVar = (name) =>
+    getComputedStyle(document.documentElement).getPropertyValue(name) ||
+    undefined;
 
-  const handleLogout = () => {
-    // Aquí puedes limpiar el estado de autenticación si lo usas
-    localStorage.removeItem("isLoggedIn");
-    navigate("/login");
-  };
+  // Colores para iconos
+  const iconGreen = getCssVar("--color-primary-green") || "#16a34a";
+  const iconBlue = getCssVar("--color-primary-blue") || "#2563eb";
+
+  // Colores para gráfico
+  const chartColors = [
+    getCssVar("--color-accent-red") || "#ff3b3f",
+    getCssVar("--color-accent-yellow") || "#ffb800",
+    getCssVar("--color-accent-green") || "#00d084",
+    getCssVar("--color-primary-blue") || "#0096ff",
+    getCssVar("--color-accent-pink") || "#ff61a6",
+    getCssVar("--color-accent-cyan") || "#00e6e6",
+    getCssVar("--color-accent-orange") || "#ff7f00",
+    getCssVar("--color-accent-violet") || "#a259ff",
+    getCssVar("--color-accent-light-blue") || "#00c3ff",
+    getCssVar("--color-accent-light-yellow") || "#ffde59",
+  ];
 
   return (
     <div className={styles.dashboardContainer}>
-      <aside className={styles.sidebar}>
-        <div className={styles.logo}>
-          <FaRecycle size={32} color="#16a34a" />
-        </div>
-        <nav className={styles.menu}>
-          <button className={styles.menuItem} title="Panel">
-            <FaHome size={24} />
-          </button>
-          <button
-            className={styles.menuItem}
-            title="Cerrar sesión"
-            onClick={() => {
-              localStorage.removeItem("isLoggedIn");
-              navigate("/login");
-            }}
-          >
-            <FaUser size={24} />
-          </button>
-        </nav>
-      </aside>
+      <DashboardSidebar />
       <main className={styles.mainContent}>
         <h1 className={styles.title}>Panel Municipal</h1>
         <div className={styles.grid}>
           <div className={styles.card}>
             <div className={styles.cardIcon}>
-              <FaTrashAlt size={28} color="#16a34a" />
+              <FaTrashAlt size={28} color={iconGreen} />
             </div>
             <div>
               <div className={styles.cardValue}>108</div>
@@ -75,7 +65,7 @@ export default function Dashboard() {
           </div>
           <div className={styles.card}>
             <div className={styles.cardIcon}>
-              <FaChartLine size={28} color="#2563eb" />
+              <FaChartLine size={28} color={iconBlue} />
             </div>
             <div>
               <div className={styles.cardValue}>35%</div>
@@ -103,18 +93,7 @@ export default function Dashboard() {
                     {
                       label: "Clasificaciones",
                       data: [6, 4, 5, 7, 8, 9, 5, 7, 6, 3],
-                      backgroundColor: [
-                        "#ff3b3f", // rojo vivo
-                        "#ffb800", // amarillo
-                        "#00d084", // verde
-                        "#0096ff", // azul
-                        "#ff61a6", // rosa
-                        "#00e6e6", // cyan
-                        "#ff7f00", // naranja
-                        "#a259ff", // violeta
-                        "#00c3ff", // azul claro
-                        "#ffde59", // amarillo claro
-                      ],
+                      backgroundColor: chartColors,
                       borderRadius: 6,
                     },
                   ],
@@ -128,14 +107,17 @@ export default function Dashboard() {
                   scales: {
                     x: {
                       grid: { display: false },
-                      ticks: { color: "#222e3a", font: { size: 12 } },
+                      ticks: {
+                        color: getCssVar("--color-text") || "#222e3a",
+                        font: { size: 12 },
+                      },
                     },
                     y: {
                       grid: { display: false },
                       beginAtZero: true,
                       ticks: {
                         stepSize: 1,
-                        color: "#222e3a",
+                        color: getCssVar("--color-text") || "#222e3a",
                         font: { size: 12 },
                       },
                     },
