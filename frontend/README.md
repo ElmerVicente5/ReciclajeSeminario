@@ -39,6 +39,27 @@ NOTA: para revisar el proyecto "asegurate de haber instalado las dependencias np
 - Botón para mostrar/ocultar la contraseña.
 - Modal para recuperación de contraseña con validaciones y mensajes.
 
+## Cambios recientes (agosto 2025)
+
+- Fondo visual: Se agregó una imagen de fondo semitransparente y responsiva, que no interfiere con los formularios ni modals.
+- Formularios responsive: Login, registro y restablecer contraseña ahora se adaptan a dispositivos móviles y pantallas pequeñas.
+- Unificación de validaciones: Todos los formularios usan validación centralizada para correo (solo .com) y contraseñas fuertes.
+- Mensajes de error claros: Se especifica cuando el correo debe terminar en .com y se muestran mensajes personalizados en todos los formularios.
+- Botones principales (Ingresar, Registrarse, Restablecer):
+  - Efecto visual de presionado y hover moderno.
+  - Consistencia visual y de comportamiento en todos los formularios.
+- Enlaces de acción (¿No tienes cuenta? Regístrate, ¿Olvidaste tu contraseña?, Cancelar):
+  - Ahora son enlaces verdes, subrayados y accesibles, no botones.
+  - Cancelar centrado en los modals.
+- Modals:
+  - Se limpian los campos al cerrar.
+  - Mensajes de éxito y error unificados y con tiempos consistentes.
+- Código refactorizado:
+  - Corrección de errores de JSX y estilos.
+  - Importación correcta de estilos en todos los componentes.
+
+> Todos estos cambios mejoran la experiencia de usuario, la accesibilidad y la mantenibilidad del frontend.
+
 ## Estado actual
 
 - Estructura base creada con Vite + React.

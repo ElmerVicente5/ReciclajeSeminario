@@ -10,7 +10,7 @@ export function useLogin() {
     setError("");
     // Simulación de autenticación (reemplazar con llamada a backend cuando esté disponible)
     await new Promise((res) => setTimeout(res, 1000));
-    if (email === "admin@demo.com" && password === "123456") {
+    if (email === "admin@demo.com" && password === "Admin123!") {
       setLoading(false);
       return { success: true, user: { email, role: "admin" } };
     } else {

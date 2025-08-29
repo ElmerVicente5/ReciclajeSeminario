@@ -5,6 +5,25 @@
   align-items: center;
   justify-content: center;
   background: var(--color-bg, #f3f4f6);
+  position: relative;
+}
+
+.loginBg::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  background: url('/zzz.jpg') center center / cover no-repeat;
+  opacity: 0.90;
+  pointer-events: none;
+}
+
+.loginContainer, .loginSuccess {
+  position: relative;
+  z-index: 1;
 }
 
 .loginContainer {

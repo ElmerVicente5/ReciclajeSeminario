@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLogin } from "../../hooks/useLogin";
+import { validateEmail, validateStrongPassword } from "../../utils/validation";
 import styles from "./LoginForm.module.css";
 
 import RecoverPasswordModal from "./RecoverPasswordModal";
@@ -14,19 +15,20 @@ export default function LoginForm({ onLogin }) {
   const [localError, setLocalError] = useState("");
   const [showRegister, setShowRegister] = useState(false);
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError("");
     if (!validateEmail(email)) {
-      setLocalError("Por favor ingresa un correo electrónico válido.");
+      setLocalError("Por favor ingresa un correo electrónico válido que termine en .com");
       return;
     }
     if (!password) {
       setLocalError("Por favor ingresa tu contraseña.");
+      return;
+    }
+    if (!validateStrongPassword(password)) {
+      setLocalError("La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.");
       return;
     }
     const result = await login({ email, password });
@@ -39,9 +41,24 @@ export default function LoginForm({ onLogin }) {
     }
   };
 
+  // Limpiar campos de login al cerrar/abrir modales de registro o recuperación
+  useEffect(() => {
+    if (!showRegister && !showRecover) {
+      setEmail("");
+      setPassword("");
+      setLocalError("");
+      setShowPassword(false);
+    }
+  }, [showRegister, showRecover]);
+
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit}>
+        <div style={{ background: '#f3f4f6', color: '#222', borderRadius: 8, padding: 10, marginBottom: 16, fontSize: 14, textAlign: 'center' }}>
+          <strong>Credenciales de prueba:</strong><br />
+          Correo: <span style={{ fontFamily: 'monospace' }}>admin@demo.com</span><br />
+          Contraseña: <span style={{ fontFamily: 'monospace' }}>Admin123!</span>
+        </div>
         <h2 className={styles.title}>
           Clasifica tu basura de forma inteligente
         </h2>
@@ -84,15 +101,6 @@ export default function LoginForm({ onLogin }) {
               {showPassword ? "Ocultar" : "Mostrar"}
             </button>
           </div>
-          <div className={styles.recoverWrapper}>
-            <button
-              type="button"
-              className={styles.recoverBtn}
-              onClick={() => setShowRecover(true)}
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
-          </div>
         </div>
         {(localError || error) && (
           <div className={styles.error}>{localError || error}</div>
@@ -100,16 +108,27 @@ export default function LoginForm({ onLogin }) {
         <button className={styles.button} type="submit" disabled={loading}>
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
+        <div style={{ textAlign: "center", marginTop: 12 }}>
+          <a
+            href="#"
+            className={styles.registerLinkBtn}
+            onClick={e => { e.preventDefault(); setShowRecover(true); }}
+            tabIndex={0}
+          >
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+        <div style={{ textAlign: "center", marginTop: 8 }}>
+          <a
+            href="#"
+            className={styles.registerLinkBtn}
+            onClick={e => { e.preventDefault(); setShowRegister(true); }}
+            tabIndex={0}
+          >
+            ¿No tienes cuenta? <span style={{ textDecoration: 'underline' }}>Regístrate</span>
+          </a>
+        </div>
       </form>
-      <div style={{ textAlign: "center", marginTop: 12 }}>
-        <button
-          type="button"
-          style={{ color: "#2563eb", fontSize: 13, textDecoration: "underline", cursor: "pointer", background: "none", border: "none", padding: 0, marginRight: 8 }}
-          onClick={() => setShowRegister(true)}
-        >
-          ¿No tienes cuenta? Regístrate
-        </button>
-      </div>
       <RecoverPasswordModal
         open={showRecover}
         onClose={() => setShowRecover(false)}

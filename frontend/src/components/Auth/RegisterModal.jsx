@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
+import { validateEmail, validateStrongPassword, validateName, validateRequired } from "../../utils/validation";
 
 export default function RegisterModal({ open, onClose }) {
   const [name, setName] = useState("");
@@ -11,11 +12,23 @@ export default function RegisterModal({ open, onClose }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+
+  // Limpiar campos al abrir/cerrar el modal
+  useEffect(() => {
+    if (!open) {
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setError("");
+      setSuccess(false);
+      setShowPassword(false);
+      setShowConfirm(false);
+    }
+  }, [open]);
+
   if (!open) return null;
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,16 +39,14 @@ export default function RegisterModal({ open, onClose }) {
       return;
     }
     if (!validateEmail(email)) {
-      setError("Correo electrónico inválido.");
+      setError("Por favor ingresa un correo electrónico válido que termine en .com");
       return;
     }
     if (name.length < 3) {
       setError("El nombre debe tener al menos 3 caracteres.");
       return;
     }
-    // Contraseña: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!validateStrongPassword(password)) {
       setError("La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.");
       return;
     }
@@ -43,6 +54,10 @@ export default function RegisterModal({ open, onClose }) {
       setError("Las contraseñas no coinciden.");
       return;
     }
+      if (!validateRequired(name) || !validateRequired(email) || !validateRequired(password) || !validateRequired(confirmPassword)) {
+        setError("Todos los campos son obligatorios.");
+        return;
+      }
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
@@ -53,7 +68,6 @@ export default function RegisterModal({ open, onClose }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose}>&times;</button>
         <h2 className={styles.title}>Registro</h2>
         {success ? (
           <div className={styles.successMsg}>¡Registro exitoso!</div>
@@ -66,6 +80,7 @@ export default function RegisterModal({ open, onClose }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
+                title="Completa este campo"
               />
             </div>
             <div className={styles.inputGroup}>
@@ -74,6 +89,7 @@ export default function RegisterModal({ open, onClose }) {
                 placeholder="Correo electrónico"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                title="Completa este campo"
               />
             </div>
             <div className={styles.inputGroup} style={{ position: "relative" }}>
@@ -84,6 +100,7 @@ export default function RegisterModal({ open, onClose }) {
                 onChange={(e) => setPassword(e.target.value)}
                 className={styles.passwordInput}
                 style={{ width: "100%" }}
+                title="Completa este campo"
               />
               <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}>
                 <button
@@ -103,6 +120,7 @@ export default function RegisterModal({ open, onClose }) {
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                title="Completa este campo"
               />
               <button
                 type="button"
@@ -115,6 +133,16 @@ export default function RegisterModal({ open, onClose }) {
             </div>
             {error && <div className={styles.error}>{error}</div>}
             <button className={styles.button} type="submit">Registrarse</button>
+            <div style={{ textAlign: 'center', width: '100%' }}>
+              <a
+                href="#"
+                onClick={e => { e.preventDefault(); onClose(); }}
+                className={styles.registerLinkBtn}
+                style={{ marginTop: 18, display: 'inline-block' }}
+              >
+                Cancelar
+              </a>
+            </div>
           </form>
         )}
       </div>

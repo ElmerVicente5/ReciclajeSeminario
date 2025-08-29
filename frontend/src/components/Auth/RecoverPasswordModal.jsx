@@ -1,4 +1,7 @@
-import { useState } from "react";
+
+import { validateEmail, validateStrongPassword, validateRequired } from "../../utils/validation";
+import { useState, useEffect } from "react";
+import styles from "./LoginForm.module.css";
 
 export default function RecoverPasswordModal({ open, onClose }) {
   const [email, setEmail] = useState("");
@@ -9,19 +12,16 @@ export default function RecoverPasswordModal({ open, onClose }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
     if (!validateEmail(email)) {
-      setError("Por favor ingresa un correo válido.");
+      setError("Por favor ingresa un correo electrónico válido que termine en .com");
       return;
     }
-    if (newPassword.length < 6) {
-      setError("La nueva contraseña debe tener al menos 6 caracteres.");
+    if (!validateStrongPassword(newPassword)) {
+      setError("La nueva contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -37,8 +37,22 @@ export default function RecoverPasswordModal({ open, onClose }) {
       setNewPassword("");
       setConfirmPassword("");
       setError("");
-    }, 5000); // 5 segundos
+    }, 1500); // igual que registro
   };
+
+
+  // Limpiar campos al abrir/cerrar el modal
+  useEffect(() => {
+    if (!open) {
+      setEmail("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setError("");
+      setSuccess(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -63,7 +77,7 @@ export default function RecoverPasswordModal({ open, onClose }) {
         boxShadow: "0 2px 16px rgba(0,0,0,0.12)",
         textAlign: "center"
       }}>
-        <h3 style={{ fontSize: "1.2rem", marginBottom: 16 }}>Restablecer contraseña</h3>
+  <h3 style={{ fontSize: "1.2rem", marginBottom: 16, fontWeight: 700 }}>Restablecer contraseña</h3>
         {success ? (
           <div style={{ color: "#16a34a", fontWeight: 500, margin: "1.5rem 0" }}>
             ¡Contraseña actualizada correctamente!
@@ -113,7 +127,7 @@ export default function RecoverPasswordModal({ open, onClose }) {
                   transform: "translateY(-50%)",
                   background: "none",
                   border: "none",
-                  color: "#2563eb",
+                  color: "#22c55e",
                   fontSize: 13,
                   cursor: "pointer"
                 }}
@@ -149,7 +163,7 @@ export default function RecoverPasswordModal({ open, onClose }) {
                   transform: "translateY(-50%)",
                   background: "none",
                   border: "none",
-                  color: "#2563eb",
+                  color: "#22c55e",
                   fontSize: 13,
                   cursor: "pointer"
                 }}
@@ -162,35 +176,21 @@ export default function RecoverPasswordModal({ open, onClose }) {
             {error && <div style={{ color: "#ef4444", fontSize: 13, marginBottom: 10 }}>{error}</div>}
             <button
               type="submit"
-              style={{
-                background: "#2563eb",
-                color: "#fff",
-                border: "none",
-                borderRadius: 6,
-                padding: "0.7rem 1.5rem",
-                fontSize: "1rem",
-                fontWeight: 500,
-                cursor: "pointer"
-              }}
+              className={styles.button}
+              style={{ width: '100%', margin: '0.5rem 0' }}
             >
               Restablecer
             </button>
           </form>
         )}
-        <button
-          onClick={onClose}
-          style={{
-            marginTop: 18,
-            background: "none",
-            border: "none",
-            color: "#2563eb",
-            fontSize: 15,
-            cursor: "pointer",
-            textDecoration: "underline"
-          }}
+        <a
+          href="#"
+          onClick={e => { e.preventDefault(); onClose(); }}
+          className="registerLinkBtn"
+          style={{ marginTop: 18, display: 'inline-block' }}
         >
           Cancelar
-        </button>
+        </a>
       </div>
     </div>
   );

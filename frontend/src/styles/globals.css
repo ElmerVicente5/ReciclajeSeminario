@@ -14,9 +14,11 @@ body {
   min-height: 100vh;
   font-family: var(--font-family-base);
   color: var(--color-text-black);
-
-  background-color: var(--color-bg);
+  position: relative;
+  background: #f6fdf4;
 }
+
+
 
 h1 {
   font-size: var(--font-size-h1);
