@@ -15,12 +15,121 @@ model roles {
 }
 
 model usuarios {
-  id              Int       @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   nombre_completo String
   contrasenia     String
   rol_id          Int?
-  fecha_registro  DateTime? @default(now()) @db.Timestamp(6)
-  estado          String?   @db.VarChar(20)
-  nombre_usuario  String    @unique
-  roles           roles?    @relation(fields: [rol_id], references: [id], onUpdate: NoAction)
+  fecha_registro  DateTime?        @default(now()) @db.Timestamp(6)
+  estado          String?          @db.VarChar(20)
+  nombre_usuario  String           @unique
+  zona_id         Int?
+  dispositivos    dispositivos[]
+  notificaciones  notificaciones[]
+  roles           roles?           @relation(fields: [rol_id], references: [id], onUpdate: NoAction)
+  zonas           zonas?           @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
+}
+
+model audiencianotificaciones {
+  id              Int            @id @default(autoincrement())
+  notificacion_id Int
+  tipo_objetivo   String
+  objetivo_id     Int?
+  notificaciones  notificaciones @relation(fields: [notificacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model calendariorecoleccion {
+  id          Int      @id @default(autoincrement())
+  ruta_id     Int
+  dia_semana  Int      @db.SmallInt
+  hora_inicio DateTime @db.Time(6)
+  hora_fin    DateTime @db.Time(6)
+  frecuencia  String?
+  notas       String?
+  rutas       rutas    @relation(fields: [ruta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model centrosacopio {
+  id        Int     @id @default(autoincrement())
+  tipo      String?
+  nombre    String
+  latitud   Float?
+  longitud  Float?
+  direccion String?
+  zona_id   Int?
+  horario   String?
+  zonas     zonas?  @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
+}
+
+model dispositivos {
+  id_dispositivo   String    @id @db.Uuid
+  usuario_id       Int?
+  plataforma       String?
+  registrado_en    DateTime? @default(now()) @db.Timestamp(6)
+  ultima_actividad DateTime? @db.Timestamp(6)
+  usuarios         usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model eventospuntosporzona {
+  id              Int          @id @default(autoincrement())
+  zona_id         Int
+  tipo_origen     String
+  origen_id       Int?
+  puntos          Int
+  tipo_residuo_id Int?
+  fecha_registro  DateTime?    @default(now()) @db.Timestamp(6)
+  descripcion     String?
+  tiporesiduo     tiporesiduo? @relation(fields: [tipo_residuo_id], references: [id], onUpdate: NoAction)
+  zonas           zonas        @relation(fields: [zona_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model notificaciones {
+  id                      Int                       @id @default(autoincrement())
+  titulo                  String
+  cuerpo                  String?
+  tipo                    String?
+  creado_por              Int?
+  programada_en           DateTime?                 @db.Timestamp(6)
+  enviada_en              DateTime?                 @db.Timestamp(6)
+  audiencianotificaciones audiencianotificaciones[]
+  usuarios                usuarios?                 @relation(fields: [creado_por], references: [id], onUpdate: NoAction)
+}
+
+model puntosporzona {
+  id             Int       @id @default(autoincrement())
+  zona_id        Int
+  periodo        String
+  puntos         Int       @default(0)
+  actualizado_en DateTime? @default(now()) @db.Timestamp(6)
+  zonas          zonas     @relation(fields: [zona_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model rutas {
+  id                    Int                     @id @default(autoincrement())
+  nombre                String
+  zona_id               Int?
+  activo                Boolean?                @default(true)
+  calendariorecoleccion calendariorecoleccion[]
+  zonas                 zonas?                  @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
+}
+
+model tiporesiduo {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String
+  categoria            String?
+  reciclable           Boolean?
+  color_contenedor     String?
+  eventospuntosporzona eventospuntosporzona[]
+}
+
+model zonas {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String
+  codigo               String                 @unique
+  centrosacopio        centrosacopio[]
+  eventospuntosporzona eventospuntosporzona[]
+  puntosporzona        puntosporzona[]
+  rutas                rutas[]
+  usuarios             usuarios[]
+
+  @@index([nombre], map: "lugar")
 }
