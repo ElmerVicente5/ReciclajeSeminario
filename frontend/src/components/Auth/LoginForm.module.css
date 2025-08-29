@@ -48,18 +48,7 @@
     font-size: 1rem;
   }
 }
-.confirmPasswordInput {
-  padding-right: 90px;
-  box-sizing: border-box;
-  font-size: 1rem;
-  padding-left: 0.7rem;
-  padding-top: 0.7rem;
-  padding-bottom: 0.7rem;
-  width: 110%;
-}
-.confirmPasswordInput::placeholder {
-  font-size: 0.97rem;
-}
+/* .confirmPasswordInput eliminado, se usará .input para alinear todos los campos */
 .confirmShowPasswordBtn {
   background: none;
   border: none;
@@ -282,13 +271,18 @@ input {
   border-radius: 0 !important;
   outline: none;
   box-shadow: none;
+  transition: color 0.18s;
 }
 
 .registerLinkBtn:visited,
 .registerLinkBtn:active,
-.registerLinkBtn:focus,
+.registerLinkBtn:focus {
+  color: #22c55e;
+  text-decoration: underline;
+}
+
 .registerLinkBtn:hover {
-  color: #22c55e !important;
+  color: #2563eb;
   text-decoration: underline;
 }
   cursor: not-allowed;

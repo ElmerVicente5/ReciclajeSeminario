@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
-import { validateEmail, validateStrongPassword, validateName, validateRequired } from "../../utils/validation";
+import { validateEmail, validateStrongPassword, validateRequired } from "../../utils/validation";
 
 export default function RegisterModal({ open, onClose }) {
   const [name, setName] = useState("");
@@ -12,8 +12,6 @@ export default function RegisterModal({ open, onClose }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-
-  // Limpiar campos al abrir/cerrar el modal
   useEffect(() => {
     if (!open) {
       setName("");
@@ -29,12 +27,10 @@ export default function RegisterModal({ open, onClose }) {
 
   if (!open) return null;
 
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    // Validaciones
-    if (!name || !email || !password || !confirmPassword) {
+    if (!validateRequired(name) || !validateRequired(email) || !validateRequired(password) || !validateRequired(confirmPassword)) {
       setError("Todos los campos son obligatorios.");
       return;
     }
@@ -46,28 +42,14 @@ export default function RegisterModal({ open, onClose }) {
       setError("El nombre debe tener al menos 3 caracteres.");
       return;
     }
-<<<<<<< HEAD
     if (!validateStrongPassword(password)) {
       setError("La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.");
-=======
-    // Contraseña: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-    if (!passwordRegex.test(password)) {
-      setError(
-        "La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.",
-      );
->>>>>>> 7d333a393bdea7757cfa91362648dd5356ad8d66
       return;
     }
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden.");
       return;
     }
-      if (!validateRequired(name) || !validateRequired(email) || !validateRequired(password) || !validateRequired(confirmPassword)) {
-        setError("Todos los campos son obligatorios.");
-        return;
-      }
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
@@ -78,17 +60,11 @@ export default function RegisterModal({ open, onClose }) {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-<<<<<<< HEAD
-=======
-        <button className={styles.closeBtn} onClick={onClose}>
-          &times;
-        </button>
->>>>>>> 7d333a393bdea7757cfa91362648dd5356ad8d66
+  {/* <button className={styles.closeBtn} onClick={onClose}>&times;</button> */}
         <h2 className={styles.title}>Registro</h2>
         {success ? (
           <div className={styles.successMsg}>¡Registro exitoso!</div>
         ) : (
-<<<<<<< HEAD
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.inputGroup}>
               <input
@@ -119,88 +95,24 @@ export default function RegisterModal({ open, onClose }) {
                 style={{ width: "100%" }}
                 title="Completa este campo"
               />
-              <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)" }}>
-=======
-          <form className={`container ${styles.form}`} onSubmit={handleSubmit}>
-            <div className="row mb-3">
-              <div className="col-12">
-                <input
-                  type="text"
-                  placeholder="Nombre completo"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="row mb-3">
-              <div className="col-12">
-                <input
-                  type="email"
-                  placeholder="Correo electrónico"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="row mb-3" style={{ position: "relative" }}>
-              <div className="col-12">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={styles.passwordInput}
-                  style={{ width: "100%" }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    right: 16,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className={styles.showPasswordBtn}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? "Ocultar" : "Mostrar"}
-                  </button>
-                </span>
-              </div>
-            </div>
-            <div className="row mb-3" style={{ position: "relative" }}>
-              <div className="col-12">
-                <input
-                  placeholder="Confirmar contraseña"
-                  className={styles.confirmPasswordInput}
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
->>>>>>> 7d333a393bdea7757cfa91362648dd5356ad8d66
-                <button
-                  type="button"
-                  className={styles.confirmShowPasswordBtn}
-                  tabIndex={-1}
-                  onClick={() => setShowConfirm((v) => !v)}
-                >
-                  {showConfirm ? "Ocultar" : "Mostrar"}
-                </button>
-<<<<<<< HEAD
-              </span>
+              <button
+                type="button"
+                className={styles.confirmShowPasswordBtn}
+                tabIndex={-1}
+                onClick={() => setShowPassword((v) => !v)}
+              >
+                {showPassword ? "Ocultar" : "Mostrar"}
+              </button>
             </div>
             <div className={styles.inputGroup} style={{ position: "relative" }}>
               <input
                 placeholder="Confirmar contraseña"
-                className={styles.confirmPasswordInput}
+                className={styles.input}
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 title="Completa este campo"
+                style={{ width: "100%", paddingRight: 80 }}
               />
               <button
                 type="button"
@@ -223,14 +135,6 @@ export default function RegisterModal({ open, onClose }) {
                 Cancelar
               </a>
             </div>
-=======
-              </div>
-            </div>
-            {error && <div className={styles.error}>{error}</div>}
-            <button className={styles.button} type="submit">
-              Registrarse
-            </button>
->>>>>>> 7d333a393bdea7757cfa91362648dd5356ad8d66
           </form>
         )}
       </div>
