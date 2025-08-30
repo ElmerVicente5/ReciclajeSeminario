@@ -1,0 +1,41 @@
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 16px;
+}
+
+.tableHeader {
+  background: #3e8e41;
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+}
+
+.tableContainer {
+  background: #e6f4ea;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.tableRow {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.cell {
+  flex: 1;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.icon {
+  font-size: 1.2rem;
+  margin-right: 8px;
+}

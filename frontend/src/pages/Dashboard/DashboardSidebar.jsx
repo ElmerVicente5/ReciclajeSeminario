@@ -102,8 +102,12 @@ export default function DashboardSidebar() {
             <button
               className="btn btn-link text-white d-flex flex-column align-items-center"
               title="Ranking por Colonia"
+              onClick={() => {
+               setMenuOpen(false);
+               navigate("/ranking");
+             }}
             >
-              <FaChartBar size={22} />{" "}
+               <FaChartBar size={22} />
               <span style={{ fontSize: 10 }}>Ranking</span>
             </button>
             <button
@@ -178,10 +182,11 @@ export default function DashboardSidebar() {
         <button
           className={`${styles.menuItem} w-100 mb-2`}
           title="Ranking por Colonia"
-        >
-          {" "}
-          <FaChartBar className={styles.menuIcon} /> Ranking por Colonia{" "}
+          onClick={() => navigate("/ranking")}
+>
+        <FaChartBar className={styles.menuIcon} /> Ranking por Colonia
         </button>
+
         <button className={`${styles.menuItem} w-100 mb-2`} title="Reportes">
           {" "}
           <FaFileAlt className={styles.menuIcon} /> Reportes{" "}

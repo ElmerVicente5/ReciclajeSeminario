@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound";
 import MapLeafletPage from "./pages/MapLeaflet/MapLeafletPage";
 import DashboardSidebar from "./pages/Dashboard/DashboardSidebar";
 import Calendar from "./pages/Calendar/Calendar";
+import Ranking from "./pages/Ranking/Ranking"; 
 
 function App() {
   // Layout que incluye el sidebar/navbar
@@ -54,9 +55,18 @@ function App() {
             </Layout>
           }
         />
+        <Route
+          path="/ranking"
+          element={
+            <Layout>
+              <Ranking />
+            </Layout>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+
