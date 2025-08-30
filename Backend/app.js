@@ -4,6 +4,7 @@ dotenv.config();
 import cors from 'cors';
 const app = express();
 import {router} from './src/routes/route.js';
+import calendarioRouter from "./src/routes/calendario.route.js";
 import { initializeDatabase} from './src/config/db.js';
 import { specs, swaggerUi } from './src/config/swagger.config.js';
 app.use(cors({
@@ -18,6 +19,8 @@ app.use(express.json());
 const port = process.env.PORT || 8000;
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api', router);
+app.use("/api/calendario", calendarioRouter);
+
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {
