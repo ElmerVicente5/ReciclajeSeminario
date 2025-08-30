@@ -10,7 +10,7 @@ const options = {
       description: 'A simple Express API with Swagger documentation',
     },
   },
-  apis: ['./src/routes/route.js'],
+  apis: ['./src/routes/route.js', './src/routes/acopio.route.js'],
    // Path to your API routes
 };
 
