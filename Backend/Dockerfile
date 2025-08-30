@@ -8,6 +8,7 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma db pull
 # correr el cliente de prisma
 RUN npx prisma generate
 

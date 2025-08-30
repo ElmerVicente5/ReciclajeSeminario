@@ -18,7 +18,13 @@ git clone -b devBackend https://github.com/tu_usuario/tu_repositorio.git
 # correr con docker-compose
 docker-compose up --build
 
+#si algunos endpoints falla debe correr el comando localmente
+dentro de la carpeta
+Backend/
+#correr el comando 
+npx generate
 
+#luego correr con docker compose
 
 # Documentacion con Swagger 
 - **summary:** Resumen breve de lo que hace el endpoint.  
@@ -60,3 +66,4 @@ router.get("/items", (req, res) => {
   res.json([{ id: 1, name: "Laptop", price: 1000 }]);
 });
 ```
+
