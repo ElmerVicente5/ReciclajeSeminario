@@ -1,5 +1,6 @@
-// Hook personalizado para manejar la lógica de login
+// Hook personalizado para manejar la lógica de login usando authService.js
 import { useState } from "react";
+import { login as authLogin } from "../services/authService";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
@@ -8,14 +9,16 @@ export function useLogin() {
   const login = async ({ email, password }) => {
     setLoading(true);
     setError("");
-    // Simulación de autenticación (reemplazar con llamada a backend cuando esté disponible)
-    await new Promise((res) => setTimeout(res, 1000));
-    if (email === "admin@demo.com" && password === "Admin123!") {
+    try {
+      const result = await authLogin({ email, password });
       setLoading(false);
-      return { success: true, user: { email, role: "admin" } };
-    } else {
+      if (!result.success) {
+        setError("Credenciales incorrectas");
+      }
+      return result;
+    } catch (err) {
       setLoading(false);
-      setError("Credenciales incorrectas");
+      setError("Error de conexión o backend no disponible");
       return { success: false };
     }
   };
