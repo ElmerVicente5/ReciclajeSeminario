@@ -6,7 +6,7 @@ const acopioRouter = express.Router();
 
 /**
  * @swagger
- * /api/acopio:
+ * /api/acopio/listarAcopios:
  *   get:
  *     summary: Obtener acopio
  *     description: Obtener informacion de los acopios con sus zonas
