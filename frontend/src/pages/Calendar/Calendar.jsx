@@ -7,6 +7,49 @@ import { useState } from "react";
 
 export default function Calendar() {
   const [date, setDate] = useState(new Date());
+
+  // Datos ejemplo del modelo Calendario de Recolección
+  const calendario = [
+    {
+      id: 1,
+      ruta_id: 101,
+      dia_semana: 1,
+      hora_inicio: "08:00",
+      hora_fin: "11:00",
+      frecuencia: "Semanal",
+      notas: "Ruta normal",
+    },
+    {
+      id: 2,
+      ruta_id: 102,
+      dia_semana: 3,
+      hora_inicio: "09:00",
+      hora_fin: "12:00",
+      frecuencia: "Quincenal",
+      notas: "Ruta especial",
+    },
+    {
+      id: 3,
+      ruta_id: 103,
+      dia_semana: 5,
+      hora_inicio: "07:00",
+      hora_fin: "10:00",
+      frecuencia: "Semanal",
+      notas: "Ruta extendida",
+    },
+  ];
+
+  // Utilidad para mostrar el día de la semana
+  const diasSemana = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
+
   return (
     <div className={`container-fluid px-2 px-md-4 py-3`}>
       <div className="row g-4">
@@ -51,6 +94,33 @@ export default function Calendar() {
                     Días sin recolección <b>8</b>
                   </span>
                 </div>
+                {/* Tabla de calendario de recolección */}
+                <div className="table-responsive mt-3">
+                  <Table striped bordered hover size="sm" className="mb-0">
+                    <thead>
+                      <tr>
+                        <th>Ruta</th>
+                        <th>Día</th>
+                        <th>Hora inicio</th>
+                        <th>Hora fin</th>
+                        <th>Frecuencia</th>
+                        <th>Notas</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {calendario.map((c) => (
+                        <tr key={c.id}>
+                          <td>{c.ruta_id}</td>
+                          <td>{diasSemana[c.dia_semana]}</td>
+                          <td>{c.hora_inicio}</td>
+                          <td>{c.hora_fin}</td>
+                          <td>{c.frecuencia}</td>
+                          <td>{c.notas}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
               </div>
               <div className={`${styles.metricsBox} flex-shrink-1 ms-md-4`}>
                 <div className={styles.metricCard}>
@@ -77,79 +147,35 @@ export default function Calendar() {
           <div className={styles.card}>
             <h3 className={styles.subtitle}>Rutas del día</h3>
             <div className={styles.rutaList}>
-              {/* Card Ruta 1 */}
-              <div
-                className={`${styles.rutaItem} flex-wrap d-flex align-items-center gap-2 gap-md-3`}
-              >
-                <span className={styles.rutaDot + " " + styles.dotGreen}></span>
-                <span className="flex-grow-1 min-w-0">
-                  <span className={styles.rutaName}>
-                    Ruta 1 – Zona Norte (08:00–11:00)
-                  </span>
-                </span>
-                <span className={styles.rutaStatus + " " + styles.statusGreen}>
-                  Completada
-                </span>
+              {calendario.map((c) => (
                 <div
-                  className={`d-flex flex-wrap gap-2 ms-auto ${styles.rutaDetails}`}
-                  style={{ minWidth: 0 }}
+                  key={c.id}
+                  className={`${styles.rutaItem} flex-wrap d-flex align-items-center gap-2 gap-md-3`}
                 >
-                  <span className={styles.rutaTag}>
-                    <FaUser /> Piloto: E.Perez
+                  <span
+                    className={styles.rutaDot + " " + styles.dotGreen}
+                  ></span>
+                  <span className="flex-grow-1 min-w-0">
+                    <span className={styles.rutaName}>
+                      Ruta {c.ruta_id} – {diasSemana[c.dia_semana]} (
+                      {c.hora_inicio}–{c.hora_fin})
+                    </span>
                   </span>
-                  <span className={styles.rutaTag}>
-                    <FaTruck /> Camión: C-25782
+                  <span
+                    className={styles.rutaStatus + " " + styles.statusGreen}
+                  >
+                    {c.frecuencia}
                   </span>
+                  <div
+                    className={`d-flex flex-wrap gap-2 ms-auto ${styles.rutaDetails}`}
+                    style={{ minWidth: 0 }}
+                  >
+                    <span className={styles.rutaTag}>
+                      <b>Notas:</b> {c.notas}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              {/* Card Ruta 2 */}
-              <div
-                className={`${styles.rutaItem} flex-wrap d-flex align-items-center gap-2 gap-md-3`}
-              >
-                <span
-                  className={styles.rutaDot + " " + styles.dotYellow}
-                ></span>
-                <span className="flex-grow-1 min-w-0">
-                  <span className={styles.rutaName}>Ruta 2: Zona Sur</span>
-                </span>
-                <span className={styles.rutaStatus + " " + styles.statusYellow}>
-                  En curso
-                </span>
-                <div
-                  className={`d-flex flex-wrap gap-2 ms-auto ${styles.rutaDetails}`}
-                  style={{ minWidth: 0 }}
-                >
-                  <span className={styles.rutaTag}>
-                    <FaUser /> Piloto: E.Perez
-                  </span>
-                  <span className={styles.rutaTag}>
-                    <FaTruck /> Camión: C-25782
-                  </span>
-                </div>
-              </div>
-              {/* Card Ruta 3 */}
-              <div
-                className={`${styles.rutaItem} flex-wrap d-flex align-items-center gap-2 gap-md-3`}
-              >
-                <span className={styles.rutaDot + " " + styles.dotRed}></span>
-                <span className="flex-grow-1 min-w-0">
-                  <span className={styles.rutaName}>Ruta 3: Centro</span>
-                </span>
-                <span className={styles.rutaStatus + " " + styles.statusRed}>
-                  Incidencia
-                </span>
-                <div
-                  className={`d-flex flex-wrap gap-2 ms-auto ${styles.rutaDetails}`}
-                  style={{ minWidth: 0 }}
-                >
-                  <span className={styles.rutaTag}>
-                    <FaUser /> Piloto: E.Perez
-                  </span>
-                  <span className={styles.rutaTag}>
-                    <FaTruck /> Camión: C-25782
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

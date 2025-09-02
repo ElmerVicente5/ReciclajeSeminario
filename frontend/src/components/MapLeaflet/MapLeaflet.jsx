@@ -13,30 +13,29 @@ import {
 import "leaflet/dist/leaflet.css";
 import styles from "./MapLeaflet.module.css";
 
-const puntosAcopio = [
-  // Retalhuleu y alrededores
-  { id: 1, lat: 14.5367, lng: -91.6761, nombre: "Retalhuleu Centro" },
-  { id: 2, lat: 14.5333, lng: -91.6833, nombre: "Acopio Norte Retalhuleu" },
-  { id: 3, lat: 14.52, lng: -91.67, nombre: "Acopio Sur Retalhuleu" },
-  { id: 4, lat: 14.545, lng: -91.67, nombre: "Acopio Este Retalhuleu" },
-  { id: 5, lat: 14.53, lng: -91.66, nombre: "Acopio Oeste Retalhuleu" },
-  { id: 6, lat: 14.54, lng: -91.68, nombre: "Acopio Central Retalhuleu" },
-];
-
-// Ruta que conecta todos los puntos en orden
-const rutaTodos = puntosAcopio.map((p) => [p.lat, p.lng]);
-
-const MAP_CENTER = [14.5367, -91.6761]; // Retalhuleu
-const MAP_ZOOM = 13;
-
-export default function MapLeaflet() {
+export default function MapLeaflet({ puntos }) {
   const [expanded, setExpanded] = useState(false);
+
+  // Si no hay puntos, usar centro y zoom por defecto
+  const MAP_CENTER =
+    puntos && puntos.length > 0
+      ? [
+          puntos[0].latitud || puntos[0].lat,
+          puntos[0].longitud || puntos[0].lng,
+        ]
+      : [14.5367, -91.6761];
+  const MAP_ZOOM = 13;
 
   // Obtener color de la Polyline desde variable CSS
   const getCssVar = (name) =>
     getComputedStyle(document.documentElement).getPropertyValue(name) ||
     undefined;
   const polylineColor = getCssVar("--color-primary-blue") || "#2563eb";
+
+  // Ruta que conecta todos los puntos
+  const rutaTodos = puntos
+    ? puntos.map((p) => [p.latitud || p.lat, p.longitud || p.lng])
+    : [];
 
   const handleExpand = () => setExpanded(true);
   const handleClose = (e) => {
@@ -64,11 +63,28 @@ export default function MapLeaflet() {
               attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {puntosAcopio.map((punto) => (
-              <Marker key={punto.id} position={[punto.lat, punto.lng]}>
-                <Popup>{punto.nombre}</Popup>
-              </Marker>
-            ))}
+            {puntos &&
+              puntos.map((punto) => (
+                <Marker
+                  key={punto.id}
+                  position={[
+                    punto.latitud || punto.lat,
+                    punto.longitud || punto.lng,
+                  ]}
+                >
+                  <Popup>
+                    <b>{punto.nombre}</b>
+                    <br />
+                    <span>Tipo: {punto.tipo}</span>
+                    <br />
+                    <span>Zona: {punto.zona_id}</span>
+                    <br />
+                    <span>Horario: {punto.horario}</span>
+                    <br />
+                    <span>Dirección: {punto.direccion}</span>
+                  </Popup>
+                </Marker>
+              ))}
             {/* Ruta que conecta todos los puntos */}
             <Polyline positions={rutaTodos} color={polylineColor} weight={5} />
           </MapContainer>
@@ -93,11 +109,28 @@ export default function MapLeaflet() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {puntosAcopio.map((punto) => (
-                <Marker key={punto.id} position={[punto.lat, punto.lng]}>
-                  <Popup>{punto.nombre}</Popup>
-                </Marker>
-              ))}
+              {puntos &&
+                puntos.map((punto) => (
+                  <Marker
+                    key={punto.id}
+                    position={[
+                      punto.latitud || punto.lat,
+                      punto.longitud || punto.lng,
+                    ]}
+                  >
+                    <Popup>
+                      <b>{punto.nombre}</b>
+                      <br />
+                      <span>Tipo: {punto.tipo}</span>
+                      <br />
+                      <span>Zona: {punto.zona_id}</span>
+                      <br />
+                      <span>Horario: {punto.horario}</span>
+                      <br />
+                      <span>Dirección: {punto.direccion}</span>
+                    </Popup>
+                  </Marker>
+                ))}
               {/* Ruta que conecta todos los puntos */}
               <Polyline
                 positions={rutaTodos}
