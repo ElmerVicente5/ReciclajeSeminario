@@ -9,7 +9,7 @@ import acopioRouter from "./src/routes/acopio.route.js";
 import {routerRankingPorZona } from "./src/routes/rankingPorZona.route.js";
 import { initializeDatabase} from './src/config/db.js';
 import { specs, swaggerUi } from './src/config/swagger.config.js';
-import { routerAuth } from "./src/routes/auth.route.js";
+import { routerAuth, users } from "./src/routes/auth.route.js";
 import { routerNotificaciones } from "./src/routes/notificaciones.route.js";
 app.use(cors({
   origin: '*',
@@ -24,6 +24,7 @@ app.use("/api/calendario", calendarioRouter);
 app.use("/api/acopio", acopioRouter);
 app.use("/api/ranking", routerRankingPorZona);
 app.use("/api/auth", routerAuth);
+app.use("/api/usuarios", users);
 app.use("/api/notificaciones", routerNotificaciones);
 
 initializeDatabase()

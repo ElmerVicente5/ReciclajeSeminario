@@ -110,10 +110,128 @@ async function crearUsuario(nombreCompleto, nombreUsuario, contrasenia) {
 
 }
 
+async function actualizarUsuarioServicio(id, nombre_completo, nombre_usuario, estado, rol_id, zona_id) {
+    try {
+        const existingUser = await prisma.usuarios.findUnique({
+            where: { id: parseInt(id) }
+        });
+        
+        if (!existingUser) {
+            throw { status: 404, message: 'Usuario no encontrado' };
+        }
+
+        const updateData = {
+            nombre_completo,
+            nombre_usuario,
+            estado,
+            rol_id: rol_id ? parseInt(rol_id) : undefined,
+            zona_id: zona_id ? parseInt(zona_id) : undefined
+        };
+
+        const user = await prisma.usuarios.update({
+            where: { id: parseInt(id) },
+            data: updateData,
+        });
+        
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function eliminarUsuarioServicio(id) {
+    try {
+        const existingUser = await prisma.usuarios.findUnique({
+            where: { id: parseInt(id) }
+        });
+        
+        if (!existingUser) {
+            throw { status: 404, message: 'Usuario no encontrado' };
+        }
+
+        const user = await prisma.usuarios.delete({
+            where: { id: parseInt(id) }
+        });
+        
+        return { message: 'Usuario eliminado correctamente', user: existingUser };
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function obtenerListaUsuarios() {
+    try {
+        const users = await prisma.usuarios.findMany(
+            {
+                orderBy: {
+                    id: 'desc'
+                },select: {
+                    id: true,
+                    nombre_completo: true,
+                    nombre_usuario: true,
+                    estado: true,
+                    fecha_registro: true,
+                    roles: {
+                        select: {
+                            id: true,
+                            nombre: true
+                        }
+                    },
+                    zonas: {
+                        select: {
+                            id: true,
+                            nombre: true
+                        }
+                    }
+                }
+            }
+        );
+        return users;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function obtenerUsuarioId(id) {
+    try {
+        const user = await prisma.usuarios.findUnique({
+            where: { id: parseInt(id) },
+            select: {
+                id: true,
+                nombre_completo: true,
+                nombre_usuario: true,
+                estado: true,
+                fecha_registro: true,
+                roles: {
+                    select: {
+                        id: true,
+                        nombre: true
+                    }
+                },
+                zonas: {
+                    select: {
+                        id: true,
+                        nombre: true
+                    }
+                }
+            }
+        });
+        if (!user) {
+            throw { status: 404, message: 'Usuario no encontrado' };
+        }
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
 export {
     buscarUsuario,
     loginServicio,
     crearUsuario,
-    buscarUsuarioPorNombre
+    buscarUsuarioPorNombre,
+    actualizarUsuarioServicio,
+    eliminarUsuarioServicio,
+    obtenerListaUsuarios,
+    obtenerUsuarioId
     
 }

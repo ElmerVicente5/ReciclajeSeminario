@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { buscarUsuario,crearUsuario,buscarUsuarioPorNombre } from '../services/auth.service.js';
 import { loginServicio } from '../services/auth.service.js';
 import { validationResult } from 'express-validator';
+import { obtenerListaUsuarios, obtenerUsuarioId, actualizarUsuarioServicio, eliminarUsuarioServicio } from '../services/auth.service.js';
 const prisma = new PrismaClient();
 const configJwt = {
     secret: process.env.SECRET_KEY,
@@ -57,10 +58,80 @@ const register = async (req,res)=>{
         return res.status(error.status).json({message: error.message});
     }   
 }
+const obtenerUsuarios = async (req, res) => {
+    try {
+        const users = await obtenerListaUsuarios();
+        return res.status(200).json(users);
+    } catch (error) {
+        return res.status(500).json({message: 'Error al obtener usuarios'});
+    }
+}
+const obtenerUsuarioPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({message: 'ID de usuario inválido'});
+        }
+        
+        const user = await obtenerUsuarioId(id);
+        return res.status(200).json(user);
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).json({message: error.message});
+        }
+        return res.status(500).json({message: 'Error al obtener usuario'});
+    }
+}
 
+const actualizarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({message: 'ID de usuario inválido'});
+        }
+        
+        const { nombre_completo, rol_id, estado, nombre_usuario, zona_id } = req.body;
+        
+        if (!nombre_completo && !rol_id && !estado && !nombre_usuario && !zona_id) {
+            return res.status(400).json({message: 'Debe proporcionar al menos un campo para actualizar'});
+        }
+        
+        const user = await actualizarUsuarioServicio(id, nombre_completo, nombre_usuario, estado, rol_id, zona_id);
+        return res.status(200).json({
+            message: 'Usuario actualizado correctamente'
+        });
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).json({message: error.message});
+        }
+        return res.status(500).json({message: 'Error al actualizar usuario'});
+    }
+}
+const eliminarUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        if (!id || isNaN(parseInt(id))) {
+            return res.status(400).json({message: 'ID de usuario inválido'});
+        }
+        
+        const result = await eliminarUsuarioServicio(id);
+        return res.status(200).json({message: 'Usuario eliminado correctamente'});
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).json({message: error.message});
+        }
+        return res.status(500).json({message: 'Error al eliminar usuario'});
+    }
+}
 
 export {
     login,
     register,
- 
+    obtenerUsuarios,
+    obtenerUsuarioPorId,
+    actualizarUsuario,
+    eliminarUsuario,
 }
