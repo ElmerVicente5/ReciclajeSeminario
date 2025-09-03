@@ -18,6 +18,13 @@ const registerValidation = [
 const rolesValidation = [
     body('nombre').notEmpty().withMessage('El nombre del rol es requerido'),
 ]
+const usersValidation = [
+    body('nombreCompleto').notEmpty().withMessage('El nombre completo es requerido'),
+    body('nombreUsuario').notEmpty().withMessage('El nombre de usuario es requerido'),
+    body('rol_id').notEmpty().withMessage('El rol es requerido'),
+    body('estado').notEmpty().withMessage('El estado es requerido'),
+    body('zona_id').notEmpty().withMessage('La zona es requerida'),
+]
  /**
     * @swagger
     * /api/auth/login:
@@ -159,7 +166,7 @@ const rolesValidation = [
   *       500:
   *         description: Error interno del servidor
   */
- users.put('/actualizarUsuario/:id', verifyToken, actualizarUsuario);
+ users.put('/actualizarUsuario/:id',usersValidation, verifyToken, actualizarUsuario);
 
  /**
   * @swagger
