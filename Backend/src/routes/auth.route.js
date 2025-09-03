@@ -1,9 +1,11 @@
 import { login, register, obtenerUsuarios, obtenerUsuarioPorId, actualizarUsuario, eliminarUsuario } from "../controllers/auth.controller.js";
+import { crearRoles, actualizarRolId, eliminarRolId, obtenerListadoRoles, obtenerRolPorId } from "../controllers/auth.controller.js";
 import { body } from "express-validator";
 import { Router } from "express";
-
+import { verifyToken } from "../middlewares/middleware.js";
 const routerAuth = Router();
 const users = Router();
+const roles = Router();
 const authValidation = [
     body('nombreUsuario').notEmpty().withMessage('El nombre de usuario es requerido'),
     body('contrasenia').notEmpty().withMessage('La contraseña es requerida'),
@@ -13,7 +15,9 @@ const registerValidation = [
     body('nombreUsuario').notEmpty().withMessage('El nombre de usuario es requerido'),
     body('contrasenia').notEmpty().withMessage('La contraseña es requerida'),
 ]
-
+const rolesValidation = [
+    body('nombre').notEmpty().withMessage('El nombre del rol es requerido'),
+]
  /**
     * @swagger
     * /api/auth/login:
@@ -88,7 +92,7 @@ const registerValidation = [
   *       500:
   *         description: Error interno del servidor
   */
- users.get('/obtenerUsuarios', obtenerUsuarios);
+ users.get('/obtenerUsuarios', verifyToken, obtenerUsuarios);
 
  /**
   * @swagger
@@ -112,7 +116,7 @@ const registerValidation = [
   *       500:
   *         description: Error interno del servidor
   */
- users.get('/obtenerUsuarioId/:id', obtenerUsuarioPorId);
+ users.get('/obtenerUsuarioId/:id', verifyToken, obtenerUsuarioPorId);
 
  /**
   * @swagger
@@ -155,7 +159,7 @@ const registerValidation = [
   *       500:
   *         description: Error interno del servidor
   */
- users.put('/actualizarUsuario/:id', actualizarUsuario);
+ users.put('/actualizarUsuario/:id', verifyToken, actualizarUsuario);
 
  /**
   * @swagger
@@ -179,9 +183,128 @@ const registerValidation = [
   *       500:
   *         description: Error interno del servidor
   */
- users.delete('/eliminarUsuario/:id', eliminarUsuario);
+ users.delete('/eliminarUsuario/:id', verifyToken, eliminarUsuario);
+
+ /**
+  * @swagger
+  * /api/roles/crearRoles:
+  *   post:
+  *     summary: Crear rol
+  *     tags:
+  *       - Roles
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               nombre:
+  *                 type: string
+  *     responses:
+  *       200:
+  *         description: Rol creado correctamente
+  *       500:
+  *         description: Error interno del servidor
+  */
+ roles.post('/crearRol', rolesValidation, verifyToken, crearRoles);
+  
+ /**
+  * @swagger
+  * /api/roles/actualizarRolId/{id}:
+  *   put:
+  *     summary: Actualizar rol
+  *     tags:
+  *       - Roles
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *         description: ID del rol
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               nombre:
+  *                 type: string
+  *     responses:
+  *       200:
+  *         description: Rol actualizado correctamente
+  *       500:
+  *         description: Error interno del servidor
+  */
+ roles.put('/actualizarRolId/:id', rolesValidation, verifyToken, actualizarRolId);
+
+ /**
+  * @swagger
+  * /api/roles/eliminarRolId/{id}:
+  *   delete:
+  *     summary: Eliminar rol
+  *     tags:
+  *       - Roles
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *         description: ID del rol
+  *     responses:
+  *       200:
+  *         description: Rol eliminado correctamente
+  *       404:
+  *         description: Rol no encontrado
+  *       500:
+  *         description: Error interno del servidor
+  */
+ roles.delete('/eliminarRolId/:id', verifyToken, eliminarRolId);
+
+ /**
+  * @swagger
+  * /api/roles/obtenerListadoRoles:
+  *   get:
+  *     summary: Obtener listado de roles
+  *     tags:
+  *       - Roles
+  *     responses:
+  *       200:
+  *         description: Listado de roles obtenido correctamente
+  *       500:
+  *         description: Error interno del servidor
+  */
+ roles.get('/obtenerListadoRoles', verifyToken, obtenerListadoRoles);
+
+ /**
+  * @swagger
+  * /api/roles/obtenerRolId/{id}:
+  *   get:
+  *     summary: Obtener rol por ID
+  *     tags:
+  *       - Roles
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *         description: ID del rol
+  *     responses:
+  *       200:
+  *         description: Rol obtenido correctamente
+  *       404:
+  *         description: Rol no encontrado
+  *       500:
+  *         description: Error interno del servidor
+  */
+ roles.get('/obtenerRolId/:id', verifyToken, obtenerRolPorId);
 
 export {
     routerAuth,
-    users
+    users,
+    roles
 }

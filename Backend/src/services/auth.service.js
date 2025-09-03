@@ -224,6 +224,86 @@ async function obtenerUsuarioId(id) {
         throw error;
     }
 }
+
+async function crearRol(nombre) {
+    try {
+        const role = await prisma.roles.create({
+            data: { nombre }
+        });
+        return { message: 'Rol creado correctamente'};
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function actualizarRol(id, nombre) {
+    try {
+        const existeRole = await prisma.roles.findUnique({
+            where: { id: parseInt(id) }
+        });
+        
+        if (!existeRole) {
+            throw { status: 404, message: 'Rol no encontrado' };
+        }
+        const role = await prisma.roles.update({
+            where: { id: parseInt(id) },
+            data: { nombre }
+        });
+        return { message: 'Rol actualizado correctamente'};
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function eliminarRol(id) {
+    try {
+        const existeRole = await prisma.roles.findUnique({
+            where: { id: parseInt(id) }
+        });
+        
+        if (!existeRole) {
+            throw { status: 404, message: 'Rol no encontrado' };
+        }
+        const role = await prisma.roles.delete({
+            where: { id: parseInt(id) }
+        });
+        if (!role) {
+            throw { status: 404, message: 'Rol no encontrado' };
+        }
+        return { status: 200, message: 'Rol eliminado correctamente'};
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function obtenerListaRoles() {
+    try {
+        const roles = await prisma.roles.findMany(
+            {
+                orderBy: {
+                    id: 'desc'
+                }
+            }
+        );
+        return roles;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function obtenerRolId(id) {
+    try {
+        const role = await prisma.roles.findUnique({
+            where: { id: parseInt(id) }
+        });
+        if (!role) {
+            throw { status: 404, message: 'Rol no encontrado' };
+        }
+        return role;
+    } catch (error) {
+        throw error;
+    }
+}
 export {
     buscarUsuario,
     loginServicio,
@@ -232,6 +312,11 @@ export {
     actualizarUsuarioServicio,
     eliminarUsuarioServicio,
     obtenerListaUsuarios,
-    obtenerUsuarioId
+    obtenerUsuarioId,
+    crearRol,
+    actualizarRol,
+    eliminarRol,
+    obtenerListaRoles,
+    obtenerRolId
     
 }

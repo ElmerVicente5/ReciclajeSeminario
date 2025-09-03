@@ -5,6 +5,7 @@ import { buscarUsuario,crearUsuario,buscarUsuarioPorNombre } from '../services/a
 import { loginServicio } from '../services/auth.service.js';
 import { validationResult } from 'express-validator';
 import { obtenerListaUsuarios, obtenerUsuarioId, actualizarUsuarioServicio, eliminarUsuarioServicio } from '../services/auth.service.js';
+import { crearRol, actualizarRol, eliminarRol, obtenerListaRoles, obtenerRolId } from '../services/auth.service.js';
 const prisma = new PrismaClient();
 const configJwt = {
     secret: process.env.SECRET_KEY,
@@ -127,6 +128,62 @@ const eliminarUsuario = async (req, res) => {
     }
 }
 
+const crearRoles = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { nombre } = req.body;
+        const result = await crearRol(nombre);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.status).json({message: error.message});
+    }
+}
+const actualizarRolId = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { id } = req.params;
+        const { nombre } = req.body;
+        const result = await actualizarRol(id, nombre);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.status).json({message: error.message});
+    }
+}
+const eliminarRolId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await eliminarRol(id);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.status).json({message: error.message});
+    }
+}
+
+const obtenerListadoRoles = async (req, res) => {
+    try {
+        const result = await obtenerListaRoles();
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.status).json({message: error.message});
+    }
+}
+const obtenerRolPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await obtenerRolId(id);
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(error.status).json({message: error.message});
+    }
+}
+
+
 export {
     login,
     register,
@@ -134,4 +191,9 @@ export {
     obtenerUsuarioPorId,
     actualizarUsuario,
     eliminarUsuario,
+    crearRoles,
+    actualizarRolId,
+    eliminarRolId,
+    obtenerListadoRoles,
+    obtenerRolPorId
 }
