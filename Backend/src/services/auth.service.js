@@ -1,0 +1,119 @@
+import jwt from 'jsonwebtoken'; 
+import { PrismaClient } from '../generated/prisma/client.js';
+import bcrypt from 'bcrypt';
+import { configJwt } from '../config/config.jwt.js';
+const prisma = new PrismaClient();
+const ROLES = {
+    ADMIN: 'ADMIN',
+    USER: 'USER'
+}
+const SALT_ROUNDS = 10;
+async function buscarUsuario(nombreUsuario) {
+    try{
+      
+        const usuarioEncontrado = await prisma.usuarios.findFirst({
+            where: {
+                nombre_usuario: nombreUsuario
+            },
+            select: {
+                id: true,
+                nombre_completo: true,
+                nombre_usuario: true,
+                contrasenia: true,
+                rol_id: true,
+                estado: true,
+                roles: {
+                    select: {
+                        id: true,
+                        nombre: true
+                    }
+                }
+            }
+        }); 
+        if(!usuarioEncontrado){
+            return null;
+        }
+
+        return usuarioEncontrado;
+    }catch(error){
+        throw error;
+    }
+}
+async function buscarUsuarioPorNombre(nombreUsuario) {
+    try {
+        const usuarioEncontrado = await prisma.usuarios.findFirst({
+            where: {nombre_usuario: nombreUsuario}
+        });
+        if(!usuarioEncontrado){
+            return null;
+        }
+        return usuarioEncontrado;
+    }catch(error){
+        throw error
+    }
+}
+async function loginServicio(nombreUsuario) {
+    
+    try{
+        const usuarioEncontrado = await buscarUsuario(nombreUsuario);
+        const token = jwt.sign({
+            id: usuarioEncontrado.id, 
+            rol: usuarioEncontrado.roles.nombre, 
+            estado: usuarioEncontrado.estado,
+            nombre_completo: usuarioEncontrado.nombre_completo,
+            nombre_usuario: usuarioEncontrado.nombre_usuario
+        }, configJwt.secret, {expiresIn: configJwt.expiresIn});
+        const refreshToken = jwt.sign({
+            id: usuarioEncontrado.id, 
+            rol: usuarioEncontrado.roles.nombre, 
+            estado: usuarioEncontrado.estado,
+            nombre_completo: usuarioEncontrado.nombre_completo,
+            nombre_usuario: usuarioEncontrado.nombre_usuario
+        }, configJwt.secret, {expiresIn: configJwt.refreshIn});
+        return {accessToken: token, refreshToken: refreshToken};
+    }catch(error){
+        throw error;
+    }
+}
+async function crearUsuario(nombreCompleto, nombreUsuario, contrasenia) {
+    try {
+        
+    
+    const result = await prisma.$transaction(async (tx) => {
+        const hashedPassword = await bcrypt.hash(contrasenia, SALT_ROUNDS);
+        const role = await tx.roles.findFirst({
+            where: {
+                nombre: ROLES.ADMIN
+            }
+        });
+        const usuario = await tx.usuarios.create({
+            data: {
+                nombre_completo: nombreCompleto,
+                nombre_usuario: nombreUsuario,
+                contrasenia: hashedPassword,
+                rol_id: role.id,
+                estado: 'ACTIVO',
+             
+            }
+        });
+        const token = await loginServicio(nombreUsuario);
+        return {
+            message: 'Usuario creado correctamente',
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken
+        };
+    });
+    return result;
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+export {
+    buscarUsuario,
+    loginServicio,
+    crearUsuario,
+    buscarUsuarioPorNombre
+    
+}
