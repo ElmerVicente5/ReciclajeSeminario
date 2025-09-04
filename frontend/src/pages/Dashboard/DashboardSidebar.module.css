@@ -29,7 +29,7 @@
 .logoText {
   font-weight: 500;
   font-size: 1.05rem;
-  color: var(--color-text-dark, #213547);
+  color: var(--color-text-white);
 }
 .menu {
   display: flex;

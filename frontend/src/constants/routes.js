@@ -4,4 +4,6 @@ export const ROUTES = {
   LOGIN: "/login",
   DASHBOARD: "/dashboard",
   MAPA: "/mapa",
+  USUARIOS: "/usuarios",
+  CONFIGURACION: "/configuracion",
 };

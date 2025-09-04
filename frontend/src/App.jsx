@@ -6,7 +6,9 @@ import NotFound from "./pages/NotFound";
 import MapLeafletPage from "./pages/MapLeaflet/MapLeafletPage";
 import DashboardSidebar from "./pages/Dashboard/DashboardSidebar";
 import Calendar from "./pages/Calendar/Calendar";
-import Ranking from "./pages/Ranking/Ranking"; 
+import Ranking from "./pages/Ranking/Ranking";
+import Usuarios from "./pages/Usuarios/Usuarios";
+import Configuracion from "./pages/Configuracion/Configuracion";
 
 function App() {
   // Layout que incluye el sidebar/navbar
@@ -63,10 +65,25 @@ function App() {
             </Layout>
           }
         />
+        <Route
+          path="/usuarios"
+          element={
+            <Layout>
+              <Usuarios />
+            </Layout>
+          }
+        />
+        <Route
+          path="/configuracion"
+          element={
+            <Layout>
+              <Configuracion />
+            </Layout>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-

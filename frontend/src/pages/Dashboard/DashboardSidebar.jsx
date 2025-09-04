@@ -9,6 +9,7 @@ import {
   FaCog,
   FaBars,
   FaTimes,
+  FaUser,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.jpg";
@@ -60,6 +61,17 @@ export default function DashboardSidebar() {
             }}
           >
             <button
+              className="btn btn-link text-white d-flex flex-column align-items-center"
+              title="Usuarios y Roles"
+              onClick={() => {
+                setMenuOpen(false);
+                navigate("/usuarios");
+              }}
+            >
+              <FaUser size={22} />
+              <span style={{ fontSize: 10 }}>Usuarios</span>
+            </button>
+            <button
               className="btn btn-link text-white"
               onClick={() => setMenuOpen(false)}
               aria-label="Cerrar menú"
@@ -103,11 +115,11 @@ export default function DashboardSidebar() {
               className="btn btn-link text-white d-flex flex-column align-items-center"
               title="Ranking por Colonia"
               onClick={() => {
-               setMenuOpen(false);
-               navigate("/ranking");
-             }}
+                setMenuOpen(false);
+                navigate("/ranking");
+              }}
             >
-               <FaChartBar size={22} />
+              <FaChartBar size={22} />
               <span style={{ fontSize: 10 }}>Ranking</span>
             </button>
             <button
@@ -157,6 +169,13 @@ export default function DashboardSidebar() {
       <nav className={`${styles.menu} w-100`}>
         <button
           className={`${styles.menuItem} w-100 mb-2`}
+          title="Usuarios y Roles"
+          onClick={() => navigate("/usuarios")}
+        >
+          <FaUser className={styles.menuIcon} /> Usuarios y Roles
+        </button>
+        <button
+          className={`${styles.menuItem} w-100 mb-2`}
           title="Dashboard"
           onClick={() => navigate("/dashboard")}
         >
@@ -183,8 +202,8 @@ export default function DashboardSidebar() {
           className={`${styles.menuItem} w-100 mb-2`}
           title="Ranking por Colonia"
           onClick={() => navigate("/ranking")}
->
-        <FaChartBar className={styles.menuIcon} /> Ranking por Colonia
+        >
+          <FaChartBar className={styles.menuIcon} /> Ranking por Colonia
         </button>
 
         <button className={`${styles.menuItem} w-100 mb-2`} title="Reportes">
@@ -194,9 +213,9 @@ export default function DashboardSidebar() {
         <button
           className={`${styles.menuItem} w-100 mb-2`}
           title="Configuración"
+          onClick={() => navigate("/configuracion")}
         >
-          {" "}
-          <FaCog className={styles.menuIcon} /> Configuración{" "}
+          <FaCog className={styles.menuIcon} /> Configuración
         </button>
         <button
           className={`${styles.menuItem} w-100 mb-2`}
