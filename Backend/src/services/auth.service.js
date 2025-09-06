@@ -96,14 +96,14 @@ async function crearUsuario(nombreCompleto, nombreUsuario, contrasenia) {
              
             }
         });
-        const token = await loginServicio(nombreUsuario);
+        return usuario;
+    });
+    const token = await loginServicio(result.nombre_usuario);
         return {
             message: 'Usuario creado correctamente',
             accessToken: token.accessToken,
             refreshToken: token.refreshToken
         };
-    });
-    return result;
     } catch (error) {
         throw error;
     }
