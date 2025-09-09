@@ -38,47 +38,57 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route
           path="/mapa"
           element={
-            <Layout>
-              <MapLeafletPage />
-            </Layout>
+            <PrivateRoute>
+              <Layout>
+                <MapLeafletPage />
+              </Layout>
+            </PrivateRoute>
           }
         />
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="*" element={<NotFound />} />
         <Route
           path="/calendario"
           element={
-            <Layout>
-              <Calendar />
-            </Layout>
+            <PrivateRoute>
+              <Layout>
+                <Calendar />
+              </Layout>
+            </PrivateRoute>
           }
         />
         <Route
           path="/ranking"
           element={
-            <Layout>
-              <Ranking />
-            </Layout>
+            <PrivateRoute>
+              <Layout>
+                <Ranking />
+              </Layout>
+            </PrivateRoute>
           }
         />
         <Route
           path="/usuarios"
           element={
-            <Layout>
-              <Usuarios />
-            </Layout>
+            <PrivateRoute>
+              <Layout>
+                <Usuarios />
+              </Layout>
+            </PrivateRoute>
           }
         />
         <Route
           path="/configuracion"
           element={
-            <Layout>
-              <Configuracion />
-            </Layout>
+            <PrivateRoute>
+              <Layout>
+                <Configuracion />
+              </Layout>
+            </PrivateRoute>
           }
         />
       </Routes>

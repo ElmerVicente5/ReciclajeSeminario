@@ -1,24 +1,57 @@
+.loginLogoMuni {
+  position: absolute;
+  left: 16%; /* Alineado con el bote verde */
+  top: 32px;
+  width: 260px;
+  height: auto;
+  z-index: 1;
+  opacity: 0.92;
+  pointer-events: none;
+}
 /* Estilos para la página de login usando variables globales */
+
+.loginPage {
+    display: flex;
+    height: 100vh; /* Ocupa toda la altura de la pantalla */
+  }
+
 .loginBg {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-bg, #f3f4f6);
-  position: relative;
+  flex: 1;
+  width: 50%;
+  background: linear-gradient(to bottom, #a8d5a8, #16a34a), url('/redisuos.png'); /* Fondo verde dinámico con imagen */
+  background-blend-mode: overlay;
+  background-position: center center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.loginLogoUMG {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 180px;
+  height: auto;
+  z-index: 1;
+  opacity: 0.92;
+  pointer-events: none;
 }
 
 .loginBg::before {
   content: "";
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  left: 50%;
+  width: 50%;
+  height: 100vh; /* Ajustar altura para ocupar todo el lado derecho */
   z-index: 0;
-  background: url('/zzz.jpg') center center / cover no-repeat;
-  opacity: 0.90;
+  background: url('/medio.png') center center / contain no-repeat; /* Asegurar que se aprecie completamente */
   pointer-events: none;
+}
+@media (max-width: 900px) {
+  .loginBg::before {
+    background-size: contain;
+    background-position: center bottom;
+  }
 }
 
 .loginContainer, .loginSuccess {
@@ -27,8 +60,11 @@
 }
 
 .loginContainer {
-  width: 100%;
-  max-width: 400px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
 .loginSuccess {
