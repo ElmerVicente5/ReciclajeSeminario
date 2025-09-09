@@ -1,4 +1,6 @@
-import { useState } from "react";
+
+// Página de login para la plataforma web de reciclaje inteligente
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../../components/Auth/LoginForm";
 import styles from "./Login.module.css";
@@ -6,6 +8,13 @@ import styles from "./Login.module.css";
 export default function Login() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  // Logout automático al acceder a la página de login
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      localStorage.removeItem("isLoggedIn");
+    }
+  }, []);
 
   const handleLogin = (user) => {
     setSuccess(true);
@@ -28,8 +37,20 @@ export default function Login() {
   };
 
   return (
-    <div className={styles.loginBg}>
-      <div className={styles.loginContainer}>
+    <div className={styles.loginPage}> {/* Clase para dividir la pantalla */}
+      <div className={styles.loginBg}> {/* Fondo de los botes */}
+        <img
+          src="/logoMuni.png"
+          alt="Logo Municipalidad"
+          className={styles.loginLogoMuni}
+        />
+        <img
+          src="/LogoUMG.png"
+          alt="Logo UMG"
+          className={styles.loginLogoUMG}
+        />
+      </div>
+      <div className={styles.loginContainer}> {/* Card del login */}
         {success && (
           <div className={styles.loginSuccess}>¡Inicio de sesión exitoso!</div>
         )}
