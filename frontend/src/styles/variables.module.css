@@ -25,9 +25,10 @@
   /* Colores de enlaces y botones */
   --color-link: #1bb934; /* Verde principal para enlaces */
   --color-link-hover: #1464ff; /* Azul para hover de enlaces */
-  --color-btn-bg: #1bb934; /* Verde principal para botones */
+  --color-btn-bg: #22c55e; /* Verde principal para botones */
   --color-btn-hover: #1464ff; /* Azul para hover de botones */
   --color-btn-bg-light: #e6f4ea; /* Verde pálido para botones secundarios */
+  
 
   /* Tipografías recomendadas */
   --font-family-base: "Inter", "Roboto", Arial, sans-serif;

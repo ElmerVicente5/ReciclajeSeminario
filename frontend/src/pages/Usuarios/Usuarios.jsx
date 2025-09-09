@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Roles from "./Roles";
 import useUsuarios from "../../hooks/useUsuarios";
 import styles from "./Usuarios.module.css";
@@ -7,13 +7,19 @@ import { Table, Button, Modal, Form } from "react-bootstrap";
 export default function Usuarios() {
   const {
     usuarios,
-    roles,
-    zonas,
     cargarUsuarios,
     crearUsuario,
     editarUsuario,
     eliminarUsuario,
+    error,
+    loading,
+    // Si tienes hooks para roles y zonas, agrégalos aquí
   } = useUsuarios();
+
+  // Si tienes hooks para roles y zonas, reemplaza estos estados por los hooks
+  const [roles, setRoles] = useState([]);
+  const [zonas, setZonas] = useState([]);
+
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     id: null,
@@ -24,27 +30,54 @@ export default function Usuarios() {
   });
   const [editMode, setEditMode] = useState(false);
 
-  // ...existing code for handlers...
+  // Cargar usuarios, roles y zonas al montar
+  useEffect(() => {
+    cargarUsuarios();
+    // Si tienes hooks para roles y zonas, llama aquí a cargarRoles() y cargarZonas()
+    // setRoles(await cargarRoles());
+    // setZonas(await cargarZonas());
+  }, []);
+
+  const handleEdit = (usuario) => {
+    setShowModal(true);
+    setEditMode(true);
+    setForm({
+      id: usuario.id,
+      nombre: usuario.nombre,
+      contraseña: "", // No mostrar la contraseña actual
+      rol_id: usuario.rol_id,
+      zona_id: usuario.zona_id,
+    });
+  };
+
+  const handleCreate = () => {
+    setShowModal(true);
+    setEditMode(false);
+    setForm({
+      id: null,
+      nombre: "",
+      contraseña: "",
+      rol_id: "",
+      zona_id: "",
+    });
+  };
+
+  const handleSave = async () => {
+    if (editMode) {
+      await editarUsuario(form);
+    } else {
+      await crearUsuario(form);
+    }
+    setShowModal(false);
+  };
 
   return (
     <div className={styles.pageBg}>
       <h1>Gestión de Usuarios</h1>
-      <Button
-        variant="primary"
-        onClick={() => {
-          setShowModal(true);
-          setEditMode(false);
-          setForm({
-            id: null,
-            nombre: "",
-            contraseña: "",
-            rol_id: "",
-            zona_id: "",
-          });
-        }}
-      >
+      <Button variant="primary" onClick={handleCreate}>
         Nuevo Usuario
       </Button>
+      {error && <div className={styles.error}>{error}</div>}
       <div className="table-responsive mt-3">
         <Table striped bordered hover size="sm">
           <thead>
@@ -70,14 +103,7 @@ export default function Usuarios() {
                 </td>
                 <td>{u.fecha_registro}</td>
                 <td>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setShowModal(true);
-                      setEditMode(true);
-                      setForm(u);
-                    }}
-                  >
+                  <Button size="sm" onClick={() => handleEdit(u)}>
                     Editar
                   </Button>{" "}
                   <Button
@@ -153,13 +179,7 @@ export default function Usuarios() {
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Cancelar
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              editMode ? editarUsuario(form) : crearUsuario(form);
-              setShowModal(false);
-            }}
-          >
+          <Button variant="primary" onClick={handleSave}>
             {editMode ? "Guardar" : "Crear"}
           </Button>
         </Modal.Footer>

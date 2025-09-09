@@ -3,43 +3,26 @@ import { Table } from "react-bootstrap";
 import { FaUser, FaTruck } from "react-icons/fa";
 import CalendarWidget from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCalendario } from "../../hooks/useCalendario";
 
 export default function Calendar() {
   const [date, setDate] = useState(new Date());
+  const [calendario, setCalendario] = useState([]);
+  const { getCalendario, loading, error } = useCalendario();
 
-  // Datos ejemplo del modelo Calendario de Recolección
-  const calendario = [
-    {
-      id: 1,
-      ruta_id: 101,
-      dia_semana: 1,
-      hora_inicio: "08:00",
-      hora_fin: "11:00",
-      frecuencia: "Semanal",
-      notas: "Ruta normal",
-    },
-    {
-      id: 2,
-      ruta_id: 102,
-      dia_semana: 3,
-      hora_inicio: "09:00",
-      hora_fin: "12:00",
-      frecuencia: "Quincenal",
-      notas: "Ruta especial",
-    },
-    {
-      id: 3,
-      ruta_id: 103,
-      dia_semana: 5,
-      hora_inicio: "07:00",
-      hora_fin: "10:00",
-      frecuencia: "Semanal",
-      notas: "Ruta extendida",
-    },
-  ];
+  useEffect(() => {
+    const cargar = async () => {
+      try {
+        const data = await getCalendario();
+        setCalendario(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setCalendario([]);
+      }
+    };
+    cargar();
+  }, []);
 
-  // Utilidad para mostrar el día de la semana
   const diasSemana = [
     "Domingo",
     "Lunes",
@@ -52,6 +35,12 @@ export default function Calendar() {
 
   return (
     <div className={`container-fluid px-2 px-md-4 py-3`}>
+      {error && (
+        <div style={{ color: "red", marginBottom: 16 }}>{error}</div>
+      )}
+      {loading && (
+        <div style={{ marginBottom: 16 }}>Cargando calendario...</div>
+      )}
       <div className="row g-4">
         <div className="col-12 col-md-6">
           <div className={styles.card}>

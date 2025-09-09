@@ -1,27 +1,36 @@
-// Hook personalizado para manejar la lógica de login usando authService.js
 import { useState } from "react";
-import { login as authLogin } from "../services/authService";
+import { fetchApi } from "../services/api";
 
-export function useLogin() {
+export const useLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const login = async ({ email, password }) => {
+  const login = async ({ nombreUsuario, contrasenia }) => {
     setLoading(true);
     setError("");
     try {
-      const result = await authLogin({ email, password });
+      const res = await fetchApi("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ nombreUsuario, contrasenia }),
+      });
       setLoading(false);
-      if (!result.success) {
-        setError("Credenciales incorrectas");
+
+      // Guarda el token en localStorage
+      if (res.accessToken) {
+        localStorage.setItem("token", res.accessToken);
+        return {
+          success: true,
+          user: { nombreUsuario, accessToken: res.accessToken, refreshToken: res.refreshToken },
+        };
       }
-      return result;
+      setError(res.message || "Credenciales incorrectas.");
+      return { success: false };
     } catch (err) {
       setLoading(false);
-      setError("Error de conexión o backend no disponible");
+      setError("No se pudo conectar al servidor.");
       return { success: false };
     }
   };
 
   return { login, loading, error };
-}
+};

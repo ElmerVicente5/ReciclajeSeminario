@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
 import { validateEmail, validateStrongPassword, validateRequired } from "../../utils/validation";
+import { useRegister } from "../../hooks/useRegister";
 
 export default function RegisterModal({ open, onClose }) {
   const [name, setName] = useState("");
@@ -11,6 +12,8 @@ export default function RegisterModal({ open, onClose }) {
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const { register, loading, error: backendError } = useRegister();
 
   useEffect(() => {
     if (!open) {
@@ -27,7 +30,7 @@ export default function RegisterModal({ open, onClose }) {
 
   if (!open) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (!validateRequired(name) || !validateRequired(email) || !validateRequired(password) || !validateRequired(confirmPassword)) {
@@ -50,17 +53,28 @@ export default function RegisterModal({ open, onClose }) {
       setError("Las contraseñas no coinciden.");
       return;
     }
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      onClose();
-    }, 1500);
+
+    // Enviar al backend
+    const result = await register({
+      nombreCompleto: name,
+      nombreUsuario: email,
+      contrasenia: password,
+    });
+
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onClose();
+      }, 1500);
+    } else {
+      setError(backendError || "Error en el registro.");
+    }
   };
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
-  {/* <button className={styles.closeBtn} onClick={onClose}>&times;</button> */}
         <h2 className={styles.title}>Registro</h2>
         {success ? (
           <div className={styles.successMsg}>¡Registro exitoso!</div>
@@ -123,8 +137,10 @@ export default function RegisterModal({ open, onClose }) {
                 {showConfirm ? "Ocultar" : "Mostrar"}
               </button>
             </div>
-            {error && <div className={styles.error}>{error}</div>}
-            <button className={styles.button} type="submit">Registrarse</button>
+            {(error || backendError) && <div className={styles.error}>{error || backendError}</div>}
+            <button className={styles.button} type="submit" disabled={loading}>
+              {loading ? "Registrando..." : "Registrarse"}
+            </button>
             <div style={{ textAlign: 'center', width: '100%' }}>
               <a
                 href="#"
@@ -137,7 +153,7 @@ export default function RegisterModal({ open, onClose }) {
             </div>
           </form>
         )}
-      </div>
+          </div>
     </div>
   );
 }

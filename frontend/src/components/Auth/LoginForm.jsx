@@ -15,7 +15,6 @@ export default function LoginForm({ onLogin }) {
   const [localError, setLocalError] = useState("");
   const [showRegister, setShowRegister] = useState(false);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError("");
@@ -31,17 +30,22 @@ export default function LoginForm({ onLogin }) {
       setLocalError("La contraseña debe tener al menos 8 caracteres, incluir mayúscula, minúscula, número y símbolo.");
       return;
     }
-    const result = await login({ email, password });
-    if (!result.success) {
-      setLocalError("Correo o contraseña incorrectos.");
-      return;
-    }
-    if (onLogin) {
-      onLogin(result.user);
+    try {
+      const result = await login({ nombreUsuario: email, contrasenia: password });
+      console.log("Login result:", result); // <-- Depuración
+      if (!result.success) {
+        setLocalError("Correo o contraseña incorrectos.");
+        return;
+      }
+      if (onLogin) {
+        onLogin(result.user);
+      }
+    } catch (err) {
+      console.error("Error en login:", err); // <-- Depuración
+      setLocalError("Error inesperado al intentar ingresar.");
     }
   };
 
-  // Limpiar campos de login al cerrar/abrir modales de registro o recuperación
   useEffect(() => {
     if (!showRegister && !showRecover) {
       setEmail("");

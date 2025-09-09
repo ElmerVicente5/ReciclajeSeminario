@@ -1,38 +1,22 @@
 import { useState, useEffect } from "react";
 import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
 import styles from "./MapLeafletPage.module.css";
-import { useAcopio } from "../../hooks/useAcopio"; // Importa el hook
+import { useAcopio } from "../../hooks/useAcopio";
 
 export default function MapLeafletPage() {
   const { getAcopio } = useAcopio();
   const [puntos, setPuntos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Simulación de zonas
-  const zonas = [
-    { id: 1, nombre: "Zona Centro" },
-    { id: 2, nombre: "Zona Norte" },
-    { id: 3, nombre: "Zona Sur" },
-  ];
-
-  // Resumen (puedes calcularlo dinámicamente si lo necesitas)
-  const resumen = [
-    { label: "Activos", value: puntos.filter(p => p.estado === "Activo").length, className: styles.resumenActivo },
-    { label: "Saturados", value: puntos.filter(p => p.estado === "Saturado").length, className: styles.resumenSaturado },
-    { label: "Fuera de servicio", value: puntos.filter(p => p.estado === "Fuera de servicio").length, className: styles.resumenFuera },
-  ];
-
   // Estado para filtro de zona
   const [zonaFiltro, setZonaFiltro] = useState(0); // 0 = todas
-  const puntosFiltrados =
-    zonaFiltro === 0 ? puntos : puntos.filter((p) => p.zona_id === zonaFiltro);
 
+  // Obtén los puntos desde la API
   useEffect(() => {
     const fetchPuntos = async () => {
       setLoading(true);
       try {
         const data = await getAcopio();
-        // Si tu API devuelve los puntos en data.puntos, ajusta aquí
         setPuntos(
           data.map((p) => ({
             ...p,
@@ -50,7 +34,47 @@ export default function MapLeafletPage() {
       setLoading(false);
     };
     fetchPuntos();
-  }, [getAcopio]);
+  }, []); // <-- Solo se ejecuta una vez al montar
+
+  // Filtrado por zona usando el objeto zonas si existe
+  const puntosFiltrados =
+    zonaFiltro === 0
+      ? puntos
+      : puntos.filter((p) =>
+          p.zonas?.id ? p.zonas.id === zonaFiltro : p.zona_id === zonaFiltro
+        );
+
+  // Resumen dinámico
+  const resumen = [
+    {
+      label: "Activos",
+      value: puntos.filter((p) => p.estado === "Activo").length,
+      className: styles.resumenActivo,
+    },
+    {
+      label: "Saturados",
+      value: puntos.filter((p) => p.estado === "Saturado").length,
+      className: styles.resumenSaturado,
+    },
+    {
+      label: "Fuera de servicio",
+      value: puntos.filter((p) => p.estado === "Fuera de servicio").length,
+      className: styles.resumenFuera,
+    },
+  ];
+
+  // Opciones de zonas para el filtro (siempre desde los datos)
+  const zonasUnicas = [
+    ...new Map(
+      puntos
+        .map((p) =>
+          p.zonas
+            ? { id: p.zonas.id, nombre: p.zonas.nombre }
+            : { id: p.zona_id, nombre: `Zona ${p.zona_id}` }
+        )
+        .map((z) => [z.id, z])
+    ).values(),
+  ];
 
   return (
     <div className={styles.pageBg}>
@@ -72,7 +96,7 @@ export default function MapLeafletPage() {
                     onChange={(e) => setZonaFiltro(Number(e.target.value))}
                   >
                     <option value={0}>Todas</option>
-                    {zonas.map((z) => (
+                    {zonasUnicas.map((z) => (
                       <option key={z.id} value={z.id}>
                         {z.nombre}
                       </option>
@@ -116,8 +140,8 @@ export default function MapLeafletPage() {
                   <div>No hay puntos disponibles.</div>
                 ) : (
                   puntosFiltrados.map((p) => {
-                    const zona =
-                      zonas.find((z) => z.id === p.zona_id)?.nombre || p.zona_id;
+                    const zonaNombre = p.zonas?.nombre || `Zona ${p.zona_id}`;
+                    const zonaCodigo = p.zonas?.codigo;
                     return (
                       <div
                         key={p.id}
@@ -136,8 +160,14 @@ export default function MapLeafletPage() {
                             marginBottom: 4,
                           }}
                         >
-                          <b>Tipo:</b> {p.tipo} | <b>Zona:</b> {zona} |{" "}
-                          <b>Horario:</b> {p.horario}
+                          <b>Tipo:</b> {p.tipo} | <b>Zona:</b> {zonaNombre}
+                          {zonaCodigo && (
+                            <>
+                              {" "}
+                              | <b>Código:</b> {zonaCodigo}
+                            </>
+                          )}{" "}
+                          | <b>Horario:</b> {p.horario}
                         </div>
                         <div
                           style={{

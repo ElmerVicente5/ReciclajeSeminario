@@ -3,7 +3,7 @@
   min-width: 140px;
   max-width: 220px;
   transition: width 0.2s;
-  background: #074f12;
+  background: var( --color-btn-bg);
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -1,38 +1,96 @@
-import { useState, useEffect } from "react";
-import usuariosService from "../services/usuariosService";
-import zonas from "../constants/zonas";
-import roles from "../constants/roles";
+import { useState } from "react";
+import { fetchApi } from "../services/api";
 
-export default function useUsuarios() {
+const useUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    cargarUsuarios();
-  }, []);
+  // Obtener todos los usuarios
+  const cargarUsuarios = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await fetchApi("/api/usuarios/obtenerUsuarios");
+      setUsuarios(data || []);
+    } catch (err) {
+      setError("Error al cargar usuarios.");
+    }
+    setLoading(false);
+  };
 
-  function cargarUsuarios() {
-    usuariosService.getAll().then(setUsuarios);
-  }
+  // Obtener usuario por ID
+  const getById = async (id) => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await fetchApi(`/api/usuarios/obtenerUsuarioId/${id}`);
+      setLoading(false);
+      return data;
+    } catch (err) {
+      setError("Error al obtener usuario.");
+      setLoading(false);
+      return null;
+    }
+  };
 
-  function crearUsuario(data) {
-    usuariosService.create(data).then(cargarUsuarios);
-  }
+  // Crear usuario (puedes adaptar el endpoint si lo tienes)
+  const crearUsuario = async (data) => {
+    setLoading(true);
+    setError("");
+    try {
+      await fetchApi("/api/usuarios/crearUsuario", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      await cargarUsuarios();
+    } catch (err) {
+      setError("Error al crear usuario.");
+    }
+    setLoading(false);
+  };
 
-  function editarUsuario(data) {
-    usuariosService.update(data).then(cargarUsuarios);
-  }
+  // Editar usuario
+  const editarUsuario = async (data) => {
+    setLoading(true);
+    setError("");
+    try {
+      await fetchApi(`/api/usuarios/actualizarUsuario/${data.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      await cargarUsuarios();
+    } catch (err) {
+      setError("Error al editar usuario.");
+    }
+    setLoading(false);
+  };
 
-  function eliminarUsuario(id) {
-    usuariosService.remove(id).then(cargarUsuarios);
-  }
+  // Eliminar usuario
+  const eliminarUsuario = async (id) => {
+    setLoading(true);
+    setError("");
+    try {
+      await fetchApi(`/api/usuarios/eliminarUsuario/${id}`, {
+        method: "DELETE",
+      });
+      await cargarUsuarios();
+    } catch (err) {
+      setError("Error al eliminar usuario.");
+    }
+    setLoading(false);
+  };
 
   return {
     usuarios,
-    roles,
-    zonas,
+    loading,
+    error,
     cargarUsuarios,
+    getById,
     crearUsuario,
     editarUsuario,
     eliminarUsuario,
   };
-}
+};
+
+export default useUsuarios;
