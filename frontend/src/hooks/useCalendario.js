@@ -5,11 +5,14 @@ export const useCalendario = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const getCalendario = async () => {
+  const getCalendario = async (zona, fecha) => {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchApi("/api/calendario");
+      // Envía los parámetros como query string
+      const data = await fetchApi(
+        `/api/calendario?zona=${encodeURIComponent(zona)}&fecha=${encodeURIComponent(fecha)}`
+      );
       setLoading(false);
       return Array.isArray(data) ? data : [];
     } catch (err) {

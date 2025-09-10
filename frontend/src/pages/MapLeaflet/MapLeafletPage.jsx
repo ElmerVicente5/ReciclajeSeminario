@@ -17,9 +17,19 @@ export default function MapLeafletPage() {
       setLoading(true);
       try {
         const data = await getAcopio();
+        console.log('Datos de acopio API:', data); // Mostrar datos en consola
         setPuntos(
           data.map((p) => ({
-            ...p,
+            id: p.id,
+            latitud: p.latitud,
+            longitud: p.longitud,
+            zona_id: p.zona_id,
+            horario: p.horario,
+            tipo: p.tipo,
+            nombre: p.nombre,
+            direccion: p.direccion,
+            estado: p.estado,
+            zonas: p.zonas,
             estadoClass:
               p.estado === "Activo"
                 ? styles.activo
@@ -150,6 +160,18 @@ export default function MapLeafletPage() {
                         <span className="fw-bold flex-grow-1 min-w-0">
                           {p.nombre}
                         </span>
+                        <div
+                          style={{
+                            color: "#222e3a",
+                            fontSize: "0.98rem",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <b>ID:</b> {p.id} | <b>Latitud:</b> {p.latitud} |{" "}
+                          <b>Longitud:</b> {p.longitud} | <b>Zona ID:</b> {p.zona_id} |{" "}
+                          <b>Tipo:</b> {p.tipo} | <b>Horario:</b> {p.horario} |{" "}
+                          <b>Dirección:</b> {p.direccion}
+                        </div>
                         <span className={p.estadoClass} style={{ marginLeft: 8 }}>
                           {p.estado}
                         </span>
@@ -160,23 +182,12 @@ export default function MapLeafletPage() {
                             marginBottom: 4,
                           }}
                         >
-                          <b>Tipo:</b> {p.tipo} | <b>Zona:</b> {zonaNombre}
+                          <b>Zona:</b> {zonaNombre}
                           {zonaCodigo && (
                             <>
-                              {" "}
-                              | <b>Código:</b> {zonaCodigo}
+                              {" "}| <b>Código:</b> {zonaCodigo}
                             </>
-                          )}{" "}
-                          | <b>Horario:</b> {p.horario}
-                        </div>
-                        <div
-                          style={{
-                            color: "#222e3a",
-                            fontSize: "0.98rem",
-                            marginBottom: 4,
-                          }}
-                        >
-                          <b>Dirección:</b> {p.direccion}
+                          )}
                         </div>
                       </div>
                     );

@@ -9,19 +9,23 @@ import { useCalendario } from "../../hooks/useCalendario";
 export default function Calendar() {
   const [date, setDate] = useState(new Date());
   const [calendario, setCalendario] = useState([]);
+  const [zona, setZona] = useState("");
   const { getCalendario, loading, error } = useCalendario();
 
   useEffect(() => {
+    if (!zona) return;
     const cargar = async () => {
       try {
-        const data = await getCalendario();
-        setCalendario(Array.isArray(data) ? data : []);
+        const fecha = date.toISOString().slice(0, 10);
+        const response = await getCalendario(zona, fecha);
+        console.log('Datos calendario:', response); // Mostrar datos en consola
+        setCalendario(Array.isArray(response?.data) ? response.data : []);
       } catch (err) {
         setCalendario([]);
       }
     };
     cargar();
-  }, []);
+  }, [zona, date]);
 
   const diasSemana = [
     "Domingo",
@@ -35,6 +39,7 @@ export default function Calendar() {
 
   return (
     <div className={`container-fluid px-2 px-md-4 py-3`}>
+      {!zona && <div style={{ color: "orange" }}>Seleccione una zona para ver el calendario.</div>}
       {error && (
         <div style={{ color: "red", marginBottom: 16 }}>{error}</div>
       )}
@@ -47,9 +52,12 @@ export default function Calendar() {
             <div className={styles.headerRow}>
               <h2 className={styles.title}>Calendario</h2>
               <div className={styles.filters}>
-                <select className={styles.filter}>
-                  <option>Zona</option>
-                  <option>Todas</option>
+                <select className={styles.filter} value={zona} onChange={e => setZona(e.target.value)}>
+                  <option value="">Zona</option>
+                  <option value="Todas">Todas</option>
+                  <option value="Norte">Norte</option>
+                  <option value="Sur">Sur</option>
+                  {/* Agrega más zonas si es necesario */}
                 </select>
                 <select className={styles.filter}>
                   <option>Categoría</option>

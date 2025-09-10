@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchApi } from "../services/api";
 
 const useRoles = () => {
@@ -10,7 +10,7 @@ const useRoles = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchApi("/api/roles");
+      const data = await fetchApi("/api/roles/obtenerListadoRoles");
       setRoles(data || []);
     } catch (err) {
       setError("Error al cargar roles.");
@@ -18,11 +18,15 @@ const useRoles = () => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    cargarRoles();
+  }, []);
+
   const crearRol = async (rol) => {
     setLoading(true);
     setError("");
     try {
-      await fetchApi("/api/roles", {
+      await fetchApi("/api/roles/crearRoles", {
         method: "POST",
         body: JSON.stringify(rol),
       });
@@ -37,7 +41,7 @@ const useRoles = () => {
     setLoading(true);
     setError("");
     try {
-      await fetchApi(`/api/roles/${rol.id}`, {
+      await fetchApi(`/api/roles/actualizarRolId/${rol.id}`, {
         method: "PUT",
         body: JSON.stringify(rol),
       });
@@ -52,7 +56,7 @@ const useRoles = () => {
     setLoading(true);
     setError("");
     try {
-      await fetchApi(`/api/roles/${id}`, {
+      await fetchApi(`/api/roles/eliminarRolId/${id}`, {
         method: "DELETE",
       });
       await cargarRoles();

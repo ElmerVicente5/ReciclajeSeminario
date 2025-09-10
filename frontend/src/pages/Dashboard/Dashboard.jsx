@@ -35,14 +35,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Aquí puedes limpiar el estado de autenticación si lo usas
-    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
   return (
     <div className={styles.dashboardContainer}>
-      <DashboardSidebar />
+      <DashboardSidebar onLogout={handleLogout} />
       <main className={styles.mainContent}>
         <h1 className={styles.title}>Panel Municipal</h1>
         <div className={`row ${styles.grid}`}>

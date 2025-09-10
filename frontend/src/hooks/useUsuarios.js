@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { fetchApi } from "../services/api";
 
+// Protección de acceso: si no hay token, redirige al login
+if (!localStorage.getItem("token")) {
+  window.location.href = "/login";
+}
+
 const useUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(false);

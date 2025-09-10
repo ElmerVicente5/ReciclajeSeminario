@@ -1,4 +1,3 @@
-
 // Página de login para la plataforma web de reciclaje inteligente
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,24 +15,19 @@ export default function Login() {
     }
   }, []);
 
-  const handleLogin = (user) => {
-    setSuccess(true);
-    // Guardar estado de login en localStorage
-    localStorage.setItem("isLoggedIn", "true");
-    // Guardar token si existe
-    if (user.token) {
-      localStorage.setItem("token", user.token);
-    }
-    setTimeout(() => {
+  useEffect(() => {
+    if (success) {
       navigate("/dashboard");
-    }, 1200); // Espera 1.2s para mostrar el mensaje de éxito
-  };
+    }
+  }, [success, navigate]);
 
-  // Función de logout
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("token");
-    navigate("/login");
+  const handleLogin = (user) => {
+    console.log('Login result:', user); // Depuración
+    setSuccess(true);
+    // Guardar token si existe
+    if (user.accessToken) {
+      localStorage.setItem("token", user.accessToken);
+    }
   };
 
   return (
@@ -55,13 +49,6 @@ export default function Login() {
           <div className={styles.loginSuccess}>¡Inicio de sesión exitoso!</div>
         )}
         <LoginForm onLogin={handleLogin} />
-        <button
-          onClick={handleLogout}
-          className={styles.logoutBtn}
-          style={{ marginTop: 16 }}
-        >
-          Cerrar sesión
-        </button>
       </div>
     </div>
   );

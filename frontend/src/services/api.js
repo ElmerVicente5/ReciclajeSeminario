@@ -13,3 +13,12 @@ export const fetchApi = async (url, options = {}) => {
   }
   return res.json();
 };
+
+export const logout = () => {
+  localStorage.removeItem("token");
+};
+
+export function isAuthenticated() {
+  const token = localStorage.getItem("token");
+  return !!token;
+}
