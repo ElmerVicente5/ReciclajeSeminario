@@ -21,6 +21,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { isAuthenticated } from "../../services/api";
 
 ChartJS.register(
   CategoryScale,
@@ -32,6 +33,11 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
+  if (!isAuthenticated()) {
+    window.location.href = "/login";
+    return null;
+  }
+
   const navigate = useNavigate();
 
   const handleLogout = () => {

@@ -3,8 +3,14 @@ import styles from "./Usuarios.module.css";
 import { Table, Button, Modal, Form } from "react-bootstrap";
 import { useState } from "react";
 import { FaEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
+import { isAuthenticated } from "../../services/api";
 
 export default function Roles() {
+  if (!isAuthenticated()) {
+    window.location.href = "/login";
+    return null;
+  }
+
   const { roles, crearRol, editarRol, eliminarRol } = useRoles();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ id: null, nombre: "" });

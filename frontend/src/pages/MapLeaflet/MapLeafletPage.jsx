@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
 import styles from "./MapLeafletPage.module.css";
 import { useAcopio } from "../../hooks/useAcopio";
+import { isAuthenticated } from "../../services/api";
 
 export default function MapLeafletPage() {
+  if (!isAuthenticated()) {
+    window.location.href = "/login";
+    return null;
+  }
+
   const { getAcopio } = useAcopio();
   const [puntos, setPuntos] = useState([]);
   const [loading, setLoading] = useState(true);

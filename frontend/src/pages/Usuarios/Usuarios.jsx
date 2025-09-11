@@ -4,8 +4,15 @@ import useUsuarios from "../../hooks/useUsuarios";
 import useRoles from "../../hooks/useRoles";
 import styles from "./Usuarios.module.css";
 import { Table, Button, Modal, Form } from "react-bootstrap";
+import { isAuthenticated } from "../../services/api";
 
 export default function Usuarios() {
+  if (!isAuthenticated()) {
+    console.warn("No autenticado, redirigiendo a login. Token:", localStorage.getItem("token"));
+    window.location.href = "/login";
+    return null;
+  }
+
   const {
     usuarios,
     cargarUsuarios,
@@ -36,7 +43,7 @@ export default function Usuarios() {
   // Cargar usuarios, roles y zonas al montar
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Token actual:", token);
+    console.log("Token actual en Usuarios.jsx:", token);
     cargarUsuarios();
     cargarRoles(); // Asegura que los roles estén actualizados
     // Si tienes hooks para zonas, llama aquí a cargarZonas()

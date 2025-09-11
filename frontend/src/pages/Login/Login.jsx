@@ -10,11 +10,10 @@ export default function Login() {
 
   // Logout automático al acceder a la página de login
   useEffect(() => {
-    if (localStorage.getItem("isLoggedIn") === "true") {
-      localStorage.removeItem("isLoggedIn");
-    }
+    localStorage.removeItem("token");
   }, []);
 
+  // Redirigir al dashboard cuando el login es exitoso
   useEffect(() => {
     if (success) {
       navigate("/dashboard");

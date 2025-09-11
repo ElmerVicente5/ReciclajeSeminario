@@ -5,8 +5,14 @@ import CalendarWidget from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useState, useEffect } from "react";
 import { useCalendario } from "../../hooks/useCalendario";
+import { isAuthenticated } from "../../services/api";
 
 export default function Calendar() {
+  if (!isAuthenticated()) {
+    window.location.href = "/login";
+    return null;
+  }
+
   const [date, setDate] = useState(new Date());
   const [calendario, setCalendario] = useState([]);
   const [zona, setZona] = useState("");

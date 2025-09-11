@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { fetchApi } from "../services/api";
 
-// Protección de acceso: si no hay token, redirige al login
-if (!localStorage.getItem("token")) {
-  window.location.href = "/login";
-}
-
 const useUsuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,6 +14,7 @@ const useUsuarios = () => {
       const data = await fetchApi("/api/usuarios/obtenerUsuarios");
       setUsuarios(data || []);
     } catch (err) {
+      console.error("Error al cargar usuarios:", err);
       setError("Error al cargar usuarios.");
     }
     setLoading(false);
@@ -33,6 +29,7 @@ const useUsuarios = () => {
       setLoading(false);
       return data;
     } catch (err) {
+      console.error("Error al obtener usuario:", err);
       setError("Error al obtener usuario.");
       setLoading(false);
       return null;
@@ -50,6 +47,7 @@ const useUsuarios = () => {
       });
       await cargarUsuarios();
     } catch (err) {
+      console.error("Error al crear usuario:", err);
       setError("Error al crear usuario.");
     }
     setLoading(false);
@@ -66,6 +64,7 @@ const useUsuarios = () => {
       });
       await cargarUsuarios();
     } catch (err) {
+      console.error("Error al editar usuario:", err);
       setError("Error al editar usuario.");
     }
     setLoading(false);
@@ -81,6 +80,7 @@ const useUsuarios = () => {
       });
       await cargarUsuarios();
     } catch (err) {
+      console.error("Error al eliminar usuario:", err);
       setError("Error al eliminar usuario.");
     }
     setLoading(false);
