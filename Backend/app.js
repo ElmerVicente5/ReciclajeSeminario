@@ -12,11 +12,15 @@ import { initializeDatabase} from './src/config/db.js';
 import { specs, swaggerUi } from './src/config/swagger.config.js';
 import { routerAuth, users, roles } from "./src/routes/auth.route.js";
 import { routerNotificaciones } from "./src/routes/notificaciones.route.js";
+
 import { routerAuthApp } from "./src/routes/auth.app.route.js";
 import { routerRankinZonasApp } from "./src/routes/rankinZonas.app.route.js";
 import { routerRankingPorZonaApp } from "./src/routes/rankingPorZona.app.route.js";
 import { routerNotificacionesApp } from "./src/routes/notificaciones.app.route.js";
-  app.use(cors({
+ 
+import { rutasRouter } from "./src/routes/rutas.route.js";
+app.use(cors({
+
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-api-key']
@@ -37,6 +41,7 @@ app.use("/api/auth/app", routerAuthApp);
 app.use("/api/app/ranking-zonas", routerRankinZonasApp);
 app.use("/api/app/notificaciones", routerNotificacionesApp);
 app.use("/api/app/ranking", routerRankingPorZonaApp);
+app.use("/api/rutas", rutasRouter);
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {
