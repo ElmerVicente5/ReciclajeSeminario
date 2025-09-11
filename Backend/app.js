@@ -11,6 +11,7 @@ import { initializeDatabase} from './src/config/db.js';
 import { specs, swaggerUi } from './src/config/swagger.config.js';
 import { routerAuth, users, roles } from "./src/routes/auth.route.js";
 import { routerNotificaciones } from "./src/routes/notificaciones.route.js";
+import { rutasRouter } from "./src/routes/rutas.route.js";
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
@@ -27,6 +28,7 @@ app.use("/api/auth", routerAuth);
 app.use("/api/usuarios", users);
 app.use("/api/roles", roles);
 app.use("/api/notificaciones", routerNotificaciones);
+app.use("/api/rutas", rutasRouter);
 
 initializeDatabase()
   .then(() => {
