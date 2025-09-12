@@ -1,6 +1,6 @@
 import express from "express";
 import { body, param, query, validationResult } from "express-validator";
-import { obtenerCalendario } from "../services/calendario.service.js"; 
+import { obtenerCalendario,insertarHorario  } from "../services/calendario.service.js"; 
 
 
 // Middleware de validación
@@ -29,9 +29,10 @@ export const getCalendario = [
       }
      
       const { zona, fecha } = req.query;
-
-      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const diaSemana = dias[new Date(fecha).getDay()];
+      const diaSemana = new Date(fecha).getDay();
+      console.log("diaSemana:", diaSemana);
+      //const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      //const diaSemana = dias[new Date(fecha).getDay()];
 
       const data = await obtenerCalendario(zona, diaSemana);
 
@@ -45,4 +46,54 @@ export const getCalendario = [
       res.status(500).json({ error: "Error interno del servidor" });
     }
   },
+];
+
+
+const horarioValidation = [
+  body("ruta_id")
+    .notEmpty().withMessage("El campo 'ruta_id' es obligatorio")
+    .isInt().withMessage("ruta_id debe ser un número entero"),
+  body("dia_semana")
+    .notEmpty().withMessage("El campo 'dia_semana' es obligatorio")
+    .isInt({ min: 0, max: 6 }).withMessage("dia_semana debe estar entre 0 (Domingo) y 6 (Sábado)"),
+  body("hora_inicio")
+    .notEmpty().withMessage("hora_inicio es obligatorio")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage("hora_inicio debe estar en formato HH:mm"),
+  body("hora_fin")
+    .notEmpty().withMessage("hora_fin es obligatorio")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage("hora_fin debe estar en formato HH:mm"),
+  body("frecuencia").optional().isString(),
+  body("notas").optional().isString(),
+];
+
+export const crearHorario = [
+  ...horarioValidation,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { ruta_id, dia_semana, hora_inicio, hora_fin, frecuencia, notas } = req.body;
+
+      const nuevoHorario = await insertarHorario({
+        ruta_id,
+        dia_semana,
+        hora_inicio,
+        hora_fin,
+        frecuencia,
+        notas
+      });
+
+      res.status(201).json({
+        message: "Horario creado exitosamente",
+        data: nuevoHorario,
+      });
+
+    } catch (error) {
+      console.error("Error al crear horario:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+  }
 ];
