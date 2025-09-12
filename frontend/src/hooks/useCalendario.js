@@ -11,7 +11,7 @@ export const useCalendario = () => {
     try {
       // Envía los parámetros como query string
       const data = await fetchApi(
-        `/api/calendario?zona=${encodeURIComponent(zona)}&fecha=${encodeURIComponent(fecha)}`
+        `/api/calendario${encodeURIComponent(zona)}&fecha=${encodeURIComponent(fecha)}`
       );
       setLoading(false);
       return Array.isArray(data) ? data : [];

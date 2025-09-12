@@ -58,11 +58,11 @@ export default function LoginForm({ onLogin }) {
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div style={{ background: '#f3f4f6', color: '#222', borderRadius: 8, padding: 10, marginBottom: 16, fontSize: 14, textAlign: 'center' }}>
+        {/* <div style={{ background: '#f3f4f6', color: '#222', borderRadius: 8, padding: 10, marginBottom: 16, fontSize: 14, textAlign: 'center' }}>
           <strong>Credenciales de prueba:</strong><br />
           Correo: <span style={{ fontFamily: 'monospace' }}>admin@demo.com</span><br />
           Contraseña: <span style={{ fontFamily: 'monospace' }}>Admin123!</span>
-        </div>
+        </div> */}
         <h2 className={styles.title}>
           Clasifica tu basura de forma inteligente
         </h2>
