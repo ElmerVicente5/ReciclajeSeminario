@@ -1,7 +1,7 @@
 import {configJwt} from '../config/config.jwt.js';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '../generated/prisma/client.js';
-async function verifyToken(req,res,next){
+async function verifyTokenApp(req,res,next){
     const token = req.headers['authorization']
     if(!token){
         return res.status(401).json({message: 'No autorizado'});
@@ -30,4 +30,4 @@ async function verifyToken(req,res,next){
     }
 }
 
-export {verifyToken};
+export {verifyTokenApp};

@@ -5,6 +5,7 @@ import cors from 'cors';
 const app = express();
 import {router} from './src/routes/route.js';
 import calendarioRouter from "./src/routes/calendario.route.js";
+import { calendarioRouterApp } from "./src/routes/calendario.route.js";
 import acopioRouter from "./src/routes/acopio.route.js";
 import {routerRankingPorZona } from "./src/routes/rankingPorZona.route.js";
 import { routerRankinZonas } from "./src/routes/rankinZonas.route.js";
@@ -41,6 +42,7 @@ app.use("/api/auth/app", routerAuthApp);
 app.use("/api/app/ranking-zonas", routerRankinZonasApp);
 app.use("/api/app/notificaciones", routerNotificacionesApp);
 app.use("/api/app/ranking", routerRankingPorZonaApp);
+app.use("/api/app/calendario", calendarioRouterApp);
 app.use("/api/rutas", rutasRouter);
 initializeDatabase()
   .then(() => {

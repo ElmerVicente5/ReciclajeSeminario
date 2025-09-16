@@ -1,6 +1,6 @@
 import { getRankingZonas } from '../controllers/rankinZona.controller.js';
 import { Router } from 'express';
-import { verifyToken } from '../middlewares/middleware.app.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 const routerRankinZonasApp = Router();
 /**
  * @swagger
@@ -30,5 +30,5 @@ const routerRankinZonasApp = Router();
  *                     type: integer
  *                     example: 450
  */
-routerRankinZonasApp.get('/', verifyToken, getRankingZonas);
+routerRankinZonasApp.get('/', verifyTokenApp, getRankingZonas);
 export { routerRankinZonasApp };

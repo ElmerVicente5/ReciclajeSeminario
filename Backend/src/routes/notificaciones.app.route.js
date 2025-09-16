@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { crearNotificacion, obtenerTodasLasNotificaciones } from '../controllers/notificaciones.controller.js';
 import { body } from 'express-validator';
-import { verifyToken } from '../middlewares/middleware.app.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 const crearNotificacionValidation = [
     body('titulo').notEmpty().withMessage('El titulo es requerido'),
     body('cuerpo').notEmpty().withMessage('El cuerpo es requerido'),
@@ -70,7 +70,7 @@ const routerNotificacionesApp = Router();
  *       500:
  *         description: Error interno del servidor
  */
-routerNotificacionesApp.post('/crear', verifyToken, crearNotificacionValidation, crearNotificacion);
+routerNotificacionesApp.post('/crear', verifyTokenApp, crearNotificacionValidation, crearNotificacion);
 /**
  * @swagger
  * /api/app/notificaciones/obtenerNotificaciones:
@@ -151,5 +151,5 @@ routerNotificacionesApp.post('/crear', verifyToken, crearNotificacionValidation,
  *       500:
  *         description: Error interno del servidor
  */
-routerNotificacionesApp.get('/obtenerNotificaciones', verifyToken, obtenerTodasLasNotificaciones);
+routerNotificacionesApp.get('/obtenerNotificaciones', verifyTokenApp, obtenerTodasLasNotificaciones);
 export { routerNotificacionesApp };

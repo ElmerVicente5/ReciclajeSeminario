@@ -1,9 +1,11 @@
 import express from 'express';
 
 import { verifyToken } from '../middlewares/middleware.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 
-import { getCalendario,crearHorario } from '../controllers/calendario.controller.js';
+import { getCalendario, crearHorario, getCalendarioPorDias } from '../controllers/calendario.controller.js';
 const calendarioRouter = express.Router();
+const calendarioRouterApp = express.Router();
 
 
 /**
@@ -191,4 +193,108 @@ calendarioRouter.get('/', verifyToken, getCalendario);
 
 calendarioRouter.post('/insert', verifyToken, crearHorario);
 
+/**
+ * @swagger
+ * /api/app/calendario/dias:
+ *   get:
+ *     summary: Obtener calendario por días del mes
+ *     description: Devuelve todas las fechas de un mes específico organizadas por días de la semana según la configuración del calendario de recolección.
+ *     tags: [App]
+ *     security:
+ *       - bearerAuth: []   # JWT requerido para aplicación móvil
+ *     parameters:
+ *       - in: query
+ *         name: mes
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         required: true
+ *         description: Mes del año (1-12)
+ *         example: 9
+ *       - in: query
+ *         name: anio
+ *         schema:
+ *           type: integer
+ *           minimum: 1900
+ *         required: true
+ *         description: Año (mayor o igual a 1900)
+ *         example: 2025
+ *     responses:
+ *       200:
+ *         description: Calendario obtenido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       dia_semana:
+ *                         type: integer
+ *                         description: Día de la semana (1=Lunes, 2=Martes, ..., 7=Domingo)
+ *                         example: 1
+ *                       nombre_mes:
+ *                         type: string
+ *                         description: Nombre del mes en español
+ *                         example: "Septiembre"
+ *                       nombre_dia:
+ *                         type: string
+ *                         description: Nombre del día de la semana en español
+ *                         example: "Lunes"
+ *                       fechas:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           format: date
+ *                         description: Array de fechas en formato ISO (YYYY-MM-DD) que corresponden a ese día de la semana en el mes
+ *                         example: ["2025-09-01", "2025-09-08", "2025-09-15", "2025-09-22", "2025-09-29"]
+ *               example:
+ *                 data:
+ *                   - dia_semana: 1
+ *                     nombre_mes: "Septiembre"
+ *                     nombre_dia: "Lunes"
+ *                     fechas: ["2025-09-01", "2025-09-08", "2025-09-15", "2025-09-22", "2025-09-29"]
+ *                   - dia_semana: 3
+ *                     nombre_mes: "Septiembre"
+ *                     nombre_dia: "Miércoles"
+ *                     fechas: ["2025-09-03", "2025-09-10", "2025-09-17", "2025-09-24"]
+ *       400:
+ *         description: Error de validación en los parámetros
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *               examples:
+ *                 parametros_requeridos:
+ *                   summary: Parámetros faltantes
+ *                   value:
+ *                     error: "Los parámetros 'mes' y 'anio' son requeridos"
+ *                 mes_invalido:
+ *                   summary: Mes fuera de rango
+ *                   value:
+ *                     error: "El mes debe estar entre 1 y 12"
+ *                 anio_invalido:
+ *                   summary: Año inválido
+ *                   value:
+ *                     error: "El año debe ser mayor o igual a 1900"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+calendarioRouterApp.get('/dias', verifyTokenApp, getCalendarioPorDias);
 export default calendarioRouter;
+export { calendarioRouterApp };

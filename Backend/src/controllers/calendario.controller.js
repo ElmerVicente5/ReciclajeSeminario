@@ -1,6 +1,6 @@
 import express from "express";
 import { body, param, query, validationResult } from "express-validator";
-import { obtenerCalendario,insertarHorario  } from "../services/calendario.service.js"; 
+import { obtenerCalendario, insertarHorario, obtenerCalendarioPorDias } from "../services/calendario.service.js"; 
 
 
 // Middleware de validación
@@ -18,6 +18,18 @@ const calendarioValidation= [
    .withMessage("La fecha debe estar en formato válido YYYY-MM-DD"),
 ];
 
+const calendarioValidationPorDias = [
+  param("mes")
+    .notEmpty()
+    .withMessage("El parámetro 'mes' es obligatorio")
+    .isInt({ min: 1, max: 12 })
+    .withMessage("El mes debe estar entre 1 y 12"),
+  param("anio")
+    .notEmpty()
+    .withMessage("El parámetro 'anio' es obligatorio")
+    .isInt({ min: 1900 })
+    .withMessage("El año debe ser mayor o igual a 1900"),
+];
 
 export const getCalendario = [
   ...calendarioValidation, // validaciones
@@ -47,6 +59,94 @@ export const getCalendario = [
     }
   },
 ];
+
+export const getCalendarioPorDias = [
+  async (req, res) => {
+    try {
+      const { mes, anio } = req.query;
+      if (mes > 12 || mes < 1) {
+        return res.status(400).json({ 
+          error: "El mes debe estar entre 1 y 12" 
+        });
+      }
+      if (anio < 1900) {
+        return res.status(400).json({ 
+          error: "El año debe ser mayor o igual a 1900" 
+        });
+      }
+      if (!mes || !anio) {
+        return res.status(400).json({ 
+          error: "Los parámetros 'mes' y 'anio' son requeridos" 
+        });
+      }
+      const calendario = await obtenerCalendarioPorDias();
+      
+      const fechasPorDia = calendario.map(cal => {
+        let diaSemanaJS;
+        if (cal.dia_semana === 7) {
+          diaSemanaJS = 0; 
+        } else {
+          diaSemanaJS = cal.dia_semana; 
+        }
+        
+        const fechas = [];
+        const date = new Date(parseInt(anio), parseInt(mes) - 1, 1); 
+        
+        while (date.getMonth() === parseInt(mes) - 1) {
+          if (date.getDay() === diaSemanaJS) {
+            fechas.push(new Date(date));
+          }
+          date.setDate(date.getDate() + 1);
+        }
+        
+        return {
+          dia_semana: cal.dia_semana,
+          nombre_mes: getNombreMes(parseInt(mes)),
+          nombre_dia: getNombreDia(cal.dia_semana),
+          fechas: fechas.map(f => f.toISOString().split('T')[0])
+        };
+      });
+
+      res.json({
+        data: fechasPorDia
+      });
+    } catch (error) {
+      console.error("Error al obtener el calendario:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+    }
+]
+
+const getNombreDia = (diaSemana) => {
+  const nombres = {
+    1: 'Lunes',
+    2: 'Martes', 
+    3: 'Miércoles',
+    4: 'Jueves',
+    5: 'Viernes',
+    6: 'Sábado',
+    7: 'Domingo'
+  };
+  return nombres[diaSemana] || 'Desconocido';
+};
+
+const getNombreMes = (mes) => {
+  const nombres = {
+    1: 'Enero',
+    2: 'Febrero',
+    3: 'Marzo',
+    4: 'Abril',
+    5: 'Mayo',
+    6: 'Junio',
+    7: 'Julio',
+    8: 'Agosto',
+    9: 'Septiembre',
+    10: 'Octubre',
+    11: 'Noviembre',
+    12: 'Diciembre'
+  };
+  return nombres[mes] || 'Desconocido';
+};
 
 
 const horarioValidation = [
