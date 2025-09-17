@@ -20,11 +20,12 @@ import { routerRankingPorZonaApp } from "./src/routes/rankingPorZona.app.route.j
 import { routerNotificacionesApp } from "./src/routes/notificaciones.app.route.js";
  
 import { rutasRouter } from "./src/routes/rutas.route.js";
+import { zonasRouter } from "./src/routes/zonas.route.js";
 app.use(cors({
 
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-api-key']
+  allowedHeaders: ['Content-Type', 'x-api-key' , 'authorization']
 }));
 app.use(express.json());
 const port = process.env.PORT || 8000;
@@ -44,6 +45,7 @@ app.use("/api/app/notificaciones", routerNotificacionesApp);
 app.use("/api/app/ranking", routerRankingPorZonaApp);
 app.use("/api/app/calendario", calendarioRouterApp);
 app.use("/api/rutas", rutasRouter);
+app.use("/api/zonas", zonasRouter);
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {

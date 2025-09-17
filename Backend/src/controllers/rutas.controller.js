@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator';
-import { listarRutasPorZona } from '../services/rutas.service.js';
+import { listarRutasPorZona , crearRuta , actualizarRuta , eliminarRuta } from '../services/rutas.service.js';
 
 export const getRutas = async (req, res) => {
     const errors = validationResult(req);
@@ -16,5 +16,44 @@ export const getRutas = async (req, res) => {
             message: "Error al obtener las rutas",
             error: error.message
         });
+    }
+}
+export const crearRutas = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { nombre, zona_id } = req.body;
+        const ruta = await crearRuta({ nombre, zona_id });
+        res.status(201).json({ message: "Ruta creada exitosamente", ruta });
+    } catch (error) {
+        res.status(500).json({ message: "Error al crear la ruta", error: error.message });
+    }
+}
+export const actualizarRutas = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { id, nombre, zona_id , activo } = req.body;
+        const ruta = await actualizarRuta({ id, nombre, zona_id , activo });
+        res.status(200).json({ message: "Ruta actualizada exitosamente", ruta });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar la ruta", error: error.message });
+    }
+}
+export const eliminarRutas = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    try {
+        const { id } = req.body;
+        const ruta = await eliminarRuta({ id });
+        res.status(200).json({ message: "Ruta eliminada exitosamente", ruta });
+    } catch (error) {
+        res.status(500).json({ message: "Error al eliminar la ruta", error: error.message });
     }
 }
