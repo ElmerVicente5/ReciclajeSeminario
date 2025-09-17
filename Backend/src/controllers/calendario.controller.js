@@ -1,6 +1,6 @@
 import express from "express";
 import { body, param, query, validationResult } from "express-validator";
-import { obtenerCalendario, insertarHorario, obtenerCalendarioPorDias } from "../services/calendario.service.js"; 
+import { obtenerCalendario, insertarHorario, obtenerCalendarioPorDias, obtenerInformacionCalendario } from "../services/calendario.service.js"; 
 
 
 // Middleware de validación
@@ -148,6 +148,59 @@ const getNombreMes = (mes) => {
   return nombres[mes] || 'Desconocido';
 };
 
+export const getInformacionCalendario = [
+  async (req, res) => {
+    try {
+      const { fecha } = req.params;
+      
+      if (!fecha) {
+        return res.status(400).json({ 
+          error: "El parámetro 'fecha' es obligatorio" 
+        });
+      }
+      
+      const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!fechaRegex.test(fecha)) {
+        return res.status(400).json({ 
+          error: "La fecha debe estar en formato YYYY-MM-DD" 
+        });
+      }
+      
+      const [year, month, day] = fecha.split('-');
+      const fechaCompleta = `${year}-${month}-${day}`;
+      
+      const dateObj = new Date(fechaCompleta);
+      
+      if (isNaN(dateObj.getTime())) {
+        return res.status(400).json({ 
+          error: "Fecha inválida" 
+        });
+      }
+      
+      let diaSemana = dateObj.getDay();
+      if (diaSemana === 0) {
+        diaSemana = 7;
+      }
+      
+      const calendario = await obtenerInformacionCalendario(diaSemana);
+
+      if (calendario.length === 0) {
+        return res.status(400).json({ 
+          error: "No se encontro información para el día de la semana especificado" 
+        });
+      }
+
+      res.json({
+        data: calendario,
+        fecha: fechaCompleta,
+        diaSemana: diaSemana
+      });
+    } catch (error) {
+      console.error("Error al obtener la información del calendario:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+  }
+];
 
 const horarioValidation = [
   body("ruta_id")

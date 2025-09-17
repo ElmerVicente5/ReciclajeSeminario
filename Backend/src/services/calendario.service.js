@@ -51,6 +51,34 @@ export const obtenerCalendarioPorDias = async () => {
   }
 };
 
+export const obtenerInformacionCalendario = async (diaSemana) => {
+  try {
+    const calendario = await prisma.calendariorecoleccion.findMany({
+      where: {
+        dia_semana: diaSemana, 
+      },
+      select: {
+        dia_semana: true,
+        hora_inicio: true,
+        hora_fin: true,
+        frecuencia: true,
+        notas: true,
+        rutas: {
+          select: {
+            id: true,
+            nombre: true,
+          }
+        },
+      },
+    });
+
+    return calendario;
+  } catch (error) {
+    console.error("Error al obtener la información del calendario:", error);
+    throw error;
+  }
+};
+
 export const insertarHorario = async ({ ruta_id, dia_semana, hora_inicio, hora_fin, frecuencia, notas }) => {
   try {
     // Convertir las horas a ISO-8601
