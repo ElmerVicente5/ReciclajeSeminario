@@ -36,4 +36,46 @@ export const listarRutasPorZona = async () => {
         }
         throw { status: 500, message: 'Error al obtener las rutas por zona' };
     }
+
+}
+
+export const crearRuta = async ({ nombre, zona_id }) => {
+    try {
+        const nuevaRuta = await prisma.rutas.create({
+            data: { nombre, zona_id, activo: true }
+        });
+        return nuevaRuta;
+    } catch (error) {
+        console.error("Error al crear la ruta:", error);
+        throw error;
+    }
+}
+
+export const actualizarRuta = async ({ id, nombre, zona_id , activo}) => {
+    try {
+        if(activo == "false"){
+            activo = false;
+        }else{
+            activo = true;
+        }
+        const ruta = await prisma.rutas.update({
+            where: { id },
+            data: { nombre, zona_id: parseInt(zona_id), activo: Boolean(activo) }
+        });
+        return ruta;
+    } catch (error) {
+        console.error("Error al actualizar la ruta:", error);
+        throw error;
+    }
+}
+export const eliminarRuta = async ({ id }) => {
+    try {
+        const ruta = await prisma.rutas.delete({
+            where: { id }
+        });
+        return ruta;
+    } catch (error) {
+        console.error("Error al eliminar la ruta:", error);
+        throw error;
+    }
 }
