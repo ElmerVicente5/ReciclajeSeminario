@@ -21,7 +21,7 @@ const calendarioRouter = express.Router();
  * @swagger
  * /api/calendario:
  *   get:
- *     summary: Obtener calendario según zona y fecha
+ *     summary: Obtener calendario según zona y fecha || publico
  *     description: Devuelve los datos del calendario para una zona específica y un día de la semana derivado de la fecha indicada.
  *     tags: [Calendario]
  *     security:
@@ -85,14 +85,14 @@ const calendarioRouter = express.Router();
  *                   type: string
  *                   example: Error interno del servidor
  */
-calendarioRouter.get('/', verifyToken, getCalendario);
+calendarioRouter.get('/',  getCalendario);
 
 
 /**
  * @swagger
  * /api/calendario/insert:
  *   post:
- *     summary: Crear un nuevo horario en el calendario de recolección
+ *     summary: Crear un nuevo horario en el calendario de recolección || Admin
  *     description: Inserta un nuevo horario asociado a una ruta específica, día de la semana, hora de inicio y fin.
  *     tags: [Calendario]
  *     security:
@@ -200,7 +200,7 @@ calendarioRouter.post('/insert', verifyToken, crearHorario);
  * @swagger
  * /api/calendario/obtenerCalendario:
  *   get:
- *     summary: Obtener todo el calendario de recolección
+ *     summary: Obtener todo el calendario de recolección || publico
  *     description: Devuelve todos los horarios registrados en el calendario de recolección, incluyendo información de las rutas y zonas asociadas.
  *     tags: [Calendario]
  *     security:
@@ -269,14 +269,14 @@ calendarioRouter.post('/insert', verifyToken, crearHorario);
  *                   type: string
  *                   example: Error interno del servidor
  */
-calendarioRouter.get('/obtenerCalendario', verifyToken, obtenerCalendarioRecoleccion);
+calendarioRouter.get('/obtenerCalendario',  obtenerCalendarioRecoleccion);
 
 
 /**
  * @swagger
  * /api/calendario/update/{id}:
  *   put:
- *     summary: Actualizar un horario en el calendario de recolección
+ *     summary: Actualizar un horario en el calendario de recolección || Admin
  *     description: Permite modificar los datos de un horario específico en el calendario de recolección.
  *     tags: [Calendario]
  *     security:
@@ -376,9 +376,9 @@ calendarioRouter.put('/update/:id', verifyToken, updateHorario);
 
 /**
  * @swagger
- * /api/calendario/delete/{id}:
+ * /api/calendario/delete/{id}: 
  *   delete:
- *     summary: Eliminar un horario del calendario de recolección
+ *     summary: Eliminar un horario del calendario de recolección || Admin
  *     description: Elimina un horario específico en base a su ID.
  *     tags: [Calendario]
  *     security:
