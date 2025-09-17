@@ -1,5 +1,5 @@
 import { getRankingByZone } from '../controllers/rankingPorZona.controller.js';
-import { verifyToken } from '../middlewares/middleware.app.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 import express from 'express';
 const routerRankingPorZonaApp = express.Router();
 
@@ -56,7 +56,7 @@ const routerRankingPorZonaApp = express.Router();
  * 
  * 
  */
-routerRankingPorZonaApp.get('/', verifyToken, getRankingByZone);
+routerRankingPorZonaApp.get('/', verifyTokenApp, getRankingByZone);
 
 export {
     routerRankingPorZonaApp

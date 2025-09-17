@@ -1,13 +1,16 @@
 import express from 'express';
 
 import { verifyToken } from '../middlewares/middleware.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 
 import { getCalendario,
     crearHorario,
     obtenerCalendarioRecoleccion,
     updateHorario,
      deleteHorario  } from '../controllers/calendario.controller.js';
+import { getCalendario, crearHorario, getCalendarioPorDias, getInformacionCalendario } from '../controllers/calendario.controller.js';
 const calendarioRouter = express.Router();
+const calendarioRouterApp = express.Router();
 
 
 /**
@@ -205,6 +208,33 @@ calendarioRouter.post('/insert', verifyToken, crearHorario);
  *     tags: [Calendario]
  *     security:
  *       - bearerAuth: []  # JWT requerido
+/**
+ * @swagger
+ * /api/app/calendario/dias:
+ *   get:
+ *     summary: Obtener calendario por días del mes
+ *     description: Devuelve todas las fechas de un mes específico organizadas por días de la semana según la configuración del calendario de recolección.
+ *     tags: [App]
+ *     security:
+ *       - bearerAuth: []   # JWT requerido para aplicación móvil
+ *     parameters:
+ *       - in: query
+ *         name: mes
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         required: true
+ *         description: Mes del año (1-12)
+ *         example: 9
+ *       - in: query
+ *         name: anio
+ *         schema:
+ *           type: integer
+ *           minimum: 1900
+ *         required: true
+ *         description: Año (mayor o igual a 1900)
+ *         example: 2025
  *     responses:
  *       200:
  *         description: Calendario obtenido exitosamente
@@ -340,6 +370,35 @@ calendarioRouter.get('/obtenerCalendario',  obtenerCalendarioRecoleccion);
  *                     notas:
  *                       type: string
  *                       example: "Se actualizó el horario para días festivos"
+ *                       dia_semana:
+ *                         type: integer
+ *                         description: Día de la semana (1=Lunes, 2=Martes, ..., 7=Domingo)
+ *                         example: 1
+ *                       nombre_mes:
+ *                         type: string
+ *                         description: Nombre del mes en español
+ *                         example: "Septiembre"
+ *                       nombre_dia:
+ *                         type: string
+ *                         description: Nombre del día de la semana en español
+ *                         example: "Lunes"
+ *                       fechas:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           format: date
+ *                         description: Array de fechas en formato ISO (YYYY-MM-DD) que corresponden a ese día de la semana en el mes
+ *                         example: ["2025-09-01", "2025-09-08", "2025-09-15", "2025-09-22", "2025-09-29"]
+ *               example:
+ *                 data:
+ *                   - dia_semana: 1
+ *                     nombre_mes: "Septiembre"
+ *                     nombre_dia: "Lunes"
+ *                     fechas: ["2025-09-01", "2025-09-08", "2025-09-15", "2025-09-22", "2025-09-29"]
+ *                   - dia_semana: 3
+ *                     nombre_mes: "Septiembre"
+ *                     nombre_dia: "Miércoles"
+ *                     fechas: ["2025-09-03", "2025-09-10", "2025-09-17", "2025-09-24"]
  *       400:
  *         description: Error de validación en los parámetros
  *         content:
@@ -358,6 +417,21 @@ calendarioRouter.get('/obtenerCalendario',  obtenerCalendarioRecoleccion);
  *                         type: string
  *                       location:
  *                         type: string
+ *                 error:
+ *                   type: string
+ *               examples:
+ *                 parametros_requeridos:
+ *                   summary: Parámetros faltantes
+ *                   value:
+ *                     error: "Los parámetros 'mes' y 'anio' son requeridos"
+ *                 mes_invalido:
+ *                   summary: Mes fuera de rango
+ *                   value:
+ *                     error: "El mes debe estar entre 1 y 12"
+ *                 anio_invalido:
+ *                   summary: Año inválido
+ *                   value:
+ *                     error: "El año debe ser mayor o igual a 1900"
  *       500:
  *         description: Error interno del servidor
  *         content:
@@ -393,6 +467,29 @@ calendarioRouter.put('/update/:id', verifyToken, updateHorario);
  *     responses:
  *       200:
  *         description: Horario eliminado exitosamente
+ *                   example: "Error interno del servidor"
+ */
+calendarioRouterApp.get('/dias', verifyTokenApp, getCalendarioPorDias);
+
+/**
+ * @swagger
+ * /api/app/calendario/informacion/{fecha}:
+ *   get:
+ *     summary: Obtener información del calendario por fecha
+ *     description: Devuelve la información del calendario para un día específico basado en la fecha proporcionada en formato yy-mm-dd. La fecha se convierte automáticamente al día de la semana correspondiente (1=Lunes, 2=Martes, ..., 7=Domingo).
+ *     tags: [App]
+ *     parameters:
+ *       - in: path
+ *         name: fecha
+ *         schema:
+ *           type: string
+ *           pattern: ^\d{4}-\d{2}-\d{2}$
+ *         required: true
+ *         description: Fecha en formato YYYY-MM-DD (ej. 2025-09-16)
+ *         example: "2025-09-16"
+ *     responses:
+ *       200:
+ *         description: Información del calendario obtenida exitosamente
  *         content:
  *           application/json:
  *             schema:
@@ -433,6 +530,7 @@ calendarioRouter.put('/update/:id', verifyToken, updateHorario);
  *               type: object
  *               properties:
  *                 errors:
+ *                 data:
  *                   type: array
  *                   items:
  *                     type: object
@@ -443,6 +541,70 @@ calendarioRouter.put('/update/:id', verifyToken, updateHorario);
  *                         type: string
  *                       location:
  *                         type: string
+ *                       dia_semana:
+ *                         type: integer
+ *                         description: Día de la semana (1=Lunes, 2=Martes, ..., 7=Domingo)
+ *                         example: 1
+ *                       hora_inicio:
+ *                         type: string
+ *                         format: time
+ *                         description: Hora de inicio de recolección
+ *                         example: "08:00:00"
+ *                       hora_fin:
+ *                         type: string
+ *                         format: time
+ *                         description: Hora de fin de recolección
+ *                         example: "12:00:00"
+ *                       frecuencia:
+ *                         type: string
+ *                         description: Frecuencia de recolección
+ *                         example: "Semanal"
+ *                       notas:
+ *                         type: string
+ *                         description: Notas adicionales
+ *                         example: "Recolección de residuos orgánicos"
+ *                       rutas:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             description: ID de la ruta
+ *                             example: 1
+ *                           nombre:
+ *                             type: string
+ *                             description: Nombre de la ruta
+ *                             example: "Ruta Centro"
+ *                 fecha:
+ *                   type: string
+ *                   format: date
+ *                   description: Fecha completa procesada
+ *                   example: "2025-09-16"
+ *                 diaSemana:
+ *                   type: integer
+ *                   description: Número del día de la semana calculado
+ *                   example: 2
+ *       400:
+ *         description: Error de validación en los parámetros
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *               examples:
+ *                 fecha_requerida:
+ *                   summary: Fecha faltante
+ *                   value:
+ *                     error: "El parámetro 'fecha' es obligatorio"
+ *                 formato_invalido:
+ *                   summary: Formato de fecha incorrecto
+ *                   value:
+ *                     error: "La fecha debe estar en formato yy-mm-dd"
+ *                 fecha_invalida:
+ *                   summary: Fecha no válida
+ *                   value:
+ *                     error: "Fecha inválida"
  *       500:
  *         description: Error interno del servidor
  *         content:
@@ -457,4 +619,8 @@ calendarioRouter.put('/update/:id', verifyToken, updateHorario);
 
 // Eliminar horario
 calendarioRouter.delete('/delete/:id', verifyToken, deleteHorario);
+
+
+calendarioRouterApp.get('/informacion/:fecha',  getInformacionCalendario);
 export default calendarioRouter;
+export { calendarioRouterApp };
