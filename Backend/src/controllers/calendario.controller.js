@@ -1,6 +1,11 @@
 import express from "express";
 import { body, param, query, validationResult } from "express-validator";
-import { obtenerCalendario,insertarHorario  } from "../services/calendario.service.js"; 
+import { obtenerCalendario,
+  insertarHorario,
+  calendariorecoleccion,
+actualizarHorario,
+eliminarHorario
+} from "../services/calendario.service.js"; 
 
 
 // Middleware de validación
@@ -93,6 +98,87 @@ export const crearHorario = [
 
     } catch (error) {
       console.error("Error al crear horario:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+  }
+];
+
+export const obtenerCalendarioRecoleccion= async(req,res)=>{
+  try {
+      const horarios = await calendariorecoleccion(req, res);
+      res.json({
+        message: "Calendario obtenido exitosamente",
+        data: horarios,
+      });
+
+  }catch (error) {
+      console.error("Error al obtener el calendario:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+
+}
+
+
+// Validación para actualizar
+const actualizarHorarioValidation = [
+  param("id").isInt().withMessage("El id debe ser un número entero"),
+  body("hora_inicio").optional().matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage("hora_inicio debe estar en formato HH:mm"),
+  body("hora_fin").optional().matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage("hora_fin debe estar en formato HH:mm"),
+  body("frecuencia").optional().isString(),
+  body("notas").optional().isString(),
+];
+
+export const updateHorario = [
+  ...actualizarHorarioValidation,
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { id } = req.params;
+      const { hora_inicio, hora_fin, frecuencia, notas } = req.body;
+
+      const horarioActualizado = await actualizarHorario(parseInt(id), {
+        hora_inicio,
+        hora_fin,
+        frecuencia,
+        notas,
+      });
+
+      res.json({
+        message: "Horario actualizado exitosamente",
+        data: horarioActualizado,
+      });
+
+    } catch (error) {
+      console.error("Error al actualizar horario:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+  }
+];
+
+// Eliminar un horario
+export const deleteHorario = [
+  param("id").isInt().withMessage("El id debe ser un número entero"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { id } = req.params;
+      const horarioEliminado = await eliminarHorario(parseInt(id));
+
+      res.json({
+        message: "Horario eliminado exitosamente",
+        data: horarioEliminado,
+      });
+
+    } catch (error) {
+      console.error("Error al eliminar horario:", error);
       res.status(500).json({ error: "Error interno del servidor" });
     }
   }

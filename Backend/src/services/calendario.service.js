@@ -57,3 +57,64 @@ export const insertarHorario = async ({ ruta_id, dia_semana, hora_inicio, hora_f
     throw error;
   }
 };
+
+export const calendariorecoleccion = async (req, res) => {
+  try {
+    const calendario = await prisma.calendariorecoleccion.findMany({
+      include: {
+        rutas: {
+          select: {
+            nombre: true, 
+            zonas: {
+              select: {
+                nombre: true 
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return calendario;
+  } catch (error) {
+    console.error("Error al obtener el calendario:", error);
+    throw error;
+  }
+};
+
+// Actualizar un horario existente
+export const actualizarHorario = async (id, { hora_inicio, hora_fin, frecuencia, notas }) => {
+  try {
+    const fechaFicticia = "1970-01-01";
+    const horaInicioISO = hora_inicio ? new Date(`${fechaFicticia}T${hora_inicio}:00.000Z`) : undefined;
+    const horaFinISO = hora_fin ? new Date(`${fechaFicticia}T${hora_fin}:00.000Z`) : undefined;
+
+    const horarioActualizado = await prisma.calendariorecoleccion.update({
+      where: { id },
+      data: {
+        hora_inicio: horaInicioISO,
+        hora_fin: horaFinISO,
+        frecuencia,
+        notas,
+      },
+    });
+
+    return horarioActualizado;
+  } catch (error) {
+    console.error("Error al actualizar horario:", error);
+    throw error;
+  }
+};
+
+// Eliminar un horario existente
+export const eliminarHorario = async (id) => {
+  try {
+    const horarioEliminado = await prisma.calendariorecoleccion.delete({
+      where: { id },
+    });
+    return horarioEliminado;
+  } catch (error) {
+    console.error("Error al eliminar horario:", error);
+    throw error;
+  }
+};
