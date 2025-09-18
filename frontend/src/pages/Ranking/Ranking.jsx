@@ -17,7 +17,7 @@ export default function Ranking() {
         <div className={styles.tableHeader}>🏅 Ranking por Zona</div>
         <div className="table-responsive">
           <Table striped bordered hover size="sm" className="bg-white rounded">
-            <thead className="bg-primary text-white">
+            <thead className={styles.rankingTableHeader}>
               <tr>
                 <th>#</th>
                 <th>Zona</th>

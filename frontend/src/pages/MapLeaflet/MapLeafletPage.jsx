@@ -3,6 +3,8 @@ import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
 import styles from "./MapLeafletPage.module.css";
 import { useAcopio } from "../../hooks/useAcopio";
 import { isAuthenticated } from "../../services/api";
+import { Button, Modal } from "react-bootstrap";
+import { FaPlus } from "react-icons/fa";
 
 export default function MapLeafletPage() {
   if (!isAuthenticated()) {
@@ -13,6 +15,7 @@ export default function MapLeafletPage() {
   const { getAcopio } = useAcopio();
   const [puntos, setPuntos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showMap, setShowMap] = useState(false); // Estado para el modal del mapa
 
   // Estado para filtro de zona
   const [zonaFiltro, setZonaFiltro] = useState(0); // 0 = todas
@@ -23,7 +26,6 @@ export default function MapLeafletPage() {
       setLoading(true);
       try {
         const data = await getAcopio();
-        console.log('Datos de acopio API:', data); // Mostrar datos en consola
         setPuntos(
           data.map((p) => ({
             id: p.id,
@@ -60,25 +62,6 @@ export default function MapLeafletPage() {
           p.zonas?.id ? p.zonas.id === zonaFiltro : p.zona_id === zonaFiltro
         );
 
-  // Resumen dinámico
-  const resumen = [
-    {
-      label: "Activos",
-      value: puntos.filter((p) => p.estado === "Activo").length,
-      className: styles.resumenActivo,
-    },
-    {
-      label: "Saturados",
-      value: puntos.filter((p) => p.estado === "Saturado").length,
-      className: styles.resumenSaturado,
-    },
-    {
-      label: "Fuera de servicio",
-      value: puntos.filter((p) => p.estado === "Fuera de servicio").length,
-      className: styles.resumenFuera,
-    },
-  ];
-
   // Opciones de zonas para el filtro (siempre desde los datos)
   const zonasUnicas = [
     ...new Map(
@@ -92,119 +75,144 @@ export default function MapLeafletPage() {
     ).values(),
   ];
 
+  const handleAgregar = () => {
+    // Aquí puedes abrir un modal o navegar a la página de agregar punto
+    alert("Agregar nuevo punto de acopio");
+  };
+
   return (
-    <div className={styles.pageBg}>
-      <div className={`container-fluid px-2 px-md-4 py-3 ${styles.container}`}>
-        <div className="row g-4">
-          <div className="col-12 col-md-6">
-            <h1 className={styles.titulo}>Puntos de Acopio</h1>
-            <div className="d-flex flex-row flex-wrap gap-3 mb-3 align-items-stretch">
-              <div
-                className={`d-flex flex-row flex-wrap gap-2 ${styles.filtros}`}
-                style={{ flex: 2, minWidth: 0 }}
+    <div className={`${styles.pageBg} container-fluid`}>
+      <div className={`${styles.usuariosContainer} row mx-auto`}>
+        <div className="col-12">
+          <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
+            <h1 className={styles.panelTitle}>Puntos de Acopio</h1>
+          </div>
+          {/* Filtros y botón agregar */}
+          <div className="row mb-3">
+            <div className="col-12 col-md-4 mb-2 mb-md-0 d-flex align-items-center">
+              <select
+                className={`form-select ${styles.filtroSelect}`}
+                value={zonaFiltro}
+                onChange={(e) => setZonaFiltro(Number(e.target.value))}
               >
-                <div className={styles.filtro}>
-                  Zona
-                  <br />
-                  <select
-                    className="form-select form-select-sm mt-1"
-                    value={zonaFiltro}
-                    onChange={(e) => setZonaFiltro(Number(e.target.value))}
-                  >
-                    <option value={0}>Todas</option>
-                    {zonasUnicas.map((z) => (
-                      <option key={z.id} value={z.id}>
-                        {z.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className={styles.filtro}>
-                  Residuo
-                  <br />
-                  Todos
-                </div>
-                <div className={styles.filtro}>
-                  Estado
-                  <br />
-                  Todos
-                </div>
-                <div className={styles.filtro}>
-                  Buscar
-                  <br />
-                  Dirección
-                </div>
-              </div>
-              <div
-                className={`d-flex flex-row gap-2 ${styles.resumen}`}
-                style={{ flex: 1, minWidth: 0 }}
-              >
-                {resumen.map((r) => (
-                  <div key={r.label} className={styles.resumenItem}>
-                    {r.label}
-                    <span className={r.className}>{r.value}</span>
-                  </div>
+                <option value={0}>Todas las zonas</option>
+                {zonasUnicas.map((z) => (
+                  <option key={z.id} value={z.id}>
+                    {z.nombre}
+                  </option>
                 ))}
+              </select>
+              <Button
+                variant="success"
+                className="ms-2"
+                style={{
+                  borderRadius: 8,
+                  fontWeight: 500,
+                  padding: "8px 18px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+                onClick={handleAgregar}
+              >
+                <FaPlus />
+                Agregar
+              </Button>
+            </div>
+            {/* Elimina el botón de ver mapa interactivo */}
+          </div>
+          <div className="row">
+            <div className="col-12 col-lg-7 d-flex flex-column" style={{ minHeight: 350 }}>
+              <div className={styles.cardScrollContainer}>
+                <table className={`table table-striped table-bordered ${styles.acopioTable}`}>
+                  <thead className={styles.acopioTableHeader}>
+                    <tr>
+                      <th>ID</th>
+                      <th>Nombre</th>
+                      <th>Tipo</th>
+                      <th>Horario</th>
+                      <th>Dirección</th>
+                      <th>Zona</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="text-center py-4">
+                          <span className="spinner-border text-primary" />
+                        </td>
+                      </tr>
+                    ) : puntosFiltrados.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="text-center">
+                          No hay puntos disponibles.
+                        </td>
+                      </tr>
+                    ) : (
+                      puntosFiltrados.map((p) => {
+                        const zonaNombre = p.zonas?.nombre || `Zona ${p.zona_id}`;
+                        const zonaCodigo = p.zonas?.codigo;
+                        return (
+                          <tr key={p.id} className={styles.acopioTableRow}>
+                            <td>{p.id}</td>
+                            <td>
+                              <div className={styles.puntoNombre}>{p.nombre}</div>
+                            </td>
+                            <td>{p.tipo}</td>
+                            <td>{p.horario}</td>
+                            <td>{p.direccion}</td>
+                            <td>
+                              {zonaNombre}
+                              {zonaCodigo && (
+                                <span> | <b>Código:</b> {zonaCodigo}</span>
+                              )}
+                            </td>
+                            <td>
+                              <span className={p.estadoClass}>{p.estado}</span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div className={`${styles.listados} w-100`}>
-              <div className={styles.listadoTitulo}>Listados de Puntos</div>
-              <div className="d-flex flex-column gap-3">
-                {loading ? (
-                  <div>Cargando puntos...</div>
-                ) : puntosFiltrados.length === 0 ? (
-                  <div>No hay puntos disponibles.</div>
-                ) : (
-                  puntosFiltrados.map((p) => {
-                    const zonaNombre = p.zonas?.nombre || `Zona ${p.zona_id}`;
-                    const zonaCodigo = p.zonas?.codigo;
-                    return (
-                      <div
-                        key={p.id}
-                        className={`${styles.punto} d-flex flex-wrap align-items-center gap-2 gap-md-3 w-100`}
-                      >
-                        <span className="fw-bold flex-grow-1 min-w-0">
-                          {p.nombre}
-                        </span>
-                        <div
-                          style={{
-                            color: "#222e3a",
-                            fontSize: "0.98rem",
-                            marginBottom: 4,
-                          }}
-                        >
-                          <b>ID:</b> {p.id} | <b>Latitud:</b> {p.latitud} |{" "}
-                          <b>Longitud:</b> {p.longitud} | <b>Zona ID:</b> {p.zona_id} |{" "}
-                          <b>Tipo:</b> {p.tipo} | <b>Horario:</b> {p.horario} |{" "}
-                          <b>Dirección:</b> {p.direccion}
-                        </div>
-                        <span className={p.estadoClass} style={{ marginLeft: 8 }}>
-                          {p.estado}
-                        </span>
-                        <div
-                          style={{
-                            color: "#222e3a",
-                            fontSize: "0.98rem",
-                            marginBottom: 4,
-                          }}
-                        >
-                          <b>Zona:</b> {zonaNombre}
-                          {zonaCodigo && (
-                            <>
-                              {" "}| <b>Código:</b> {zonaCodigo}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+            {/* Mapa al lado derecho */}
+            <div className="col-12 col-lg-5 d-flex flex-column" style={{ minHeight: 350 }}>
+              <div className={styles.mapaContainer}>
+                <MapLeaflet puntos={puntosFiltrados} />
               </div>
             </div>
           </div>
-          <div className="col-12 col-md-6">
-            <MapLeaflet puntos={puntosFiltrados} />
-          </div>
+          {/* Modal para el mapa interactivo */}
+          <Modal
+            show={showMap}
+            onHide={() => setShowMap(false)}
+            size="xl"
+            centered
+            dialogClassName={styles.mapaModal}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Mapa Interactivo de Puntos de Acopio
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ padding: 0 }}>
+              <div className={styles.mapaContainer}>
+                <MapLeaflet puntos={puntosFiltrados} />
+              </div>
+              <div className="text-center py-3">
+                <Button variant="secondary" onClick={() => setShowMap(false)}>
+                  Cerrar mapa
+                </Button>
+                <span className="ms-3 text-muted" style={{ fontSize: "1rem" }}>
+                  Puedes cerrar el mapa con el botón o la X arriba.
+                </span>
+              </div>
+            </Modal.Body>
+          </Modal>
         </div>
       </div>
     </div>
