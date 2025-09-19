@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button, Form, ListGroup, Card, Badge, OverlayTrigger, Popover } from "react-bootstrap";
 import styles from "./Notificaciones.module.css";
 import DashboardSidebar from "../Dashboard/DashboardSidebar";
+import { useNotificaciones } from "../../hooks/useNotificaciones";
 
 // Simulación de usuario actual (puedes cambiar esto por tu lógica real)
 const usuarioActual = {
@@ -20,6 +21,15 @@ export default function Notificaciones() {
   ]);
   const [mensaje, setMensaje] = useState("");
   const [toastBubble, setToastBubble] = useState({ show: false, mensaje: "", autor: "", fecha: "", id: null });
+  const [titulo, setTitulo] = useState("");
+  const [cuerpo, setCuerpo] = useState("");
+  const [tipo, setTipo] = useState("ALERTA");
+  const [programadaEn, setProgramadaEn] = useState(new Date().toISOString().slice(0, 16)); // formato para input datetime-local
+  const [audiencia, setAudiencia] = useState([
+    { tipo_objetivo: "ZONA", objetivo_id: 1 },
+    { tipo_objetivo: "ROL", objetivo_id: 2 }
+  ]);
+  const { getNotificaciones, createNotificacion } = useNotificaciones();
 
   // Mostrar notificación en otras pestañas usando localStorage events
   useEffect(() => {
@@ -45,15 +55,28 @@ export default function Notificaciones() {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  const handleCrear = () => {
-    if (mensaje.trim() === "") return;
+  useEffect(() => {
+    // Cargar notificaciones desde la API al montar
+    getNotificaciones().then((res) => {
+      if (Array.isArray(res)) setNotificaciones(res);
+    });
+  }, [getNotificaciones]);
+
+  const handleCrear = async () => {
+    if (titulo.trim() === "" || cuerpo.trim() === "") return;
     const nueva = {
-      id: Date.now(),
-      mensaje,
-      fecha: new Date().toLocaleString(),
-      autor: usuarioActual.nombre,
+      titulo,
+      cuerpo,
+      tipo,
+      creadoPor: 0, // Cambia por el id del usuario actual si lo tienes
+      programadaEn: new Date(programadaEn).toISOString(),
+      audiencia,
     };
-    setNotificaciones([nueva, ...notificaciones]);
+    await createNotificacion(nueva);
+    const actualizadas = await getNotificaciones();
+    if (Array.isArray(actualizadas)) setNotificaciones(actualizadas);
+    setTitulo("");
+    setCuerpo("");
     setMensaje("");
     // Enviar a otras pestañas
     localStorage.setItem("nuevaNotificacion", JSON.stringify(nueva));
@@ -161,11 +184,45 @@ export default function Notificaciones() {
                     <Form className={styles.nuevaForm}>
                       <Form.Control
                         type="text"
-                        placeholder="Escribe una notificación..."
-                        value={mensaje}
-                        onChange={(e) => setMensaje(e.target.value)}
+                        placeholder="Título de la notificación"
+                        value={titulo}
+                        onChange={e => setTitulo(e.target.value)}
                         maxLength={120}
+                        className="mb-2"
                       />
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        placeholder="Cuerpo de la notificación"
+                        value={cuerpo}
+                        onChange={e => setCuerpo(e.target.value)}
+                        maxLength={240}
+                        className="mb-2"
+                      />
+                      <Form.Select
+                        value={tipo}
+                        onChange={e => setTipo(e.target.value)}
+                        className="mb-2"
+                      >
+                        <option value="ALERTA">Alerta</option>
+                        <option value="INFO">Info</option>
+                        <option value="AVISO">Aviso</option>
+                      </Form.Select>
+                      <Form.Group className="mb-2">
+                        <Form.Label>Programar para:</Form.Label>
+                        <Form.Control
+                          type="datetime-local"
+                          value={programadaEn}
+                          onChange={e => setProgramadaEn(e.target.value)}
+                        />
+                      </Form.Group>
+                      {/* Audiencia: puedes personalizar según tu lógica */}
+                      <Form.Group className="mb-2">
+                        <Form.Label>Audiencia (ejemplo):</Form.Label>
+                        <Form.Text className="ms-2">
+                          ZONA 1 y ROL 2
+                        </Form.Text>
+                      </Form.Group>
                       <Button variant="primary" onClick={handleCrear}>
                         Enviar
                       </Button>
@@ -207,10 +264,11 @@ export default function Notificaciones() {
                   </ListGroup>
                 </Card.Body>
               </Card>
+              {/* ...existing code... */}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
