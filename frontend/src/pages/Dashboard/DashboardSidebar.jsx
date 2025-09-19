@@ -10,6 +10,7 @@ import {
   FaBars,
   FaTimes,
   FaUser,
+  FaBell,
 } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
@@ -159,9 +160,20 @@ export default function DashboardSidebar() {
 
   // Sidebar vertical en escritorio
   return (
-    <aside className={`${styles.sidebar} d-flex flex-column align-items-center py-3 px-2 animate__animated animate__fadeInLeft col-12 col-md-3 col-lg-2`}>
-      <div className="row w-100 mb-2">
-        <div className="col-12 d-flex justify-content-center">
+    <aside
+      className={`${styles.sidebar} d-flex flex-column align-items-center py-3 px-2 animate__animated animate__fadeInLeft`}
+      style={{
+        minHeight: "100vh",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        left: 0,
+        zIndex: 100,
+        background: "#fff",
+      }}
+    >
+      <div className="w-100 mb-2">
+        <div className="d-flex justify-content-center">
           <img
             src={logo}
             alt="Logo Municipalidad"
@@ -233,6 +245,15 @@ export default function DashboardSidebar() {
           }}
         >
           <FaCog className={styles.menuIcon} /> <span>Configuración</span>
+        </button>
+        <button
+          className={`${styles.menuItem} w-100 mb-2`}
+          title="Notificaciones"
+          onClick={() => {
+            handleNavigation("/notificaciones");
+          }}
+        >
+          <FaBell className={styles.menuIcon} /> <span>Notificaciones</span>
         </button>
         <button
           className={`${styles.menuItem} w-100 mb-2`}

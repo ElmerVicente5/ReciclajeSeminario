@@ -88,12 +88,7 @@
   background: #f8fafc;
   padding: 18px 20px;
 }
-.puntoHeader {
-  /* Opcional: personaliza el header del punto */
-}
-.puntoNombre {
-  /* Opcional: personaliza el nombre del punto */
-}
+
 .puntoDato {
   color: #222e3a;
   font-size: 0.98rem;

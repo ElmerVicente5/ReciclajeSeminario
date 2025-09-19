@@ -9,6 +9,7 @@ import Calendar from "./pages/Calendar/Calendar";
 import Ranking from "./pages/Ranking/Ranking";
 import Usuarios from "./pages/Usuarios/Usuarios";
 import Configuracion from "./pages/Configuracion/Configuracion";
+import Notificaciones from "./pages/Notificaciones/Notificaciones";
 
 function App() {
   // Layout que incluye el sidebar/navbar
@@ -91,6 +92,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/notificaciones" element={<Notificaciones />} />
       </Routes>
     </BrowserRouter>
   );
