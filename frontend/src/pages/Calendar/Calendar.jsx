@@ -54,16 +54,4 @@ export default function Calendar() {
     </div>
   );
 }
-        </div>
-        <div className="col-12 col-lg-5">
-          <CalendarioMap calendarioHook={calendarioHook} />
-        </div>
-      </div>
-      <CalendarioForm
-        show={showForm}
-        onHide={() => setShowForm(false)}
-        calendarioHook={calendarioHook}
-      />
-    </div>
-  );
-}
+       

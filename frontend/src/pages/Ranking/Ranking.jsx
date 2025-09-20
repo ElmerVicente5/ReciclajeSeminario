@@ -46,20 +46,4 @@ export default function Ranking() {
     </div>
   );
 }
-                  </td>
-                  <td>{zona.zona}</td>
-                  <td style={{ textAlign: "right" }}>
-                    {zona.total_puntos !== undefined
-                      ? zona.total_puntos
-                      : "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+                 
