@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { crearNotificacion, obtenerTodasLasNotificaciones } from '../controllers/notificaciones.controller.js';
 import { body } from 'express-validator';
-import { verifyToken } from '../middlewares/middleware.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 const crearNotificacionValidation = [
     body('titulo').notEmpty().withMessage('El titulo es requerido'),
     body('cuerpo').notEmpty().withMessage('El cuerpo es requerido'),
@@ -10,15 +10,14 @@ const crearNotificacionValidation = [
     body('programadaEn').notEmpty().withMessage('La fecha programada es requerida'),
     body('audiencia').isArray().notEmpty().withMessage('La audiencia es requerida'),
 ]
-const routerNotificaciones = Router();
-
+const routerNotificacionesApp = Router();
 /**
  * @swagger
- * /api/notificaciones/crear:
+ * /api/app/notificaciones/crear:
  *   post:
  *     summary: Crear notificacion
  *     tags:
- *       - Notificaciones
+ *       - App
  *     requestBody:
  *       required: true
  *       content:
@@ -71,14 +70,14 @@ const routerNotificaciones = Router();
  *       500:
  *         description: Error interno del servidor
  */
-routerNotificaciones.post('/crear', verifyToken, crearNotificacionValidation, crearNotificacion);
+routerNotificacionesApp.post('/crear', verifyTokenApp, crearNotificacionValidation, crearNotificacion);
 /**
  * @swagger
- * /api/notificaciones/obtenerNotificaciones:
+ * /api/app/notificaciones/obtenerNotificaciones:
  *   get:
  *     summary: Obtener todas las notificaciones
  *     tags:
- *       - Notificaciones
+ *       - App
  *     responses:
  *      200:
  *       description: Notificaciones obtenidas exitosamente
@@ -152,5 +151,5 @@ routerNotificaciones.post('/crear', verifyToken, crearNotificacionValidation, cr
  *       500:
  *         description: Error interno del servidor
  */
-routerNotificaciones.get('/obtenerNotificaciones', verifyToken, obtenerTodasLasNotificaciones);
-export { routerNotificaciones };
+routerNotificacionesApp.get('/obtenerNotificaciones', verifyTokenApp, obtenerTodasLasNotificaciones);
+export { routerNotificacionesApp };

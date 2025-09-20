@@ -9,9 +9,17 @@ const options = {
       version: '1.0.0',
       description: 'A simple Express API with Swagger documentation',
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {           
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT', 
+        },
+      },
+    },
   },
-  apis: ['./src/routes/*.route.js','./src/routes/route.js'],
-   // Path to your API routes
+  apis: ['./src/routes/*.route.js', './src/routes/route.js'], 
 };
 
 const specs = swaggerJsdoc(options);
