@@ -1,36 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Dashboard.module.css";
 import DashboardSidebar from "./DashboardSidebar";
-import {
-  FaRecycle,
-  FaUser,
-  FaHome,
-  FaTrashAlt,
-  FaChartLine,
-} from "react-icons/fa";
-import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
-import { FiLogOut } from "react-icons/fi";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { FaUser, FaBell, FaChartLine, FaMapMarkerAlt, FaRoute, FaWarehouse } from "react-icons/fa";
+import { Bar, Doughnut } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
 import { isAuthenticated } from "../../services/api";
+import { useDashboard } from "../../hooks/useDashboard";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+
+// Función para calcular inicio y fin del mes actual
+const getCurrentMonthRange = () => {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return {
+    start: firstDay.toISOString().split("T")[0],
+    end: lastDay.toISOString().split("T")[0],
+  };
+};
 
 export default function Dashboard() {
   if (!isAuthenticated()) {
@@ -39,124 +28,161 @@ export default function Dashboard() {
   }
 
   const navigate = useNavigate();
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
+  const [fechaInicio, setFechaInicio] = useState(getCurrentMonthRange().start);
+  const [fechaFin, setFechaFin] = useState(getCurrentMonthRange().end);
+
+  const { data: dashboardData, loading, error, refresh } = useDashboard(fechaInicio, fechaFin);
+
+  if (loading) return <div>Cargando dashboard...</div>;
+  if (error) return <div>{error}</div>;
+  if (!dashboardData) return null;
+
+  // Datos de residuos
+  const residuosLabels = dashboardData.tipos_residuos?.map(r => r.categoria) || [];
+  const residuosData = dashboardData.tipos_residuos?.map(r => r.cantidad) || [];
+
+  // Datos de zonas
+  const zonasLabels = dashboardData.zonas?.map(z => z.zonas.nombre) || [];
+  const zonasData = dashboardData.zonas?.map(z => z.puntos) || [];
+
+  // Zona con más puntos
+  const zonaTop = dashboardData.zonas?.length
+    ? dashboardData.zonas.reduce((prev, curr) => (prev.puntos > curr.puntos ? prev : curr))
+    : null;
+
+  const handleFilter = () => refresh();
+
   return (
     <div className={styles.dashboardContainer}>
       <DashboardSidebar onLogout={handleLogout} />
       <main className={styles.mainContent}>
-        <h1 className={styles.title}>Panel Municipal</h1>
-        <div className={`row ${styles.grid}`}>
-          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
-            <div className={styles.cardIcon}>
-              <FaTrashAlt size={28} color="#16a34a" />
-            </div>
+        <h1 className={styles.title}>Actividad en el sistema</h1>
+
+        {/* Filtros de fecha */}
+        <div className={styles.filterContainer}>
+          <label className={styles.dateLabel}>
+            Fecha inicio:
+            <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className={styles.dateInput} />
+          </label>
+          <label className={styles.dateLabel}>
+            Fecha fin:
+            <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className={styles.dateInput} />
+          </label>
+          <button onClick={handleFilter} className={styles.filterButton}>Filtrar</button>
+        </div>
+
+        {/* Tarjetas métricas */}
+        <div className={styles.cardsGrid}>
+          <div className={styles.card}>
+            <FaUser size={28} color="#2196f3" />
             <div>
-              <div className={styles.cardValue}>108</div>
-              <div className={styles.cardLabel}>Clasificaciones</div>
+              <div className={styles.cardValue}>{dashboardData.usuarios?.total ?? 0}</div>
+              <div className={styles.cardLabel}>Usuarios Totales</div>
             </div>
           </div>
-          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
-            <div className={styles.cardIcon}>
-              <FaChartLine size={28} color="#2563eb" />
-            </div>
+
+          <div className={styles.card}>
+            <FaChartLine size={28} color="#1bb934" />
             <div>
-              <div className={styles.cardValue}>35%</div>
-              <div className={styles.cardLabel}>Participación</div>
+              <div className={styles.cardValue}>{dashboardData.notificaciones?.enviadas ?? 0}</div>
+              <div className={styles.cardLabel}>Notificaciones Enviadas</div>
             </div>
           </div>
-          <div className={`col-12 col-lg-8 mb-4 ${styles.cardFull}`}>
-            <div className={styles.cardLabel}>Clasificaciones por Día</div>
-            <div style={{ height: 180 }}>
+
+          <div className={styles.card}>
+            <FaBell size={28} color="#ffca28" />
+            <div>
+              <div className={styles.cardValue}>{dashboardData.notificaciones?.pendientes ?? 0}</div>
+              <div className={styles.cardLabel}>Notificaciones Pendientes</div>
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <FaMapMarkerAlt size={28} color="#ff7043" />
+            <div>
+              {zonaTop ? (
+                <>
+                  <div className={styles.cardValue}>{zonaTop.zonas.nombre}</div>
+                  <div className={styles.cardLabel}>Zona con más puntos ({zonaTop.puntos})</div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.cardValue}>N/A</div>
+                  <div className={styles.cardLabel}>No hay datos en este rango</div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <FaWarehouse size={28} color="#8e44ad" />
+            <div>
+              <div className={styles.cardValue}>{dashboardData.centros_acopio ?? 0}</div>
+              <div className={styles.cardLabel}>Centros de Acopio</div>
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <FaRoute size={28} color="#16a085" />
+            <div>
+              <div className={styles.cardValue}>{dashboardData.rutas ?? 0}</div>
+              <div className={styles.cardLabel}>Rutas</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Gráficas */}
+        <div className={styles.chartsGrid}>
+          <div className={styles.chartCard}>
+            <h3>Puntos por Zona</h3>
+            {zonasLabels.length ? (
               <Bar
+              className={styles.barChartCanvas} 
                 data={{
-                  labels: [
-                    "Lun",
-                    "Mar",
-                    "Mié",
-                    "Jue",
-                    "Vie",
-                    "Sáb",
-                    "Dom",
-                    "Lun",
-                    "Mar",
-                    "Mié",
-                  ],
-                  datasets: [
-                    {
-                      label: "Clasificaciones",
-                      data: [6, 4, 5, 7, 8, 9, 5, 7, 6, 3],
-                      backgroundColor: [
-                        "#ff3b3f", // rojo vivo
-                        "#ffb800", // amarillo
-                        "#00d084", // verde
-                        "#0096ff", // azul
-                        "#ff61a6", // rosa
-                        "#00e6e6", // cyan
-                        "#ff7f00", // naranja
-                        "#a259ff", // violeta
-                        "#00c3ff", // azul claro
-                        "#ffde59", // amarillo claro
-                      ],
-                      borderRadius: 6,
-                    },
-                  ],
+                  labels: zonasLabels,
+                  datasets: [{
+                    label: "Puntos",
+                    data: zonasData,
+                    backgroundColor: ["#2196f3","#168126ff","#ffd969ff"],
+                    borderRadius: 6,
+                  }],
                 }}
                 options={{
                   responsive: true,
-                  plugins: {
-                    legend: { display: false },
-                    title: { display: false },
-                  },
-                  scales: {
-                    x: {
-                      grid: { display: false },
-                      ticks: { color: "#222e3a", font: { size: 12 } },
-                    },
-                    y: {
-                      grid: { display: false },
-                      beginAtZero: true,
-                      ticks: {
-                        stepSize: 1,
-                        color: "#222e3a",
-                        font: { size: 12 },
-                      },
-                    },
-                  },
+                  plugins: { legend: { display: false } },
+                  scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { display: false } } },
                 }}
                 height={120}
               />
-            </div>
+            ) : (
+              <p className={styles.noData}>No hay datos para mostrar</p>
+            )}
           </div>
-          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
-            <div className={styles.cardLabel}>Residuos Comunes</div>
-            <div className={styles.progressGroup}>
-              <div className={styles.progressLabel}>Vidito</div>
-              <div
-                className={styles.progressBar}
-                style={{ width: "80%" }}
-              ></div>
-              <div className={styles.progressLabel}>Plástico</div>
-              <div
-                className={styles.progressBar}
-                style={{ width: "60%" }}
-              ></div>
-              <div className={styles.progressLabel}>Orgánico</div>
-              <div
-                className={styles.progressBar}
-                style={{ width: "40%" }}
-              ></div>
-            </div>
-          </div>
-          <div className={`col-12 col-md-6 col-lg-4 mb-4 ${styles.card}`}>
-            <div className={styles.cardLabel}>Puntos de Acopio</div>
-            <div className={styles.map}>
-              <MapLeaflet />
-            </div>
+
+          <div className={styles.chartCard}>
+            <h3>Total Clasificación de residuos por categoría</h3>
+            {residuosLabels.length ? (
+              <Doughnut
+              className={styles.doughnutChartCanvas} 
+                data={{
+                  labels: residuosLabels,
+                  datasets: [{
+                    label: "Cantidad",
+                    data: residuosData,
+                    backgroundColor: ["#66bb6a","#81c784","#a5d6a7","#c8e6c9"],
+                    borderWidth: 2,
+                  }],
+                }}
+                options={{ responsive: true, plugins: { legend: { position: "bottom" }, tooltip: { enabled: true } } }}
+              />
+            ) : (
+              <p className={styles.noData}>No hay datos para mostrar</p>
+            )}
           </div>
         </div>
       </main>
