@@ -3,9 +3,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../../components/Auth/LoginForm";
 import styles from "./Login.module.css";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 export default function Login() {
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Logout automático al acceder a la página de login
@@ -22,6 +24,7 @@ export default function Login() {
 
   const handleLogin = (user) => {
     console.log('Login result:', user); // Depuración
+    setLoading(true);
     setSuccess(true);
     // Guardar token si existe
     if (user.accessToken) {
@@ -29,8 +32,14 @@ export default function Login() {
     }
   };
 
+  const handleError = () => {
+    setLoading(false);
+    setSuccess(false);
+  };
+
   return (
-    <div className={styles.loginPage}> {/* Clase para dividir la pantalla */}
+    <div className={styles.loginPage} style={{ position: "relative" }}>
+      <LoadingOverlay loading={loading} message="Algo anda mal" size="large" />
       <div className={styles.loginBg}> {/* Fondo de los botes */}
         <img
           src="/logoMuni.png"
@@ -47,7 +56,7 @@ export default function Login() {
         {success && (
           <div className={styles.loginSuccess}>¡Inicio de sesión exitoso!</div>
         )}
-        <LoginForm onLogin={handleLogin} />
+        <LoginForm onLogin={handleLogin} onError={handleError} />
       </div>
     </div>
   );

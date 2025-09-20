@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { obtenerRutas, crearRuta, actualizarRuta, eliminarRuta, obtenerZonas } from "../../services/api";
-import { Button, Table, Modal, Form } from "react-bootstrap";
+import { Button, Table, Modal, Form, Spinner } from "react-bootstrap";
 
 export default function RutaPanel() {
   const [rutas, setRutas] = useState([]);
@@ -110,13 +110,26 @@ export default function RutaPanel() {
   };
 
   return (
-    <div>
+    <div style={{ position: "relative" }}>
+      {/* Loading/Error overlay */}
+      {(loading || error) && (
+        <div style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(255,255,255,0.6)",
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <Spinner animation="border" variant={error ? "danger" : "primary"} />
+        </div>
+      )}
       <div className="mb-2 d-flex gap-2">
         <Button variant="success" size="sm" onClick={handleAdd}>
           Agregar ruta
         </Button>
       </div>
-      {loading && <div className="alert alert-info">Cargando rutas...</div>}
       {error && <div className="alert alert-danger">{error}</div>}
       <Table striped bordered hover size="sm" className="mb-0">
         <thead>

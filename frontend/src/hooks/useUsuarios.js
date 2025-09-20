@@ -50,7 +50,7 @@ const useUsuarios = () => {
     setLoading(false);
   };
 
-  // Editar usuario (PUT /api/usuarios/actualizarUsuario/{id})
+  // Editar usuario
   const editarUsuario = async (data) => {
     setLoading(true);
     setError("");

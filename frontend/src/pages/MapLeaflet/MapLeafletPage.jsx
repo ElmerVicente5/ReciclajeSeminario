@@ -3,8 +3,9 @@ import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
 import styles from "./MapLeafletPage.module.css";
 import { useAcopio } from "../../hooks/useAcopio";
 import { isAuthenticated } from "../../services/api";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Spinner } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 export default function MapLeafletPage() {
   if (!isAuthenticated()) {
@@ -15,6 +16,7 @@ export default function MapLeafletPage() {
   const { getAcopio } = useAcopio();
   const [puntos, setPuntos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false); // Estado para el modal del mapa
 
   // Estado para filtro de zona
@@ -24,6 +26,7 @@ export default function MapLeafletPage() {
   useEffect(() => {
     const fetchPuntos = async () => {
       setLoading(true);
+      setError("");
       try {
         const data = await getAcopio();
         setPuntos(
@@ -47,6 +50,7 @@ export default function MapLeafletPage() {
           }))
         );
       } catch (error) {
+        setError("Error al cargar puntos de acopio.");
         setPuntos([]);
       }
       setLoading(false);
@@ -81,7 +85,8 @@ export default function MapLeafletPage() {
   };
 
   return (
-    <div className={`${styles.pageBg} container-fluid`}>
+    <div className={`${styles.pageBg} container-fluid`} style={{ position: "relative" }}>
+      <LoadingOverlay loading={loading} error={error} />
       <div className={`${styles.usuariosContainer} row mx-auto`}>
         <div className="col-12">
           <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
@@ -137,13 +142,7 @@ export default function MapLeafletPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan={7} className="text-center py-4">
-                          <span className="spinner-border text-primary" />
-                        </td>
-                      </tr>
-                    ) : puntosFiltrados.length === 0 ? (
+                    {!loading && !error && puntosFiltrados.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="text-center">
                           No hay puntos disponibles.

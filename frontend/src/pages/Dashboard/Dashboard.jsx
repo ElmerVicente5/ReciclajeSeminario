@@ -7,6 +7,8 @@ import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
 import { isAuthenticated } from "../../services/api";
 import { useDashboard } from "../../hooks/useDashboard";
+import { Spinner } from "react-bootstrap";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -38,20 +40,20 @@ export default function Dashboard() {
 
   const { data: dashboardData, loading, error, refresh } = useDashboard(fechaInicio, fechaFin);
 
-  if (loading) return <div>Cargando dashboard...</div>;
-  if (error) return <div>{error}</div>;
-  if (!dashboardData) return null;
+  // Elimina los returns que rompen el layout
+  // if (error) return <div>{error}</div>;
+  // if (!dashboardData) return null;
 
   // Datos de residuos
-  const residuosLabels = dashboardData.tipos_residuos?.map(r => r.categoria) || [];
-  const residuosData = dashboardData.tipos_residuos?.map(r => r.cantidad) || [];
+  const residuosLabels = dashboardData?.tipos_residuos?.map(r => r.categoria) || [];
+  const residuosData = dashboardData?.tipos_residuos?.map(r => r.cantidad) || [];
 
   // Datos de zonas
-  const zonasLabels = dashboardData.zonas?.map(z => z.zonas.nombre) || [];
-  const zonasData = dashboardData.zonas?.map(z => z.puntos) || [];
+  const zonasLabels = dashboardData?.zonas?.map(z => z.zonas.nombre) || [];
+  const zonasData = dashboardData?.zonas?.map(z => z.puntos) || [];
 
   // Zona con más puntos
-  const zonaTop = dashboardData.zonas?.length
+  const zonaTop = dashboardData?.zonas?.length
     ? dashboardData.zonas.reduce((prev, curr) => (prev.puntos > curr.puntos ? prev : curr))
     : null;
 
@@ -60,9 +62,9 @@ export default function Dashboard() {
   return (
     <div className={styles.dashboardContainer}>
       <DashboardSidebar onLogout={handleLogout} />
-      <main className={styles.mainContent}>
+      <main className={styles.mainContent} style={{ position: "relative" }}>
+        <LoadingOverlay loading={loading} error={error} />
         <h1 className={styles.title}>Actividad en el sistema</h1>
-
         {/* Filtros de fecha */}
         <div className={styles.filterContainer}>
           <label className={styles.dateLabel}>
@@ -75,13 +77,28 @@ export default function Dashboard() {
           </label>
           <button onClick={handleFilter} className={styles.filterButton}>Filtrar</button>
         </div>
-
+        {/* Loading/Error spinner overlay dentro del mainContent */}
+        {(loading || error) && (
+          <div style={{
+            position: "absolute",
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(255,255,255,0.6)",
+            zIndex: 100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <Spinner animation="border" variant={error ? "danger" : "primary"} />
+          </div>
+        )}
         {/* Tarjetas métricas */}
         <div className={styles.cardsGrid}>
           <div className={styles.card}>
             <FaUser size={28} color="#2196f3" />
             <div>
-              <div className={styles.cardValue}>{dashboardData.usuarios?.total ?? 0}</div>
+              <div className={styles.cardValue}>
+                {dashboardData?.usuarios?.total ?? 0}
+              </div>
               <div className={styles.cardLabel}>Usuarios Totales</div>
             </div>
           </div>
@@ -89,7 +106,9 @@ export default function Dashboard() {
           <div className={styles.card}>
             <FaChartLine size={28} color="#1bb934" />
             <div>
-              <div className={styles.cardValue}>{dashboardData.notificaciones?.enviadas ?? 0}</div>
+              <div className={styles.cardValue}>
+                {dashboardData?.notificaciones?.enviadas ?? 0}
+              </div>
               <div className={styles.cardLabel}>Notificaciones Enviadas</div>
             </div>
           </div>
@@ -97,7 +116,9 @@ export default function Dashboard() {
           <div className={styles.card}>
             <FaBell size={28} color="#ffca28" />
             <div>
-              <div className={styles.cardValue}>{dashboardData.notificaciones?.pendientes ?? 0}</div>
+              <div className={styles.cardValue}>
+                {dashboardData?.notificaciones?.pendientes ?? 0}
+              </div>
               <div className={styles.cardLabel}>Notificaciones Pendientes</div>
             </div>
           </div>
@@ -122,7 +143,9 @@ export default function Dashboard() {
           <div className={styles.card}>
             <FaWarehouse size={28} color="#8e44ad" />
             <div>
-              <div className={styles.cardValue}>{dashboardData.centros_acopio ?? 0}</div>
+              <div className={styles.cardValue}>
+                {dashboardData?.centros_acopio ?? 0}
+              </div>
               <div className={styles.cardLabel}>Centros de Acopio</div>
             </div>
           </div>
@@ -130,7 +153,9 @@ export default function Dashboard() {
           <div className={styles.card}>
             <FaRoute size={28} color="#16a085" />
             <div>
-              <div className={styles.cardValue}>{dashboardData.rutas ?? 0}</div>
+              <div className={styles.cardValue}>
+                {dashboardData?.rutas ?? 0}
+              </div>
               <div className={styles.cardLabel}>Rutas</div>
             </div>
           </div>
@@ -142,7 +167,7 @@ export default function Dashboard() {
             <h3>Puntos por Zona</h3>
             {zonasLabels.length ? (
               <Bar
-              className={styles.barChartCanvas} 
+                className={styles.barChartCanvas}
                 data={{
                   labels: zonasLabels,
                   datasets: [{
@@ -168,7 +193,7 @@ export default function Dashboard() {
             <h3>Total Clasificación de residuos por categoría</h3>
             {residuosLabels.length ? (
               <Doughnut
-              className={styles.doughnutChartCanvas} 
+                className={styles.doughnutChartCanvas}
                 data={{
                   labels: residuosLabels,
                   datasets: [{

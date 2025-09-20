@@ -4,8 +4,9 @@ import Roles from "./Roles";
 import useUsuarios from "../../hooks/useUsuarios";
 import useRoles from "../../hooks/useRoles";
 import styles from "./Usuarios.module.css";
-import { Table, Button, Modal, Form, OverlayTrigger, Tooltip, Dropdown } from "react-bootstrap";
+import { Table, Button, Modal, Form, OverlayTrigger, Tooltip, Dropdown, Spinner } from "react-bootstrap";
 import { isAuthenticated } from "../../services/api";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 export default function Usuarios() {
   if (!isAuthenticated()) {
@@ -113,7 +114,8 @@ export default function Usuarios() {
 
   return (
     <div className={`${styles.pageBg} container-fluid`}>
-      <div className={`${styles.usuariosContainer} row mx-auto`}>
+      <div className={`${styles.usuariosContainer} row mx-auto`} style={{ position: "relative" }}>
+        <LoadingOverlay loading={loading} error={error} />
         <div className="col-12">
           <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
             <FaUser className={styles.usuariosHeaderIcon} />

@@ -1,9 +1,10 @@
 import useRoles from "../../hooks/useRoles";
 import styles from "./Usuarios.module.css";
-import { Table, Button, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Table, Button, Modal, Form, OverlayTrigger, Tooltip, Spinner } from "react-bootstrap";
 import { useState, useMemo, useEffect } from "react";
 import { FaEdit, FaTrashAlt, FaPlus, FaInfoCircle } from "react-icons/fa";
 import { isAuthenticated } from "../../services/api";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 export default function Roles() {
   if (!isAuthenticated()) {
@@ -11,10 +12,12 @@ export default function Roles() {
     return null;
   }
 
-  const { roles, crearRol, editarRol, eliminarRol } = useRoles();
+  const { roles, crearRol, editarRol, eliminarRol, loading: rolesLoading, error: rolesError } = useRoles();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ id: null, nombre: "" });
   const [editMode, setEditMode] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localError, setLocalError] = useState(null);
 
   // Filtros y detalles
   const [filtroNombre, setFiltroNombre] = useState("");
@@ -39,16 +42,25 @@ export default function Roles() {
   }, []);
 
   const handleSave = async () => {
-    if (editMode) {
-      await editarRol({ id: form.id, nombre: form.nombre });
-    } else {
-      await crearRol({ nombre: form.nombre });
+    setLocalLoading(true);
+    setLocalError(null);
+    try {
+      if (editMode) {
+        await editarRol({ id: form.id, nombre: form.nombre });
+      } else {
+        await crearRol({ nombre: form.nombre });
+      }
+      setShowModal(false);
+    } catch (err) {
+      setLocalError("Error al guardar los datos. Inténtalo de nuevo.");
+    } finally {
+      setLocalLoading(false);
     }
-    setShowModal(false);
   };
 
   return (
-    <div className={styles.rolesBox}>
+    <div className={styles.rolesBox} style={{ position: "relative" }}>
+      <LoadingOverlay loading={rolesLoading || localLoading} error={rolesError || localError} />
       <h2 className={styles.panelTitle} style={{ textAlign: 'center', marginBottom: 24 }}>Roles</h2>
       {/* Filtro */}
       <div className="row mb-3">
@@ -169,6 +181,18 @@ export default function Roles() {
           <Button variant="primary" onClick={handleSave} className={styles.usuariosBtn}>
             {editMode ? "Guardar" : "Crear"}
           </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
+}
+
+// El componente está correcto. Solo asegúrate que el hook useRoles y los métodos en services/api.js usen los endpoints:
+// - POST /api/roles/crearRoles
+// - PUT /api/roles/actualizarRolId/{id}
+// - DELETE /api/roles/eliminarRolId/{id}
+// - GET /api/roles/obtenerListadoRoles
+// - GET /api/roles/obtenerRolId/{id}
         </Modal.Footer>
       </Modal>
     </div>
