@@ -265,3 +265,27 @@
   align-items: center;
   gap: 4px;
 }
+.actionBar {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.calendarWidgetWrapper {
+  margin-bottom: 12px;
+}
+.tableResponsive {
+  max-height: 350px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}
+.scrollableList {
+  max-height: 350px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}

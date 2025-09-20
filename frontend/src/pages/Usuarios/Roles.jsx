@@ -175,3 +175,10 @@ export default function Roles() {
   );
 }
 
+// El componente está correcto. Solo asegúrate que el hook useRoles y los métodos en services/api.js usen los endpoints:
+// - POST /api/roles/crearRoles
+// - PUT /api/roles/actualizarRolId/{id}
+// - DELETE /api/roles/eliminarRolId/{id}
+// - GET /api/roles/obtenerListadoRoles
+// - GET /api/roles/obtenerRolId/{id}
+

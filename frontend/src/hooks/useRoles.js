@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { fetchApi } from "../services/api";
 
 const useRoles = () => {
@@ -6,29 +6,28 @@ const useRoles = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Obtener listado de roles
   const cargarRoles = async () => {
     setLoading(true);
     setError("");
     try {
       const data = await fetchApi("/api/roles/obtenerListadoRoles");
-      setRoles(data || []);
+      setRoles(Array.isArray(data) ? data : []);
     } catch (err) {
       setError("Error al cargar roles.");
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    cargarRoles();
-  }, []);
-
-  const crearRol = async (rol) => {
+  // Crear rol (POST /api/roles/crearRol)
+  const crearRol = async (data) => {
     setLoading(true);
     setError("");
     try {
-      await fetchApi("/api/roles/crearRoles", {
+      // Solo enviar { nombre }
+      await fetchApi("/api/roles/crearRol", {
         method: "POST",
-        body: JSON.stringify(rol),
+        body: JSON.stringify({ nombre: data.nombre }),
       });
       await cargarRoles();
     } catch (err) {
@@ -37,13 +36,14 @@ const useRoles = () => {
     setLoading(false);
   };
 
-  const editarRol = async (rol) => {
+  // Editar rol (PUT /api/roles/actualizarRolId/{id})
+  const editarRol = async (data) => {
     setLoading(true);
     setError("");
     try {
-      await fetchApi(`/api/roles/actualizarRolId/${rol.id}`, {
+      await fetchApi(`/api/roles/actualizarRolId/${data.id}`, {
         method: "PUT",
-        body: JSON.stringify(rol),
+        body: JSON.stringify({ nombre: data.nombre }),
       });
       await cargarRoles();
     } catch (err) {
@@ -52,6 +52,7 @@ const useRoles = () => {
     setLoading(false);
   };
 
+  // Eliminar rol (DELETE /api/roles/eliminarRolId/{id})
   const eliminarRol = async (id) => {
     setLoading(true);
     setError("");
@@ -66,7 +67,15 @@ const useRoles = () => {
     setLoading(false);
   };
 
-  return { roles, cargarRoles, crearRol, editarRol, eliminarRol, loading, error };
+  return {
+    roles,
+    loading,
+    error,
+    cargarRoles,
+    crearRol,
+    editarRol,
+    eliminarRol,
+  };
 };
 
 export default useRoles;

@@ -14,7 +14,6 @@ const useUsuarios = () => {
       const data = await fetchApi("/api/usuarios/obtenerUsuarios");
       setUsuarios(data || []);
     } catch (err) {
-      console.error("Error al cargar usuarios:", err);
       setError("Error al cargar usuarios.");
     }
     setLoading(false);
@@ -29,14 +28,13 @@ const useUsuarios = () => {
       setLoading(false);
       return data;
     } catch (err) {
-      console.error("Error al obtener usuario:", err);
       setError("Error al obtener usuario.");
       setLoading(false);
       return null;
     }
   };
 
-  // Crear usuario (puedes adaptar el endpoint si lo tienes)
+  // Crear usuario
   const crearUsuario = async (data) => {
     setLoading(true);
     setError("");
@@ -47,24 +45,28 @@ const useUsuarios = () => {
       });
       await cargarUsuarios();
     } catch (err) {
-      console.error("Error al crear usuario:", err);
       setError("Error al crear usuario.");
     }
     setLoading(false);
   };
 
-  // Editar usuario
+  // Editar usuario (PUT /api/usuarios/actualizarUsuario/{id})
   const editarUsuario = async (data) => {
     setLoading(true);
     setError("");
     try {
       await fetchApi(`/api/usuarios/actualizarUsuario/${data.id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          nombre_completo: data.nombre_completo,
+          nombre_usuario: data.nombre_usuario,
+          rol_id: Number(data.rol_id),
+          estado: data.estado,
+          zona_id: Number(data.zona_id),
+        }),
       });
       await cargarUsuarios();
     } catch (err) {
-      console.error("Error al editar usuario:", err);
       setError("Error al editar usuario.");
     }
     setLoading(false);
@@ -80,7 +82,6 @@ const useUsuarios = () => {
       });
       await cargarUsuarios();
     } catch (err) {
-      console.error("Error al eliminar usuario:", err);
       setError("Error al eliminar usuario.");
     }
     setLoading(false);

@@ -52,8 +52,8 @@ export default function Usuarios() {
   const usuariosFiltrados = useMemo(() => {
     return usuarios.filter(u =>
       (filtroNombre === "" || u.nombre_completo?.toLowerCase().includes(filtroNombre.toLowerCase()) || u.nombre_usuario?.toLowerCase().includes(filtroNombre.toLowerCase())) &&
-      (filtroRol === "" || String(u.rol_id) === filtroRol) &&
-      (filtroEstado === "" || u.estado === filtroEstado)
+      (filtroRol === "" || String(u.roles?.id) === filtroRol) &&
+      (filtroEstado === "" || (u.estado?.toLowerCase() === filtroEstado.toLowerCase()))
     );
   }, [usuarios, filtroNombre, filtroRol, filtroEstado]);
 
@@ -287,8 +287,8 @@ export default function Usuarios() {
                   <p><strong>ID:</strong> {detalleUsuario.id}</p>
                   <p><strong>Nombre completo:</strong> {detalleUsuario.nombre_completo}</p>
                   <p><strong>Correo:</strong> {detalleUsuario.nombre_usuario}</p>
-                  <p><strong>Rol:</strong> {roles.find(r => r.id === detalleUsuario.rol_id)?.nombre || detalleUsuario.rol_id}</p>
-                  <p><strong>Zona:</strong> {detalleUsuario.zona_id}</p>
+                  <p><strong>Rol:</strong> {detalleUsuario.roles?.nombre || detalleUsuario.rol_id}</p>
+                  <p><strong>Zona:</strong> {detalleUsuario.zonas?.nombre || detalleUsuario.zona_id || "Sin zona"}</p>
                   <p><strong>Estado:</strong> {detalleUsuario.estado}</p>
                   <p><strong>Fecha registro:</strong> {detalleUsuario.fecha_registro}</p>
                 </div>
