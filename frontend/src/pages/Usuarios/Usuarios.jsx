@@ -10,6 +10,8 @@ import { isAuthenticated } from "../../services/api";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
 import Swal from 'sweetalert2';
 import useEditarUsuario from "../../hooks/useEditarUsuario";
+import RegisterModal from "../../components/Auth/RegisterModal";
+import { getCurrentUserFromToken } from "../../utils/tokenUtils";
 
 export default function Usuarios() {
   if (!isAuthenticated()) {
@@ -45,6 +47,8 @@ export default function Usuarios() {
   });
   const [editMode, setEditMode] = useState(false);
   const [showAddDropdown, setShowAddDropdown] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState("");
 
   // Filtros
   const [filtroNombre, setFiltroNombre] = useState("");
@@ -65,6 +69,16 @@ export default function Usuarios() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     console.log("Token actual en Usuarios.jsx:", token);
+    
+    // Obtener usuario del token JWT (más seguro)
+    const userFromToken = getCurrentUserFromToken();
+    const userName = userFromToken?.nombreUsuario || 
+                     localStorage.getItem("currentUser") || 
+                     "Administrador";
+    
+    console.log("🔵 Usuario actual:", userName);
+    setCurrentUser(userName);
+    
     cargarUsuarios();
     cargarRoles();
     cargarZonas();
@@ -147,6 +161,51 @@ export default function Usuarios() {
     }
   };
 
+  // Escuchar eventos de éxito de creación de rol
+  useEffect(() => {
+    const handleRolCreated = () => {
+      console.log("🔵 Evento rolCreated recibido en Usuarios.jsx");
+      
+      // Recargar roles después de crear uno nuevo
+      cargarRoles();
+      
+      // Mostrar notificación de éxito
+      Swal.fire({
+        icon: 'success',
+        title: 'Rol creado',
+        text: 'El rol ha sido creado exitosamente',
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+      });
+    };
+
+    // Escuchar ambos eventos posibles
+    window.addEventListener("rolCreated", handleRolCreated);
+    window.addEventListener("rolCreatedSuccess", handleRolCreated);
+
+    console.log("🔵 Event listeners para rol creado registrados");
+
+    return () => {
+      window.removeEventListener("rolCreated", handleRolCreated);
+      window.removeEventListener("rolCreatedSuccess", handleRolCreated);
+    };
+  }, []);
+
+  // Escuchar el evento para abrir RegisterModal
+  useEffect(() => {
+    const handleOpenRegisterModal = () => {
+      setShowRegisterModal(true);
+    };
+
+    window.addEventListener("openRegisterModal", handleOpenRegisterModal);
+
+    return () => {
+      window.removeEventListener("openRegisterModal", handleOpenRegisterModal);
+    };
+  }, []);
+
   return (
     <div className={`${styles.pageBg} container-fluid`}>
       <div className={`${styles.usuariosContainer} row mx-auto`} style={{ position: "relative" }}>
@@ -160,7 +219,7 @@ export default function Usuarios() {
         <div className="col-12">
           <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
             <FaUser className={styles.usuariosHeaderIcon} />
-            <h1 className={styles.panelTitle}>Admin: </h1>
+            <h1 className={styles.panelTitle}>Admin: {currentUser}</h1>
           </div>
           {/* Filtros */}
           <div className="row mb-3">
@@ -185,55 +244,37 @@ export default function Usuarios() {
                 ))}
               </select>
             </div>
-            <div className="col-6 col-md-4 d-flex align-items-center justify-content-end">
+            <div className="col-6 col-md-4 d-flex align-items-center justify-content-end gap-2">
+              {/* Botón independiente para agregar usuario */}
               <OverlayTrigger
                 placement="top"
-                overlay={<Tooltip id="add-tooltip">Agregar usuario o rol</Tooltip>}
+                overlay={<Tooltip id="add-user-tooltip">Agregar Usuario</Tooltip>}
               >
-                <Dropdown
-                  show={showAddDropdown}
-                  onToggle={(isOpen) => setShowAddDropdown(isOpen)}
-                  className="mb-0"
+                <Button
+                  variant="success"
+                  className={styles.usuariosBtn}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  onClick={() => setShowRegisterModal(true)}
                 >
-                  <Dropdown.Toggle
-                    variant="primary"
-                    className={styles.usuariosBtn}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-                    id="dropdown-add"
-                    aria-label="Agregar"
-                  >
-                    <FaPlus />
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setShowModal(true);
-                        setEditMode(false);
-                        setForm({
-                          id: null,
-                          nombre_completo: "",
-                          nombre_usuario: "",
-                          rol_id: "",
-                          zona_id: "",
-                          estado: "activo",
-                        });
-                        setShowAddDropdown(false);
-                      }}
-                    >
-                      <FaPlus style={{ marginRight: 6 }} />
-                      Agregar Usuario
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent("openAddRolModal"));
-                        setShowAddDropdown(false);
-                      }}
-                    >
-                      <FaPlus style={{ marginRight: 6 }} />
-                      Agregar Rol
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+                  <FaPlus />
+                  Usuario
+                </Button>
+              </OverlayTrigger>
+
+              {/* Botón para agregar rol */}
+              <OverlayTrigger
+                placement="top"
+                overlay={<Tooltip id="add-rol-tooltip">Agregar Rol</Tooltip>}
+              >
+                <Button
+                  variant="primary"
+                  className={styles.usuariosBtn}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  onClick={() => window.dispatchEvent(new CustomEvent("openAddRolModal"))}
+                >
+                  <FaPlus />
+                  Rol
+                </Button>
               </OverlayTrigger>
             </div>
           </div>
@@ -330,6 +371,17 @@ export default function Usuarios() {
               </div>
             </div>
           </div>
+          {/* Modal de RegisterModal */}
+          <RegisterModal
+            open={showRegisterModal}
+            onClose={() => setShowRegisterModal(false)}
+            userType="admin" // Crear administradores desde panel admin
+            onUserCreated={() => {
+              setShowRegisterModal(false);
+              cargarUsuarios(); // Recargar usuarios después de crear uno nuevo
+            }}
+          />
+
           {/* Modal de detalles */}
           <Modal show={!!detalleUsuario} onHide={() => setDetalleUsuario(null)}>
             <Modal.Header closeButton>
@@ -349,6 +401,8 @@ export default function Usuarios() {
               )}
             </Modal.Body>
           </Modal>
+
+          {/* Modal de edición de usuario - MANTENER */}
           <Modal show={showModal} onHide={() => setShowModal(false)}>
             <Modal.Header closeButton className={styles.usuariosModalHeader}>
               <Modal.Title className={styles.usuariosModalTitle}>
@@ -433,7 +487,6 @@ export default function Usuarios() {
               </Button>
             </Modal.Footer>
           </Modal>
-          <hr />
         </div>
       </div>
     </div>

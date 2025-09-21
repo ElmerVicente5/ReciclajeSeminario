@@ -32,16 +32,19 @@ export default function LoginForm({ onLogin }) {
     }
     try {
       const result = await login({ nombreUsuario: email, contrasenia: password });
-      console.log("Login result:", result); // <-- Depuración
+      console.log("Login result:", result);
       if (!result.success) {
         setLocalError("Correo o contraseña incorrectos.");
         return;
       }
+      
+      // Ya no guardamos aquí - se maneja en useLogin
+      
       if (onLogin) {
         onLogin(result.user);
       }
     } catch (err) {
-      console.error("Error en login:", err); // <-- Depuración
+      console.error("Error en login:", err);
       setLocalError("Error inesperado al intentar ingresar.");
     }
   };
