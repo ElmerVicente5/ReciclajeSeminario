@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLogin } from "../../hooks/useLogin";
 import { validateEmail, validateStrongPassword } from "../../utils/validation";
-import styles from "./LoginForm.module.css";
+import styles from './LoginForm.module.css';
 
 import RecoverPasswordModal from "./RecoverPasswordModal";
 import RegisterModal from "./RegisterModal";
@@ -125,8 +125,14 @@ export default function LoginForm({ onLogin }) {
         {(localError || error) && (
           <div className={styles.error}>{localError || error}</div>
         )}
-        <button className={styles.button} type="submit" disabled={loading}>
-          {loading ? "Ingresando..." : "Ingresar"}
+        <button
+          type="submit"
+          className={`${styles.loginButton} ${email && password ? styles.ready : ''} ${loading ? styles.loading : ''}`}
+          disabled={loading}
+        >
+          <span className={styles.loginButtonText}>
+            {loading ? 'Accediendo...' : 'Iniciar Sesión'}
+          </span>
         </button>
         <div style={{ textAlign: "center", marginTop: 8 }}>
           <a

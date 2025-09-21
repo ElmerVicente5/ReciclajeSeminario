@@ -7,7 +7,6 @@ import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from "chart.js";
 import { isAuthenticated } from "../../services/api";
 import { useDashboard } from "../../hooks/useDashboard";
-import { Spinner } from "react-bootstrap";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -77,20 +76,6 @@ export default function Dashboard() {
           </label>
           <button onClick={handleFilter} className={styles.filterButton}>Filtrar</button>
         </div>
-        {/* Loading/Error spinner overlay dentro del mainContent */}
-        {(loading || error) && (
-          <div style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: "rgba(255,255,255,0.6)",
-            zIndex: 100,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <Spinner animation="border" variant={error ? "danger" : "primary"} />
-          </div>
-        )}
         {/* Tarjetas métricas */}
         <div className={styles.cardsGrid}>
           <div className={styles.card}>
@@ -214,3 +199,4 @@ export default function Dashboard() {
     </div>
   );
 }
+                 

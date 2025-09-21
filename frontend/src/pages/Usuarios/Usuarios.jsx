@@ -3,10 +3,13 @@ import { FaUser, FaEdit, FaTrashAlt, FaInfoCircle, FaPlus } from "react-icons/fa
 import Roles from "./Roles";
 import useUsuarios from "../../hooks/useUsuarios";
 import useRoles from "../../hooks/useRoles";
+import useZonasSelector from "../../hooks/useZonasSelector";
 import styles from "./Usuarios.module.css";
-import { Table, Button, Modal, Form, OverlayTrigger, Tooltip, Dropdown, Spinner } from "react-bootstrap";
+import { Table, Button, Modal, Form, OverlayTrigger, Tooltip, Dropdown } from "react-bootstrap";
 import { isAuthenticated } from "../../services/api";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
+import Swal from 'sweetalert2';
+import useEditarUsuario from "../../hooks/useEditarUsuario";
 
 export default function Usuarios() {
   if (!isAuthenticated()) {
@@ -23,19 +26,19 @@ export default function Usuarios() {
     eliminarUsuario,
     error,
     loading,
-    // Si tienes hooks para roles y zonas, agrégalos aquí
   } = useUsuarios();
 
-  const { roles, cargarRoles } = useRoles(); // Usar hook de roles
-  // Si tienes hooks para zonas, agrégalos igual aquí
-  const [zonas, setZonas] = useState([]);
+  const { roles, cargarRoles } = useRoles();
+  const { zonas, cargarZonas, loading: zonasLoading, error: zonasError } = useZonasSelector();
+
+  console.log("🔵 Usuarios - Estado actual:", { usuarios: usuarios?.length, loading, error });
+  console.log("🔵 Zonas Selector - Estado actual:", { zonas: zonas?.length, zonasData: zonas });
 
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     id: null,
     nombre_completo: "",
     nombre_usuario: "",
-    contraseña: "",
     rol_id: "",
     zona_id: "",
     estado: "activo",
@@ -63,9 +66,8 @@ export default function Usuarios() {
     const token = localStorage.getItem("token");
     console.log("Token actual en Usuarios.jsx:", token);
     cargarUsuarios();
-    cargarRoles(); // Asegura que los roles estén actualizados
-    // Si tienes hooks para zonas, llama aquí a cargarZonas()
-    // setZonas(await cargarZonas());
+    cargarRoles();
+    cargarZonas();
   }, []);
 
   const handleEdit = (usuario) => {
@@ -75,7 +77,6 @@ export default function Usuarios() {
       id: usuario.id,
       nombre_completo: usuario.nombre_completo || usuario.nombre,
       nombre_usuario: usuario.nombre_usuario || "",
-      contraseña: "",
       rol_id: usuario.rol_id,
       zona_id: usuario.zona_id,
       estado: usuario.estado || "activo",
@@ -89,33 +90,73 @@ export default function Usuarios() {
       id: null,
       nombre_completo: "",
       nombre_usuario: "",
-      contraseña: "",
       rol_id: "",
       zona_id: "",
       estado: "activo",
     });
   };
 
+  const { editarUsuario: editarUsuarioAPI, loading: editandoUsuario } = useEditarUsuario();
+
   const handleSave = async () => {
-    // Validar y enviar solo los datos llenos
-    const usuarioPayload = {};
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== "" && value !== null && value !== undefined) {
-        usuarioPayload[key] = value;
+    // Verificar campos vacíos para modo edición
+    const camposVacios = [];
+    if (!form.nombre_completo) camposVacios.push("Nombre completo");
+    if (!form.nombre_usuario) camposVacios.push("Nombre de usuario");
+    if (!form.rol_id) camposVacios.push("Rol");
+    if (!form.zona_id) camposVacios.push("Zona");
+
+    // Si hay campos vacíos en modo edición, mostrar confirmación
+    if (camposVacios.length > 0 && editMode) {
+      const result = await Swal.fire({
+        title: '¿Campos vacíos detectados?',
+        text: `Los siguientes campos están vacíos: ${camposVacios.join(", ")}. ¿Estás seguro que quieres guardar?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (!result.isConfirmed) {
+        return;
       }
-    });
-    if (editMode) {
-      await editarUsuario(usuarioPayload);
-    } else {
-      await crearUsuario(usuarioPayload);
     }
-    setShowModal(false);
+
+    try {
+      if (editMode) {
+        // Usar el nuevo hook para editar usuario
+        await editarUsuarioAPI(form);
+        // Recargar la lista de usuarios después de editar
+        await cargarUsuarios();
+      } else {
+        // Preparar payload para crear usuario
+        const usuarioPayload = {};
+        Object.entries(form).forEach(([key, value]) => {
+          if (value !== "" && value !== null && value !== undefined) {
+            usuarioPayload[key] = value;
+          }
+        });
+        await crearUsuario(usuarioPayload);
+      }
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error al guardar usuario:', error);
+      // El error ya se maneja en el hook useEditarUsuario
+    }
   };
 
   return (
     <div className={`${styles.pageBg} container-fluid`}>
       <div className={`${styles.usuariosContainer} row mx-auto`} style={{ position: "relative" }}>
-        <LoadingOverlay loading={loading} error={error} />
+        <LoadingOverlay loading={loading || editandoUsuario} error={error} />
+        
+            {/* Debug info
+            <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '12px', background: '#f0f0f0', padding: '5px', zIndex: 50 }}>
+            Debug: Usuarios: {usuarios?.length || 0}, Loading: {loading ? 'Sí' : 'No'}, Error: {error || 'Ninguno'}
+            </div> */}
+        
         <div className="col-12">
           <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
             <FaUser className={styles.usuariosHeaderIcon} />
@@ -172,7 +213,6 @@ export default function Usuarios() {
                           id: null,
                           nombre_completo: "",
                           nombre_usuario: "",
-                          contraseña: "",
                           rol_id: "",
                           zona_id: "",
                           estado: "activo",
@@ -198,11 +238,12 @@ export default function Usuarios() {
             </div>
           </div>
           <div className={`d-flex flex-wrap justify-content-center align-items-center ${styles.usuariosActions}`}>
-            {error && (
+            {/* ELIMINAR - Ya no necesitamos mostrar error aquí porque LoadingOverlay lo maneja */}
+            {/* {error && (
               <div className={styles.error}>
                 {error}
               </div>
-            )}
+            )} */}
           </div>
           <div className="row">
             <div className="col-12 col-lg-7 d-flex flex-column" style={{ height: "70vh", minHeight: 350 }}>
@@ -254,8 +295,19 @@ export default function Usuarios() {
                                 size="sm"
                                 variant="outline-danger"
                                 className={styles.usuariosBtnDelete}
-                                onClick={() => {
-                                  if (window.confirm("¿Estás seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.")) {
+                                onClick={async () => {
+                                  const result = await Swal.fire({
+                                    title: '¿Estás seguro?',
+                                    text: `Se eliminará el usuario "${u.nombre_completo}" permanentemente`,
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#d33',
+                                    cancelButtonColor: '#3085d6',
+                                    confirmButtonText: 'Sí, eliminar',
+                                    cancelButtonText: 'Cancelar'
+                                  });
+
+                                  if (result.isConfirmed) {
                                     eliminarUsuario(u.id);
                                   }
                                 }}
@@ -324,15 +376,6 @@ export default function Usuarios() {
                   />
                 </Form.Group>
                 <Form.Group className="mb-2">
-                  <Form.Label>Contraseña</Form.Label>
-                  <Form.Control
-                    type="password"
-                    value={form.contraseña}
-                    onChange={(e) => setForm({ ...form, contraseña: e.target.value })}
-                    style={{ borderRadius: 6 }}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
                   <Form.Label>Rol</Form.Label>
                   <Form.Select
                     value={form.rol_id}
@@ -355,11 +398,17 @@ export default function Usuarios() {
                     style={{ borderRadius: 6 }}
                   >
                     <option value="">Seleccione...</option>
-                    {zonas.map((z) => (
-                      <option key={z.id} value={z.id}>
-                        {z.nombre}
-                      </option>
-                    ))}
+                    {zonasLoading && <option disabled>Cargando zonas...</option>}
+                    {zonasError && <option disabled>Error al cargar zonas</option>}
+                    {Array.isArray(zonas) && zonas.length > 0 ? (
+                      zonas.map((z) => (
+                        <option key={z.id} value={z.id}>
+                          {z.nombre} ({z.codigo})
+                        </option>
+                      ))
+                    ) : (
+                      !zonasLoading && !zonasError && <option disabled>No hay zonas disponibles</option>
+                    )}
                   </Form.Select>
                 </Form.Group>
                 <Form.Group className="mb-2">
@@ -372,15 +421,6 @@ export default function Usuarios() {
                     <option value="activo">Activo</option>
                     <option value="inactivo">Inactivo</option>
                   </Form.Select>
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>ID</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={form.id || ""}
-                    disabled
-                    style={{ borderRadius: 6 }}
-                  />
                 </Form.Group>
               </Form>
             </Modal.Body>

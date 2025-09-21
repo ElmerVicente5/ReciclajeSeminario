@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import { FaEdit, FaTrashAlt, FaPlus, FaInfoCircle } from "react-icons/fa";
 import { isAuthenticated } from "../../services/api";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
+import Swal from 'sweetalert2';
 
 export default function Roles() {
   if (!isAuthenticated()) {
@@ -13,6 +14,8 @@ export default function Roles() {
   }
 
   const { roles, crearRol, editarRol, eliminarRol, loading: rolesLoading, error: rolesError } = useRoles();
+  console.log("🔵 Roles - Estado actual:", { roles: roles?.length, rolesLoading, rolesError });
+
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ id: null, nombre: "" });
   const [editMode, setEditMode] = useState(false);
@@ -62,6 +65,12 @@ export default function Roles() {
     <div className={styles.rolesBox} style={{ position: "relative" }}>
       <LoadingOverlay loading={rolesLoading || localLoading} error={rolesError || localError} />
       <h2 className={styles.panelTitle} style={{ textAlign: 'center', marginBottom: 24 }}>Roles</h2>
+      
+      {/* Debug info */}
+      {/* <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
+        Debug: Roles: {roles?.length || 0}, Loading: {rolesLoading ? 'Sí' : 'No'}, Error: {rolesError || 'Ninguno'}
+      </div> */}
+      
       {/* Filtro */}
       <div className="row mb-3">
         <div className="col-12 col-md-6 mx-auto">
@@ -125,8 +134,19 @@ export default function Roles() {
                       size="sm"
                       variant="outline-danger"
                       className={styles.usuariosBtnDelete}
-                      onClick={() => {
-                        if (window.confirm("¿Estás seguro que deseas eliminar este rol? Esta acción no se puede deshacer.")) {
+                      onClick={async () => {
+                        const result = await Swal.fire({
+                          title: '¿Estás seguro?',
+                          text: `Se eliminará el rol "${r.nombre}" permanentemente`,
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonColor: '#d33',
+                          cancelButtonColor: '#3085d6',
+                          confirmButtonText: 'Sí, eliminar',
+                          cancelButtonText: 'Cancelar'
+                        });
+
+                        if (result.isConfirmed) {
                           eliminarRol(r.id);
                         }
                       }}
@@ -193,4 +213,4 @@ export default function Roles() {
 // - DELETE /api/roles/eliminarRolId/{id}
 // - GET /api/roles/obtenerListadoRoles
 // - GET /api/roles/obtenerRolId/{id}
-   
+

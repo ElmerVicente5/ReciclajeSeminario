@@ -39,7 +39,12 @@ export default function Login() {
 
   return (
     <div className={styles.loginPage} style={{ position: "relative" }}>
-      <LoadingOverlay loading={loading} message="Algo anda mal" size="large" />
+      <LoadingOverlay 
+        loading={loading} 
+        loadingText="Accediendo al sistema..." 
+        errorText="Error de autenticación" 
+        size="large" 
+      />
       <div className={styles.loginBg}> {/* Fondo de los botes */}
         <img
           src="/logoMuni.png"
