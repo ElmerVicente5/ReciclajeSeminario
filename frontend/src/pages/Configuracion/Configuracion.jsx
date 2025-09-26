@@ -1,6 +1,8 @@
 import { Tabs, Tab } from "react-bootstrap";
 import Usuarios from "../Usuarios/Usuarios";
 import Roles from "../Usuarios/Roles";
+import ZonaPanel from "../Zonas/ZonaPanel";
+import RutaPanel from "../Rutas/RutaPanel";
 import styles from "./Configuracion.module.css";
 
 export default function Configuracion() {
@@ -13,6 +15,12 @@ export default function Configuracion() {
         </Tab>
         <Tab eventKey="roles" title="Roles">
           <Roles />
+        </Tab>
+        <Tab eventKey="zonas" title="Zonas">
+          <ZonaPanel />
+        </Tab>
+        <Tab eventKey="rutas" title="Rutas">
+          <RutaPanel />
         </Tab>
       </Tabs>
     </div>

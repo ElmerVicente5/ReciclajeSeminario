@@ -1,9 +1,11 @@
 import useRoles from "../../hooks/useRoles";
 import styles from "./Usuarios.module.css";
-import { Table, Button, Modal, Form } from "react-bootstrap";
-import { useState } from "react";
-import { FaEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
+import { Table, Button, Modal, Form, OverlayTrigger, Tooltip, Spinner } from "react-bootstrap";
+import { useState, useMemo, useEffect } from "react";
+import { FaEdit, FaTrashAlt, FaPlus, FaInfoCircle } from "react-icons/fa";
 import { isAuthenticated } from "../../services/api";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
+import Swal from 'sweetalert2';
 
 export default function Roles() {
   if (!isAuthenticated()) {
@@ -11,84 +13,175 @@ export default function Roles() {
     return null;
   }
 
-  const { roles, crearRol, editarRol, eliminarRol } = useRoles();
+  const { roles, crearRol, editarRol, eliminarRol, loading: rolesLoading, error: rolesError } = useRoles();
+  console.log("🔵 Roles - Estado actual:", { roles: roles?.length, rolesLoading, rolesError });
+
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ id: null, nombre: "" });
   const [editMode, setEditMode] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localError, setLocalError] = useState(null);
+
+  // Filtros y detalles
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [detalleRol, setDetalleRol] = useState(null);
+
+  // Filtra roles por nombre
+  const rolesFiltrados = useMemo(() => {
+    return roles.filter(r =>
+      filtroNombre === "" || r.nombre.toLowerCase().includes(filtroNombre.toLowerCase())
+    );
+  }, [roles, filtroNombre]);
+
+  // Escucha el evento para abrir el modal de agregar rol desde Usuarios.jsx
+  useEffect(() => {
+    const handler = () => {
+      setShowModal(true);
+      setEditMode(false);
+      setForm({ id: null, nombre: "" });
+    };
+    window.addEventListener("openAddRolModal", handler);
+    return () => window.removeEventListener("openAddRolModal", handler);
+  }, []);
 
   const handleSave = async () => {
-    if (editMode) {
-      await editarRol({ id: form.id, nombre: form.nombre });
-    } else {
-      await crearRol({ nombre: form.nombre });
+    setLocalLoading(true);
+    setLocalError(null);
+    try {
+      if (editMode) {
+        await editarRol({ id: form.id, nombre: form.nombre });
+      } else {
+        await crearRol({ nombre: form.nombre });
+      }
+      setShowModal(false);
+    } catch (err) {
+      setLocalError("Error al guardar los datos. Inténtalo de nuevo.");
+    } finally {
+      setLocalLoading(false);
     }
-    setShowModal(false);
   };
 
-  console.log('Roles cargados:', roles);
-
   return (
-    <div className={styles.rolesBox} style={{ background: '#fff', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: 24, marginTop: 32 }}>
-      <h2 style={{ fontWeight: 700, fontSize: 28, color: '#2563eb', marginBottom: 24, textAlign: 'center', letterSpacing: 1 }}>Gestión de Roles</h2>
-      <Button
-        variant="primary"
-        onClick={() => {
-          setShowModal(true);
-          setEditMode(false);
-          setForm({ id: null, nombre: "" });
-        }}
-        style={{ fontWeight: 600, fontSize: 18, padding: '8px 24px', borderRadius: 8, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}
-      >
-        <FaPlus /> Nuevo Rol
-      </Button>
-      <div className="table-responsive mt-3">
-        <Table striped bordered hover size="sm" style={{ background: '#f9fafb', borderRadius: 8 }}>
-          <thead style={{ background: '#2563eb', color: '#fff', fontWeight: 600 }}>
+    <div className={styles.rolesBox} style={{ position: "relative" }}>
+      <LoadingOverlay loading={rolesLoading || localLoading} error={rolesError || localError} />
+      <h2 className={styles.panelTitle} style={{ textAlign: 'center', marginBottom: 24 }}>Roles</h2>
+      
+      {/* Debug info */}
+      {/* <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
+        Debug: Roles: {roles?.length || 0}, Loading: {rolesLoading ? 'Sí' : 'No'}, Error: {rolesError || 'Ninguno'}
+      </div> */}
+      
+      {/* Filtro */}
+      <div className="row mb-3">
+        <div className="col-12 col-md-6 mx-auto">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Buscar rol por nombre"
+            value={filtroNombre}
+            onChange={e => setFiltroNombre(e.target.value)}
+          />
+        </div>
+      </div>
+      {/* Tabla con fondo igual a usuarios */}
+      <div className={styles.usuariosTableBg} style={{ flex: 1, overflowY: "auto", maxHeight: "100%" }}>
+        <Table
+          striped
+          bordered
+          hover
+          size="sm"
+          className={`w-100 ${styles.usuariosTable}`}
+          responsive
+        >
+          <thead className={styles.usuariosTableHeader}>
             <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Acciones</th>
+              <th className={styles.usuariosTableHeaderCell}>Rol</th>
+              <th className={styles.usuariosTableHeaderCell}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {roles.map((r) => (
-              <tr key={r.id}>
-                <td>{r.id}</td>
+            {rolesFiltrados.map((r) => (
+              <tr key={r.id} className={styles.usuariosTableRow}>
                 <td>{r.nombre}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    style={{ marginRight: 8, borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                    onClick={() => {
-                      setShowModal(true);
-                      setEditMode(true);
-                      setForm({ id: r.id, nombre: r.nombre });
-                    }}
-                  >
-                    <FaEdit /> Editar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
-                    style={{ borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                    onClick={() => eliminarRol(r.id)}
-                  >
-                    <FaTrashAlt /> Eliminar
-                  </Button>
+                <td className="d-flex gap-2">
+                  {/* ...existing botones... */}
+                  <OverlayTrigger placement="top" overlay={<Tooltip>Ver detalles</Tooltip>}>
+                    <Button
+                      size="sm"
+                      variant="outline-info"
+                      className={styles.usuariosBtnEdit}
+                      onClick={() => setDetalleRol(r)}
+                    >
+                      <FaInfoCircle />
+                    </Button>
+                  </OverlayTrigger>
+                  <OverlayTrigger placement="top" overlay={<Tooltip>Editar</Tooltip>}>
+                    <Button
+                      size="sm"
+                      variant="outline-primary"
+                      className={styles.usuariosBtnEdit}
+                      onClick={() => {
+                        setShowModal(true);
+                        setEditMode(true);
+                        setForm({ id: r.id, nombre: r.nombre });
+                      }}
+                    >
+                      <FaEdit />
+                    </Button>
+                  </OverlayTrigger>
+                  <OverlayTrigger placement="top" overlay={<Tooltip>Eliminar</Tooltip>}>
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      className={styles.usuariosBtnDelete}
+                      onClick={async () => {
+                        const result = await Swal.fire({
+                          title: '¿Estás seguro?',
+                          text: `Se eliminará el rol "${r.nombre}" permanentemente`,
+                          icon: 'warning',
+                          showCancelButton: true,
+                          confirmButtonColor: '#d33',
+                          cancelButtonColor: '#3085d6',
+                          confirmButtonText: 'Sí, eliminar',
+                          cancelButtonText: 'Cancelar'
+                        });
+
+                        if (result.isConfirmed) {
+                          eliminarRol(r.id);
+                        }
+                      }}
+                    >
+                      <FaTrashAlt />
+                    </Button>
+                  </OverlayTrigger>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
       </div>
+      {/* Modal de detalles */}
+      <Modal show={!!detalleRol} onHide={() => setDetalleRol(null)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Detalles de Rol</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {detalleRol && (
+            <div>
+              <p><strong>ID:</strong> {detalleRol.id}</p>
+              <p><strong>Nombre:</strong> {detalleRol.nombre}</p>
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
+      {/* Modal crear/editar */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton style={{ background: '#2563eb', color: '#fff' }}>
-          <Modal.Title style={{ fontWeight: 700 }}>
+        <Modal.Header closeButton className={styles.usuariosModalHeader}>
+          <Modal.Title className={styles.usuariosModalTitle}>
             {editMode ? "Editar Rol" : "Nuevo Rol"}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ background: '#f8fafc' }}>
+        <Modal.Body className={styles.usuariosModalBody}>
           <Form>
             <Form.Group className="mb-2">
               <Form.Label>Nombre</Form.Label>
@@ -101,11 +194,11 @@ export default function Roles() {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer style={{ background: '#f8fafc' }}>
-          <Button variant="secondary" onClick={() => setShowModal(false)} style={{ borderRadius: 6 }}>
+        <Modal.Footer className={styles.usuariosModalFooter}>
+          <Button variant="secondary" onClick={() => setShowModal(false)} className={styles.usuariosBtn}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={handleSave} style={{ borderRadius: 6 }}>
+          <Button variant="primary" onClick={handleSave} className={styles.usuariosBtn}>
             {editMode ? "Guardar" : "Crear"}
           </Button>
         </Modal.Footer>
@@ -113,3 +206,11 @@ export default function Roles() {
     </div>
   );
 }
+
+// El componente está correcto. Solo asegúrate que el hook useRoles y los métodos en services/api.js usen los endpoints:
+// - POST /api/roles/crearRoles
+// - PUT /api/roles/actualizarRolId/{id}
+// - DELETE /api/roles/eliminarRolId/{id}
+// - GET /api/roles/obtenerListadoRoles
+// - GET /api/roles/obtenerRolId/{id}
+

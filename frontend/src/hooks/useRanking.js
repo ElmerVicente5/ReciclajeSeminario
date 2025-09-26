@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { fetchApi } from "../services/api";
 
 const useRanking = () => {
-  const [ranking, setRanking] = useState({ count: 0, data: [] });
+  const [ranking, setRanking] = useState({ data: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -10,10 +10,11 @@ const useRanking = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetchApi("/api/ranking");
-      setRanking(res.data); // Ajuste: res.data contiene el objeto con count y data
+      // Puedes cambiar el endpoint según lo que necesites:
+      // /api/ranking-zonas o /api/ranking
+      const data = await fetchApi("/api/ranking-zonas");
+      setRanking({ data: Array.isArray(data) ? data : [] });
     } catch (err) {
-      console.error("Error al cargar ranking:", err);
       setError("Error al cargar ranking.");
     }
     setLoading(false);
@@ -23,7 +24,11 @@ const useRanking = () => {
     cargarRanking();
   }, []);
 
-  return { ranking, loading, error };
+  return {
+    ranking,
+    loading,
+    error,
+  };
 };
 
 export default useRanking;

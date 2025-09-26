@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLogin } from "../../hooks/useLogin";
 import { validateEmail, validateStrongPassword } from "../../utils/validation";
-import styles from "./LoginForm.module.css";
+import styles from './LoginForm.module.css';
 
 import RecoverPasswordModal from "./RecoverPasswordModal";
 import RegisterModal from "./RegisterModal";
@@ -32,16 +32,19 @@ export default function LoginForm({ onLogin }) {
     }
     try {
       const result = await login({ nombreUsuario: email, contrasenia: password });
-      console.log("Login result:", result); // <-- Depuración
+      console.log("Login result:", result);
       if (!result.success) {
         setLocalError("Correo o contraseña incorrectos.");
         return;
       }
+      
+      // Ya no guardamos aquí - se maneja en useLogin
+      
       if (onLogin) {
         onLogin(result.user);
       }
     } catch (err) {
-      console.error("Error en login:", err); // <-- Depuración
+      console.error("Error en login:", err);
       setLocalError("Error inesperado al intentar ingresar.");
     }
   };
@@ -125,8 +128,14 @@ export default function LoginForm({ onLogin }) {
         {(localError || error) && (
           <div className={styles.error}>{localError || error}</div>
         )}
-        <button className={styles.button} type="submit" disabled={loading}>
-          {loading ? "Ingresando..." : "Ingresar"}
+        <button
+          type="submit"
+          className={`${styles.loginButton} ${email && password ? styles.ready : ''} ${loading ? styles.loading : ''}`}
+          disabled={loading}
+        >
+          <span className={styles.loginButtonText}>
+            {loading ? 'Accediendo...' : 'Iniciar Sesión'}
+          </span>
         </button>
         {/* Botón para ingresar como invitado */}
         <button

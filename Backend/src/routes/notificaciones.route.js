@@ -11,6 +11,7 @@ const crearNotificacionValidation = [
     body('audiencia').isArray().notEmpty().withMessage('La audiencia es requerida'),
 ]
 const routerNotificaciones = Router();
+
 /**
  * @swagger
  * /api/notificaciones/crear:

@@ -1,11 +1,11 @@
-import styles from "./Calendar.module.css";
-import { Table } from "react-bootstrap";
-import { FaUser, FaTruck } from "react-icons/fa";
-import CalendarWidget from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import CalendarioTable from "./CalendarioTable";
+import CalendarioForm from "./CalendarioForm";
+import CalendarioFilters from "./CalendarioFilters";
+import CalendarioMap from "./CalendarioMap";
 import { useCalendario } from "../../hooks/useCalendario";
 import { isAuthenticated } from "../../services/api";
+import LoadingOverlay from "../../components/Common/LoadingOverlay";
 
 export default function Calendar() {
   if (!isAuthenticated()) {
@@ -13,176 +13,45 @@ export default function Calendar() {
     return null;
   }
 
-  const [date, setDate] = useState(new Date());
-  const [calendario, setCalendario] = useState([]);
-  const [zona, setZona] = useState("");
-  const { getCalendario, loading, error } = useCalendario();
+  const calendarioHook = useCalendario();
+  const [showForm, setShowForm] = useState(false);
 
+  // Carga los datos al montar el componente y cada vez que se agrega/edita/elimina
   useEffect(() => {
-    if (!zona) return;
-    const cargar = async () => {
-      try {
-        const fecha = date.toISOString().slice(0, 10);
-        const response = await getCalendario(zona, fecha);
-        console.log('Datos calendario:', response); // Mostrar datos en consola
-        setCalendario(Array.isArray(response?.data) ? response.data : []);
-      } catch (err) {
-        setCalendario([]);
-      }
-    };
-    cargar();
-  }, [zona, date]);
+    calendarioHook.refreshCalendario && calendarioHook.refreshCalendario();
+  }, []);
 
-  const diasSemana = [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ];
+  // Muestra mensaje si no hay datos
+  const isLoading = calendarioHook.loading;
+  const hasError = calendarioHook.error;
+  const calendario = Array.isArray(calendarioHook.calendario) ? calendarioHook.calendario : [];
 
   return (
-    <div className={`container-fluid px-2 px-md-4 py-3`}>
-      {!zona && <div style={{ color: "orange" }}>Seleccione una zona para ver el calendario.</div>}
-      {error && (
-        <div style={{ color: "red", marginBottom: 16 }}>{error}</div>
-      )}
-      {loading && (
-        <div style={{ marginBottom: 16 }}>Cargando calendario...</div>
-      )}
+    <div className="container-fluid px-2 px-md-4 py-3" style={{ position: "relative" }}>
+      <LoadingOverlay loading={isLoading} error={hasError} />
+      <div className="mb-3 d-flex gap-2 flex-wrap">
+        <button className="btn btn-success btn-sm" onClick={() => setShowForm(true)}>
+          Agregar horario
+        </button>
+      </div>
+      <CalendarioFilters calendarioHook={calendarioHook} />
       <div className="row g-4">
-        <div className="col-12 col-md-6">
-          <div className={styles.card}>
-            <div className={styles.headerRow}>
-              <h2 className={styles.title}>Calendario</h2>
-              <div className={styles.filters}>
-                <select className={styles.filter} value={zona} onChange={e => setZona(e.target.value)}>
-                  <option value="">Zona</option>
-                  <option value="Todas">Todas</option>
-                  <option value="Norte">Norte</option>
-                  <option value="Sur">Sur</option>
-                  {/* Agrega más zonas si es necesario */}
-                </select>
-                <select className={styles.filter}>
-                  <option>Categoría</option>
-                  <option>Todas</option>
-                </select>
-                <select className={styles.filter}>
-                  <option>Frecuencia</option>
-                  <option>Semanal</option>
-                </select>
-              </div>
-            </div>
-            <div className={`${styles.calendarRow} d-flex flex-wrap`}>
-              <div className={`${styles.calendarBox} flex-grow-1 mb-3 mb-md-0`}>
-                <div className={styles.yearNav}></div>
-                <div className={styles.monthLabel}>
-                  {date.toLocaleString("es-ES", { month: "long" })}
-                </div>
-                <div style={{ marginBottom: 12 }}>
-                  <CalendarWidget
-                    onChange={setDate}
-                    value={date}
-                    locale="es-ES"
-                    className={styles.reactCalendar}
-                  />
-                </div>
-                <div className={styles.recoleccionInfo}>
-                  <span>
-                    Días con recolección <b>19</b>
-                  </span>
-                  <span className={styles.noRecolect}>
-                    Días sin recolección <b>8</b>
-                  </span>
-                </div>
-                {/* Tabla de calendario de recolección */}
-                <div className="table-responsive mt-3">
-                  <Table striped bordered hover size="sm" className="mb-0">
-                    <thead>
-                      <tr>
-                        <th>Ruta</th>
-                        <th>Día</th>
-                        <th>Hora inicio</th>
-                        <th>Hora fin</th>
-                        <th>Frecuencia</th>
-                        <th>Notas</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {calendario.map((c) => (
-                        <tr key={c.id}>
-                          <td>{c.ruta_id}</td>
-                          <td>{diasSemana[c.dia_semana]}</td>
-                          <td>{c.hora_inicio}</td>
-                          <td>{c.hora_fin}</td>
-                          <td>{c.frecuencia}</td>
-                          <td>{c.notas}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-              </div>
-              <div className={`${styles.metricsBox} flex-shrink-1 ms-md-4`}>
-                <div className={styles.metricCard}>
-                  <div className={styles.metricValue}>247</div>
-                  <div className={styles.metricLabel}>Total recolecciones</div>
-                </div>
-                <div className={styles.leyendaBox}>
-                  <div className={styles.leyendaTitle}>Residuos Comunes</div>
-                  <div className={styles.leyendaItem}>
-                    <span className={styles.binBlack}></span> No reciclable
-                  </div>
-                  <div className={styles.leyendaItem}>
-                    <span className={styles.binBlue}></span> Reciclable
-                  </div>
-                  <div className={styles.leyendaItem}>
-                    <span className={styles.binGreen}></span> Orgánico
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="col-12 col-lg-7">
+          {!isLoading && !hasError && calendario.length === 0 && (
+            <div className="alert alert-warning">No hay horarios para mostrar.</div>
+          )}
+          <CalendarioTable calendarioHook={calendarioHook} onEdit={() => setShowForm(true)} />
         </div>
-        <div className="col-12 col-md-6">
-          <div className={styles.card}>
-            <h3 className={styles.subtitle}>Rutas del día</h3>
-            <div className={styles.rutaList}>
-              {calendario.map((c) => (
-                <div
-                  key={c.id}
-                  className={`${styles.rutaItem} flex-wrap d-flex align-items-center gap-2 gap-md-3`}
-                >
-                  <span
-                    className={styles.rutaDot + " " + styles.dotGreen}
-                  ></span>
-                  <span className="flex-grow-1 min-w-0">
-                    <span className={styles.rutaName}>
-                      Ruta {c.ruta_id} – {diasSemana[c.dia_semana]} (
-                      {c.hora_inicio}–{c.hora_fin})
-                    </span>
-                  </span>
-                  <span
-                    className={styles.rutaStatus + " " + styles.statusGreen}
-                  >
-                    {c.frecuencia}
-                  </span>
-                  <div
-                    className={`d-flex flex-wrap gap-2 ms-auto ${styles.rutaDetails}`}
-                    style={{ minWidth: 0 }}
-                  >
-                    <span className={styles.rutaTag}>
-                      <b>Notas:</b> {c.notas}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="col-12 col-lg-5">
+          <CalendarioMap calendarioHook={calendarioHook} />
         </div>
       </div>
+      <CalendarioForm
+        show={showForm}
+        onHide={() => setShowForm(false)}
+        calendarioHook={calendarioHook}
+      />
     </div>
   );
 }
+       

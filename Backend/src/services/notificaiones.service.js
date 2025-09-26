@@ -120,7 +120,7 @@ export const obtenerTodasLasNotificacionesServicio = async () => {
             }
         });
         
-        console.log(dataMapped);
+
         if(dataMapped.length === 0){
             return [];
         }
