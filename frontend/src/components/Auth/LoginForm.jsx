@@ -137,6 +137,26 @@ export default function LoginForm({ onLogin }) {
             {loading ? 'Accediendo...' : 'Iniciar Sesión'}
           </span>
         </button>
+        {/* Botón para ingresar como invitado */}
+        <button
+          type="button"
+          className={styles.button}
+          style={{ marginTop: 12 }}
+          onClick={() => {
+            const guestUser = {
+              id: 'guest',
+              email: 'invitado@retalhuleu.com',
+              name: 'Invitado',
+              role: 'guest'
+            };
+            localStorage.setItem('token', 'guest-token');
+            localStorage.setItem('user', JSON.stringify(guestUser));
+            localStorage.setItem('isGuest', 'true');
+            window.location.href = '/dashboard';
+          }}
+        >
+          Ingresar como invitado
+        </button>
         <div style={{ textAlign: "center", marginTop: 8 }}>
           <a
             href="#"
