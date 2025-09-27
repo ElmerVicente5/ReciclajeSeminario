@@ -57,6 +57,11 @@ export default function Dashboard() {
     : null;
 
   const handleFilter = () => refresh();
+  const colores = [
+  "#668cacff", "#168126", "#ffd969", "#dc8064ff", "#dc89ebff",
+  "#00bcd4", "#ed734eff", "#4caf50", "#e91e63", "#eec54aff",
+  "#434f96ff", "#8bc34a", "#e6be84ff", "#009688", "#cddc39"
+];
 
   return (
     <div className={styles.dashboardContainer}>
@@ -76,125 +81,135 @@ export default function Dashboard() {
           </label>
           <button onClick={handleFilter} className={styles.filterButton}>Filtrar</button>
         </div>
-        {/* Tarjetas métricas */}
-        <div className={styles.cardsGrid}>
-          <div className={styles.card}>
-            <FaUser size={28} color="#2196f3" />
-            <div>
-              <div className={styles.cardValue}>
-                {dashboardData?.usuarios?.total ?? 0}
-              </div>
-              <div className={styles.cardLabel}>Usuarios Totales</div>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <FaChartLine size={28} color="#1bb934" />
-            <div>
-              <div className={styles.cardValue}>
-                {dashboardData?.notificaciones?.enviadas ?? 0}
-              </div>
-              <div className={styles.cardLabel}>Notificaciones Enviadas</div>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <FaBell size={28} color="#ffca28" />
-            <div>
-              <div className={styles.cardValue}>
-                {dashboardData?.notificaciones?.pendientes ?? 0}
-              </div>
-              <div className={styles.cardLabel}>Notificaciones Pendientes</div>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <FaMapMarkerAlt size={28} color="#ff7043" />
-            <div>
-              {zonaTop ? (
-                <>
-                  <div className={styles.cardValue}>{zonaTop.zonas.nombre}</div>
-                  <div className={styles.cardLabel}>Zona con más puntos ({zonaTop.puntos})</div>
-                </>
-              ) : (
-                <>
-                  <div className={styles.cardValue}>N/A</div>
-                  <div className={styles.cardLabel}>No hay datos en este rango</div>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <FaWarehouse size={28} color="#8e44ad" />
-            <div>
-              <div className={styles.cardValue}>
-                {dashboardData?.centros_acopio ?? 0}
-              </div>
-              <div className={styles.cardLabel}>Centros de Acopio</div>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <FaRoute size={28} color="#16a085" />
-            <div>
-              <div className={styles.cardValue}>
-                {dashboardData?.rutas ?? 0}
-              </div>
-              <div className={styles.cardLabel}>Rutas</div>
-            </div>
-          </div>
+      {/* Layout nuevo */}
+<div className={styles.topGrid}>
+  {/* Columna izquierda: Cards */}
+  <div className={styles.cardsGrid}>
+    {/* Tarjetas métricas */}
+    <div className={styles.card}>
+      <FaUser size={28} color="#2196f3" />
+      <div>
+        <div className={styles.cardValue}>
+          {dashboardData?.usuarios?.total ?? 0}
         </div>
-
-        {/* Gráficas */}
-        <div className={styles.chartsGrid}>
-          <div className={styles.chartCard}>
-            <h3>Puntos por Zona</h3>
-            {zonasLabels.length ? (
-              <Bar
-                className={styles.barChartCanvas}
-                data={{
-                  labels: zonasLabels,
-                  datasets: [{
-                    label: "Puntos",
-                    data: zonasData,
-                    backgroundColor: ["#2196f3","#168126ff","#ffd969ff"],
-                    borderRadius: 6,
-                  }],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: { legend: { display: false } },
-                  scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { display: false } } },
-                }}
-                height={120}
-              />
-            ) : (
-              <p className={styles.noData}>No hay datos para mostrar</p>
-            )}
-          </div>
-
-          <div className={styles.chartCard}>
-            <h3>Total Clasificación de residuos por categoría</h3>
-            {residuosLabels.length ? (
-              <Doughnut
-                className={styles.doughnutChartCanvas}
-                data={{
-                  labels: residuosLabels,
-                  datasets: [{
-                    label: "Cantidad",
-                    data: residuosData,
-                    backgroundColor: ["#66bb6a","#81c784","#a5d6a7","#c8e6c9"],
-                    borderWidth: 2,
-                  }],
-                }}
-                options={{ responsive: true, plugins: { legend: { position: "bottom" }, tooltip: { enabled: true } } }}
-              />
-            ) : (
-              <p className={styles.noData}>No hay datos para mostrar</p>
-            )}
-          </div>
+        <div className={styles.cardLabel}>Usuarios Totales</div>
+      </div>
+    </div>
+    <div className={styles.card}>
+      <FaChartLine size={28} color="#1bb934" />
+      <div>
+        <div className={styles.cardValue}>
+          {dashboardData?.notificaciones?.enviadas ?? 0}
         </div>
+        <div className={styles.cardLabel}>Notificaciones Enviadas</div>
+      </div>
+    </div>
+    <div className={styles.card}>
+      <FaBell size={28} color="#ffca28" />
+      <div>
+        <div className={styles.cardValue}>
+          {dashboardData?.notificaciones?.pendientes ?? 0}
+        </div>
+        <div className={styles.cardLabel}>Notificaciones Pendientes</div>
+      </div>
+    </div>
+    <div className={styles.card}>
+      <FaMapMarkerAlt size={28} color="#ff7043" />
+      <div>
+        {zonaTop ? (
+          <>
+            <div className={styles.cardValue}>{zonaTop.zonas.nombre}</div>
+            <div className={styles.cardLabel}>Zona con más puntos ({zonaTop.puntos})</div>
+          </>
+        ) : (
+          <>
+            <div className={styles.cardValue}>N/A</div>
+            <div className={styles.cardLabel}>No hay datos en este rango</div>
+          </>
+        )}
+      </div>
+    </div>
+    <div className={styles.card}>
+      <FaWarehouse size={28} color="#8e44ad" />
+      <div>
+        <div className={styles.cardValue}>
+          {dashboardData?.centros_acopio ?? 0}
+        </div>
+        <div className={styles.cardLabel}>Centros de Acopio</div>
+      </div>
+    </div>
+    <div className={styles.card}>
+      <FaRoute size={28} color="#16a085" />
+      <div>
+        <div className={styles.cardValue}>
+          {dashboardData?.rutas ?? 0}
+        </div>
+        <div className={styles.cardLabel}>Rutas</div>
+      </div>
+    </div>
+  </div>
+
+  {/* Columna derecha: Doughnut */}
+  <div className={styles.chartCard}>
+    <h3>Total Clasificación de residuos</h3>
+    {residuosLabels.length ? (
+      <Doughnut
+        className={styles.doughnutChartCanvas}
+        data={{
+          labels: residuosLabels,
+          datasets: [{
+            label: "Cantidad",
+            data: residuosData,
+            backgroundColor: ["#66bb6a","#81c784","#a5d6a7","#c8e6c9"],
+            borderWidth: 2,
+          }],
+        }}
+        options={{
+          responsive: true,
+          plugins: { legend: { position: "bottom" } }
+        }}
+      />
+    ) : (
+      <p className={styles.noData}>No hay datos para mostrar</p>
+    )}
+  </div>
+</div>
+
+{/* Fila 2 → Bar chart a lo ancho */}
+<div className={styles.fullWidthChart}>
+  <div className={styles.chartCard}>
+    <h3>Puntos por Zona</h3>
+    {zonasLabels.length ? (
+     <Bar
+        className={styles.barChartCanvas}
+        data={{
+          labels: ["Puntos"], 
+          datasets: zonasLabels.map((zona, i) => ({
+            label: zona, 
+            data: [zonasData[i]], 
+            backgroundColor: colores[i % colores.length], 
+            borderRadius: 6,
+          })),
+        }}
+        options={{
+          indexAxis: "y", 
+          responsive: true,
+          maintainAspectRatio: false,
+          aspectRatio: 2,
+          plugins: {
+            legend: { position: "right" }, 
+          },
+          scales: {
+            x: { beginAtZero: true },
+            y: { display: false }, 
+          },
+        }}
+      />
+    ) : (
+      <p className={styles.noData}>No hay datos para mostrar</p>
+    )}
+  </div>
+</div>
       </main>
     </div>
   );
