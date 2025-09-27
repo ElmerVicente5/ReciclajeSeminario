@@ -10,9 +10,7 @@ export default function Configuracion() {
     <div className={styles.pageBg}>
       <h1>Configuración</h1>
       <Tabs defaultActiveKey="usuarios" className="mb-3">
-        <Tab eventKey="usuarios" title="Usuarios">
-          <Usuarios />
-        </Tab>
+        
         <Tab eventKey="roles" title="Roles">
           <Roles />
         </Tab>

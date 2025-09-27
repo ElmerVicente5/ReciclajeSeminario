@@ -12,7 +12,7 @@ import {
   FaUser,
   FaBell,
 } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useState } from "react";
 
@@ -21,14 +21,62 @@ export default function DashboardSidebar() {
   const isMobile = window.matchMedia("(max-width: 900px)").matches;
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Check if the logged-in user is an admin
+  const user = JSON.parse(localStorage.getItem("user"));
+  // Validación robusta para admin (rol en token o en roles)
+  const token = localStorage.getItem("token");
+  let isAdmin = false;
+  if (token && token.includes('.') && token.split('.').length === 3) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const rolToken = (payload.rol || payload.role || "").toUpperCase();
+      if (rolToken === "ADMIN" || rolToken === "ADMINISTRADOR") {
+        isAdmin = true;
+      }
+    } catch {}
+  }
+  if (user?.esAdmin === true || user?.esAdmin === "true") {
+    isAdmin = true;
+  }
+  if (user?.roles?.some(r => r.nombre?.toUpperCase() === "ADMIN" || r.nombre?.toUpperCase() === "ADMINISTRADOR")) {
+    isAdmin = true;
+  }
+
   const handleNavigation = (path) => {
     navigate(path);
+  };
+
+  // Opciones del panel (sidebar)
+  const panelPages = [
+    ...(isAdmin
+      ? [
+          { path: "/usuarios", icon: <FaUser />, label: "Usuarios y Roles" },
+          { path: "/configuracion", icon: <FaCog />, label: "Configuración" },
+
+        ]
+      : []),
+    { path: "/dashboard", icon: <FaHome />, label: "Dashboard" },
+    { path: "/calendario", icon: <FaCalendarAlt />, label: "Calendario y Rutas" },
+    { path: "/mapa", icon: <FaMapMarkerAlt />, label: "Puntos de Acopio" },
+    { path: "/ranking", icon: <FaChartBar />, label: "Ranking por Colonia" },
+    { path: "/notificaciones", icon: <FaBell />, label: "Notificaciones" },
+  ];
+
+  const logoutOption = {
+    path: "/login",
+    icon: <FaRecycle />,
+    label: "Cerrar sesión",
+    onClick: () => {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("user");
+      handleNavigation("/login");
+    },
   };
 
   if (isMobile) {
     return (
       <>
-        {/* Botón hamburguesa flotante */}
+        {/* Floating hamburger button */}
         <button
           className="btn btn-success rounded-circle shadow-lg"
           style={{
@@ -48,7 +96,7 @@ export default function DashboardSidebar() {
         >
           <FaBars />
         </button>
-        {/* Menú expandible inferior */}
+        {/* Expandable bottom menu */}
         {menuOpen && (
           <nav
             className="d-flex flex-row align-items-center justify-content-between w-100 px-2 py-2 bg-success animate__animated animate__slideInUp"
@@ -65,92 +113,26 @@ export default function DashboardSidebar() {
               transition: "all 0.3s",
             }}
           >
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Usuarios y Roles"
-              onClick={() => {
-                setMenuOpen(false);
-                handleNavigation("/usuarios");
-              }}
-            >
-              <FaUser size={22} />
-              <span style={{ fontSize: 10 }}> Usuarios</span>
-            </button>
+            {[...panelPages, logoutOption].map((item, index) => (
+              <button
+                key={index}
+                className="btn btn-link text-white d-flex flex-column align-items-center"
+                title={item.label}
+                onClick={() => {
+                  setMenuOpen(false);
+                  item.onClick ? item.onClick() : handleNavigation(item.path);
+                }}
+              >
+                {item.icon}
+                <span style={{ fontSize: 10 }}> {item.label}</span>
+              </button>
+            ))}
             <button
               className="btn btn-link text-white"
               onClick={() => setMenuOpen(false)}
               aria-label="Cerrar menú"
             >
               <FaTimes size={28} />
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Dashboard"
-              onClick={() => {
-                setMenuOpen(false);
-                handleNavigation("/dashboard");
-              }}
-            >
-              <FaHome size={22} />{" "}
-              <span style={{ fontSize: 10 }}> Dashboard</span>
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Calendario y Rutas"
-              onClick={() => {
-                setMenuOpen(false);
-                handleNavigation("/calendario");
-              }}
-            >
-              <FaCalendarAlt size={22} />{" "}
-              <span style={{ fontSize: 10 }}> Calendario</span>
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Puntos de Acopio"
-              onClick={() => {
-                setMenuOpen(false);
-                handleNavigation("/mapa");
-              }}
-            >
-              <FaMapMarkerAlt size={22} />{" "}
-              <span style={{ fontSize: 10 }}> Acopio</span>
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Ranking por Colonia"
-              onClick={() => {
-                setMenuOpen(false);
-                handleNavigation("/ranking");
-              }}
-            >
-              <FaChartBar size={22} />
-              <span style={{ fontSize: 10 }}> Ranking</span>
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Reportes"
-            >
-              <FaFileAlt size={22} />{" "}
-              <span style={{ fontSize: 10 }}> Reportes</span>
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Configuración"
-            >
-              <FaCog size={22} /> <span style={{ fontSize: 10 }}>Config</span>
-            </button>
-            <button
-              className="btn btn-link text-white d-flex flex-column align-items-center"
-              title="Cerrar sesión"
-              onClick={() => {
-                localStorage.removeItem("isLoggedIn");
-                setMenuOpen(false);
-                handleNavigation("/login");
-              }}
-            >
-              <FaRecycle size={22} />{" "}
-              <span style={{ fontSize: 10 }}> Salir</span>
             </button>
           </nav>
         )}
@@ -174,96 +156,27 @@ export default function DashboardSidebar() {
     >
       <div className="w-100 mb-2">
         <div className="d-flex justify-content-center">
-          <img
-            src={logo}
-            alt="Logo Municipalidad"
-            className={styles.logoImg}
-          />
+          <img src={logo} alt="Logo Municipalidad" className={styles.logoImg} />
         </div>
       </div>
-      <span className={`${styles.logoText} mb-3 text-center w-100`}>
-        Panel Municipal
-      </span>
+      <span className={`${styles.logoText} mb-3 text-center w-100`}>Panel Municipal</span>
       <nav className={`${styles.menu} w-100`}>
+        {panelPages.map((item, index) => (
+          <button
+            key={index}
+            className={`${styles.menuItem} w-100 mb-2`}
+            title={item.label}
+            onClick={() => (item.onClick ? item.onClick() : handleNavigation(item.path))}
+          >
+            {item.icon} <span>{item.label}</span>
+          </button>
+        ))}
         <button
           className={`${styles.menuItem} w-100 mb-2`}
-          title="Usuarios y Roles"
-          onClick={() => handleNavigation("/usuarios")}
+          title={logoutOption.label}
+          onClick={logoutOption.onClick}
         >
-          <FaUser className={styles.menuIcon} /> <span>Usuarios y Roles</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Dashboard"
-          onClick={() => {
-            handleNavigation("/dashboard");
-          }}
-        >
-          <FaHome className={styles.menuIcon} /> <span>Dashboard</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Calendario y Rutas"
-          onClick={() => {
-            handleNavigation("/calendario");
-          }}
-        >
-          <FaCalendarAlt className={styles.menuIcon} /> <span>Calendario y Rutas</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Puntos de Acopio"
-          onClick={() => {
-            handleNavigation("/mapa");
-          }}
-        >
-          <FaMapMarkerAlt className={styles.menuIcon} /> <span>Puntos de Acopio</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Ranking por Colonia"
-          onClick={() => {
-            handleNavigation("/ranking");
-          }}
-        >
-          <FaChartBar className={styles.menuIcon} /> <span>Ranking por Colonia</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Reportes"
-          onClick={() => {
-            handleNavigation("/reportes");
-          }}
-        >
-          <FaFileAlt className={styles.menuIcon} /> <span>Reportes</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Configuración"
-          onClick={() => {
-            handleNavigation("/configuracion");
-          }}
-        >
-          <FaCog className={styles.menuIcon} /> <span>Configuración</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Notificaciones"
-          onClick={() => {
-            handleNavigation("/notificaciones");
-          }}
-        >
-          <FaBell className={styles.menuIcon} /> <span>Notificaciones</span>
-        </button>
-        <button
-          className={`${styles.menuItem} w-100 mb-2`}
-          title="Cerrar sesión"
-          onClick={() => {
-            localStorage.removeItem("isLoggedIn");
-            handleNavigation("/login");
-          }}
-        >
-          <FaRecycle className={styles.menuIcon} /> <span>Cerrar sesión</span>
+          {logoutOption.icon} <span>{logoutOption.label}</span>
         </button>
       </nav>
     </aside>

@@ -6,6 +6,7 @@ import { isAuthenticated } from "../../services/api";
 import { Button, Modal, Spinner } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
+import AcopioForm from "./AcopioForm";
 
 export default function MapLeafletPage() {
   if (!isAuthenticated()) {
@@ -18,6 +19,8 @@ export default function MapLeafletPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showMap, setShowMap] = useState(false); // Estado para el modal del mapa
+  const [showForm, setShowForm] = useState(false);
+  const [editingAcopio, setEditingAcopio] = useState(null);
 
   // Estado para filtro de zona
   const [zonaFiltro, setZonaFiltro] = useState(0); // 0 = todas
@@ -80,8 +83,70 @@ export default function MapLeafletPage() {
   ];
 
   const handleAgregar = () => {
-    // Aquí puedes abrir un modal o navegar a la página de agregar punto
-    alert("Agregar nuevo punto de acopio");
+    setEditingAcopio(null);
+    setShowForm(true);
+  };
+
+  const handleEdit = (acopio) => {
+    console.log('Editando acopio:', acopio);
+    setEditingAcopio(acopio);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (acopio) => {
+    if (window.confirm(`¿Está seguro de eliminar "${acopio.nombre}"?`)) {
+      try {
+        // TODO: Implementar cuando el backend tenga DELETE
+        console.warn('⚠️ Función de eliminar pendiente de implementación en backend');
+        alert("Función de eliminar pendiente de implementación en backend");
+      } catch (error) {
+        console.error('Error al eliminar:', error);
+        alert("Error al eliminar el centro de acopio");
+      }
+    }
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setTimeout(() => {
+      setEditingAcopio(null);
+    }, 300);
+  };
+
+  const handleFormSuccess = () => {
+    handleCloseForm();
+    // Refrescar datos
+    const fetchPuntos = async () => {
+      setLoading(true);
+      try {
+        const data = await getAcopio();
+        setPuntos(
+          data.map((p) => ({
+            id: p.id,
+            latitud: p.latitud,
+            longitud: p.longitud,
+            zona_id: p.zona_id,
+            horario: p.horario,
+            tipo: p.tipo,
+            nombre: p.nombre,
+            direccion: p.direccion,
+            estado: p.estado,
+            zonas: p.zonas,
+            estadoClass:
+              p.estado === "Activo"
+                ? styles.activo
+                : p.estado === "Saturado"
+                ? styles.saturado
+                : styles.fuera,
+          }))
+        );
+      } catch (error) {
+        setError("Error al cargar puntos de acopio.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPuntos();
   };
 
   return (
@@ -139,12 +204,13 @@ export default function MapLeafletPage() {
                       <th>Dirección</th>
                       <th>Zona</th>
                       <th>Estado</th>
+                      <th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {!loading && !error && puntosFiltrados.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="text-center">
+                        <td colSpan={8} className="text-center">
                           No hay puntos disponibles.
                         </td>
                       </tr>
@@ -169,6 +235,28 @@ export default function MapLeafletPage() {
                             </td>
                             <td>
                               <span className={p.estadoClass}>{p.estado}</span>
+                            </td>
+                            <td>
+                              <div className="btn-group btn-group-sm" role="group">
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  onClick={() => handleEdit(p)}
+                                  title="Editar centro"
+                                  className="d-flex align-items-center"
+                                >
+                                  <i className="fas fa-edit"></i>
+                                </Button>
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleDelete(p)}
+                                  title="Eliminar centro"
+                                  className="d-flex align-items-center"
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -214,6 +302,12 @@ export default function MapLeafletPage() {
           </Modal>
         </div>
       </div>
+      <AcopioForm
+        show={showForm}
+        onHide={handleCloseForm}
+        editingAcopio={editingAcopio}
+        onSuccess={handleFormSuccess}
+      />
     </div>
   );
 }

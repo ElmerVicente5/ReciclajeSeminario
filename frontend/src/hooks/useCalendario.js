@@ -1,10 +1,30 @@
-import { useState } from "react";
-import { getCalendario, crearHorarioCalendario, obtenerCalendarioCompleto, actualizarHorarioCalendario, eliminarHorarioCalendario } from "../services/api";
+import { useState, useCallback } from 'react';
+import axios from 'axios';
+
+const BASE_URL = 'http://localhost:8000';
+
+// Cliente para Admin (con token)
+const apiAdmin = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// Cliente público (sin token)
+const apiPublic = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 export function useCalendario() {
+  const [calendario, setCalendario] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [calendario, setCalendario] = useState([]);
+  const [rutas, setRutas] = useState([]); // Agregar estado para rutas
   const [form, setForm] = useState({
     ruta_id: "",
     dia_semana: "",
@@ -31,6 +51,34 @@ export function useCalendario() {
     "Sábado",
   ];
 
+  // Obtener rutas disponibles
+  const obtenerRutas = useCallback(async () => {
+    try {
+      // Asumiendo que existe un endpoint para obtener rutas
+      const response = await apiPublic.get('/api/rutas');
+      setRutas(response.data.data || []);
+      return response.data;
+    } catch (err) {
+      console.error('Error obteniendo rutas:', err);
+      // Si no hay endpoint específico, extraer rutas del calendario
+      if (calendario.length > 0) {
+        const rutasUnicas = calendario
+          .filter(item => item.rutas)
+          .map(item => ({
+            id: item.ruta_id,
+            nombre: item.rutas.nombre,
+            descripcion: item.rutas.descripcion,
+            zona: item.rutas.zonas?.nombre
+          }))
+          .filter((ruta, index, self) => 
+            index === self.findIndex(r => r.id === ruta.id)
+          );
+        setRutas(rutasUnicas);
+      }
+      return { data: rutas };
+    }
+  }, [calendario]);
+
   // Carga todos los datos y extrae filtros únicos
   const refreshCalendario = async () => {
     setLoading(true);
@@ -43,6 +91,10 @@ export function useCalendario() {
       // Extrae días y frecuencias únicos
       setDiasUnicos(Array.from(new Set(data.map(c => diasSemana[c.dia_semana])).values()));
       setFrecuencias(Array.from(new Set(data.map(c => c.frecuencia)).values()));
+      
+      // Obtener rutas después de cargar calendario
+      await obtenerRutas();
+      
       setLoading(false);
     } catch (err) {
       setError("Error al obtener calendario completo");
@@ -50,6 +102,24 @@ export function useCalendario() {
       setLoading(false);
     }
   };
+
+  // Obtener calendario completo (público)
+  const obtenerCalendarioCompleto = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await apiPublic.get('/api/calendario/obtenerCalendario');
+      setCalendario(response.data.data || []);
+      return response.data;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Error al obtener el calendario';
+      setError(errorMessage);
+      console.error('Error obteniendo calendario:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const getCalendarioHook = async (zona, fecha) => {
     setLoading(true);
@@ -65,19 +135,44 @@ export function useCalendario() {
     }
   };
 
-  const crearHorario = async (data) => {
+  const crearHorario = useCallback(async (horarioData) => {
     setLoading(true);
-    setError("");
+    setError(null);
     try {
-      await crearHorarioCalendario(data);
-      setLoading(false);
-      return true;
+      // Validar datos requeridos
+      if (!horarioData.ruta_id || !horarioData.dia_semana !== 0 && !horarioData.dia_semana || !horarioData.hora_inicio || !horarioData.hora_fin) {
+        throw new Error('Todos los campos obligatorios deben ser completados');
+      }
+
+      // Validar formato de hora
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(horarioData.hora_inicio) || !timeRegex.test(horarioData.hora_fin)) {
+        throw new Error('Las horas deben estar en formato HH:mm');
+      }
+
+      // Validar día de la semana
+      if (horarioData.dia_semana < 0 || horarioData.dia_semana > 6) {
+        throw new Error('El día de la semana debe estar entre 0 (Domingo) y 6 (Sábado)');
+      }
+
+      const response = await apiAdmin.post('/api/calendario/insert', horarioData);
+      
+      // Refrescar la lista después de crear
+      await obtenerCalendarioCompleto();
+      
+      return response.data;
     } catch (err) {
-      setError("Error al crear horario");
+      const errorMessage = err.response?.data?.errors?.[0]?.msg || 
+                          err.response?.data?.message || 
+                          err.message || 
+                          'Error al crear el horario';
+      setError(errorMessage);
+      console.error('Error creando horario:', err);
+      throw new Error(errorMessage);
+    } finally {
       setLoading(false);
-      return false;
     }
-  };
+  }, [obtenerCalendarioCompleto]);
 
   const getCalendarioCompleto = async () => {
     setLoading(true);
@@ -93,40 +188,57 @@ export function useCalendario() {
     }
   };
 
-  const actualizarHorario = async (id, data) => {
+  const actualizarHorario = useCallback(async (id, updateData) => {
     setLoading(true);
-    setError("");
+    setError(null);
     try {
-      // Solo envía los campos permitidos por el backend
-      const payload = {
-        hora_inicio: data.hora_inicio,
-        hora_fin: data.hora_fin,
-        frecuencia: data.frecuencia,
-        notas: data.notas,
-      };
-      await actualizarHorarioCalendario(id, payload);
-      setLoading(false);
-      return true;
-    } catch (err) {
-      setError("Error al actualizar horario");
-      setLoading(false);
-      return false;
-    }
-  };
+      // Validar formato de hora si se proporciona
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (updateData.hora_inicio && !timeRegex.test(updateData.hora_inicio)) {
+        throw new Error('La hora de inicio debe estar en formato HH:mm');
+      }
+      if (updateData.hora_fin && !timeRegex.test(updateData.hora_fin)) {
+        throw new Error('La hora de fin debe estar en formato HH:mm');
+      }
 
-  const eliminarHorario = async (id) => {
-    setLoading(true);
-    setError("");
-    try {
-      await eliminarHorarioCalendario(id);
-      setLoading(false);
-      return true;
+      const response = await apiAdmin.put(`/api/calendario/update/${id}`, updateData);
+      
+      // Refrescar la lista después de actualizar
+      await obtenerCalendarioCompleto();
+      
+      return response.data;
     } catch (err) {
-      setError("Error al eliminar horario");
+      const errorMessage = err.response?.data?.errors?.[0]?.msg || 
+                          err.response?.data?.message || 
+                          err.message || 
+                          'Error al actualizar el horario';
+      setError(errorMessage);
+      console.error('Error actualizando horario:', err);
+      throw new Error(errorMessage);
+    } finally {
       setLoading(false);
-      return false;
     }
-  };
+  }, [obtenerCalendarioCompleto]);
+
+  const eliminarHorario = useCallback(async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await apiAdmin.delete(`/api/calendario/delete/${id}`);
+      
+      // Refrescar la lista después de eliminar
+      await obtenerCalendarioCompleto();
+      
+      return response.data;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Error al eliminar el horario';
+      setError(errorMessage);
+      console.error('Error eliminando horario:', err);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [obtenerCalendarioCompleto]);
 
   // Editar y eliminar desde la tabla
   const handleEdit = (horario) => {
@@ -169,8 +281,19 @@ export function useCalendario() {
     return filtrados;
   };
 
+  // Utilidades para manejo de días
+  const getDiaSemanaNombre = useCallback((diaSemana) => {
+    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return dias[diaSemana] || 'Día inválido';
+  }, []);
+
+  const getDiaSemanaFromFecha = useCallback((fecha) => {
+    return new Date(fecha).getDay();
+  }, []);
+
   return {
     calendario: getFiltrado(),
+    rutas, // Agregar rutas al return
     form,
     setForm,
     editMode,
@@ -181,6 +304,7 @@ export function useCalendario() {
     actualizarHorario,
     eliminarHorario,
     refreshCalendario,
+    obtenerRutas, // Agregar función al return
     loading,
     error,
     zona,
@@ -192,5 +316,8 @@ export function useCalendario() {
     filtroFrecuencia,
     setFiltroFrecuencia,
     diasSemana,
+    // Utilidades
+    getDiaSemanaNombre,
+    getDiaSemanaFromFecha
   };
 }
