@@ -37,7 +37,9 @@ export function useDashboard(fechaInicio, fechaFin) {
         console.warn("No se pudo decodificar el token JWT:", decodeError);
       }
 
-      // Usar endpoint /api/dashboard/ (con barra al final) como indica la documentación
+      // Usando el endpoint:
+      // GET http://localhost:8000/api/dashboard/?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD
+      // con headers Authorization: Bearer <token> y Content-Type: application/json
       const endpoint = `${API_BASE_URL}/dashboard/?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
       console.log("Probando endpoint:", endpoint);
 
@@ -49,34 +51,45 @@ export function useDashboard(fechaInicio, fechaFin) {
         },
       });
 
-      // Si da 404, muestra mensaje claro y NO intenta otra ruta
+      // Manejo de errores HTTP
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error(
             `El endpoint del dashboard no se encontró (404): ${endpoint}.
-Verifica que el backend tenga implementado GET /api/dashboard y que esté corriendo en el puerto 8000.
-Si usas Docker, revisa los puertos y la ruta en el backend.`
+Verifica que el backend tenga implementado GET /api/dashboard/ y que esté corriendo en el puerto 8000.`
           );
         }
         if (response.status === 401) {
           throw new Error("No autorizado (401). Verifique su token de autenticación.");
+        }
+        if (response.status === 500) {
+          const errorText = await response.text();
+          throw new Error(
+            `Error interno del servidor (500): ${errorText}
+Esto indica que el backend tiene un error en la lógica del endpoint /api/dashboard/.
+Revisa los logs del backend y verifica:
+- Que los parámetros fechaInicio y fechaFin sean válidos.
+- Que el usuario tenga rol ADMIN y estado ACTIVO.
+- Que la consulta a la base de datos no falle.
+- Que la respuesta siempre incluya todos los campos esperados, aunque estén vacíos.
+Corrige el backend y vuelve a probar.`
+          );
         }
         const errorText = await response.text();
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
-      // Validar que la respuesta tenga la estructura esperada
-      if (
-        typeof result !== "object" ||
-        !result.usuarios ||
-        !result.notificaciones ||
-        !Array.isArray(result.zonas) ||
-        !Array.isArray(result.tipos_residuos)
-      ) {
-        throw new Error("La respuesta de la API no tiene la estructura esperada para el dashboard.");
-      }
-      setData(result);
+      // Validar que la respuesta tenga la estructura esperada y asignar valores por defecto si faltan campos
+      const safeResult = {
+        usuarios: result.usuarios ?? { total: 0, activos: 0, inactivos: 0, porRol: [] },
+        notificaciones: result.notificaciones ?? { enviadas: 0, pendientes: 0 },
+        zonas: Array.isArray(result.zonas) ? result.zonas : [],
+        tipos_residuos: Array.isArray(result.tipos_residuos) ? result.tipos_residuos : [],
+        centros_acopio: typeof result.centros_acopio === "number" ? result.centros_acopio : 0,
+        rutas: typeof result.rutas === "number" ? result.rutas : 0,
+      };
+      setData(safeResult);
     } catch (err) {
       setError(err.message || "Error al cargar los datos del dashboard.");
       setData(null);
