@@ -52,6 +52,26 @@ async function buscarUsuarioPorNombre(nombreUsuario) {
         throw error
     }
 }
+
+async function buscarZonaPorNombre(nombreColonia) {
+    try {
+        const zonaEncontrada = await prisma.zonas.findFirst({
+            where: {
+                nombre:{
+                  equals: nombreColonia,
+                  mode: 'insensitive'  
+                } 
+            },
+            select: {
+                id: true,
+                nombre: true,
+            }
+        });
+            return zonaEncontrada;
+    } catch (error) {
+        throw error;
+    }
+}
 async function loginServicio(nombreUsuario) {
     
     try{
@@ -75,7 +95,7 @@ async function loginServicio(nombreUsuario) {
         throw error;
     }
 }
-async function crearUsuario(nombreCompleto, nombreUsuario, contrasenia) {
+async function crearUsuario(nombreCompleto, nombreUsuario, contrasenia, nombreColonia) {
     try {
     const result = await prisma.$transaction(async (tx) => {
         const hashedPassword = await bcrypt.hash(contrasenia, SALT_ROUNDS);
@@ -84,12 +104,20 @@ async function crearUsuario(nombreCompleto, nombreUsuario, contrasenia) {
                 nombre: ROLES.USER
             }
         });
+
+        const zona = await buscarZonaPorNombre(nombreColonia);
+        if(!zona){
+            const error = new Error('La zona especificada no existe');
+            error.status = 400;
+            throw error;
+        }
         const usuario = await tx.usuarios.create({
             data: {
                 nombre_completo: nombreCompleto,
                 nombre_usuario: nombreUsuario,
                 contrasenia: hashedPassword,
                 rol_id: role.id,
+                zona_id: zona.id,
                 estado: 'ACTIVO',
             }
         });
@@ -111,5 +139,5 @@ export {
     loginServicio,
     crearUsuario,
     buscarUsuarioPorNombre,
-    
+    buscarZonaPorNombre,
 }
