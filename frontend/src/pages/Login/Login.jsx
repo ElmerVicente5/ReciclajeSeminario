@@ -23,7 +23,7 @@ export default function Login() {
   }, [success, navigate]);
 
   const handleLogin = (user) => {
-    console.log('Login result:', user); // Depuración
+    // console.log('Login result:', user); // Depuración
     setLoading(true);
     setSuccess(true);
     // Guardar token si existe

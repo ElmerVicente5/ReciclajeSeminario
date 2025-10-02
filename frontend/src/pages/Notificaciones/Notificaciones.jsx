@@ -501,10 +501,10 @@ export default function Notificaciones() {
                               }}
                               disabled={loading}
                             >
-                              <option value="TODOS">👥 Todos los Usuarios</option>
-                              <option value="ZONA">📍 Zona Específica</option>
-                              <option value="ROL">🏷️ Rol Específico</option>
-                              <option value="USUARIO">👤 Usuario Específico</option>
+                              <option value="TODOS">Todos los Usuarios</option>
+                              <option value="ZONA"> Zona Específica</option>
+                              <option value="ROL">Rol Específico</option>
+                              <option value="USUARIO">Usuario Específico</option>
                             </Form.Select>
                           </Form.Group>
                         </div>
@@ -559,7 +559,7 @@ export default function Notificaciones() {
                     <Card className="mb-4">
                       <Card.Header className="bg-danger text-white">
                         <div className="d-flex justify-content-between align-items-center">
-                          <span>🔔 Notificaciones (Admin API)</span>
+                          <span>🔔 Notificaciones </span>
                           <Button
                             size="sm"
                             variant="outline-light"
@@ -574,7 +574,7 @@ export default function Notificaciones() {
                             ) : (
                               <>
                                 <i className="fas fa-sync-alt me-1"></i>
-                                Recargar Admin
+                                Recargar
                               </>
                             )}
                           </Button>

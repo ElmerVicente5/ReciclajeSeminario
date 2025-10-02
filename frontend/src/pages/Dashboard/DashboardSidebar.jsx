@@ -46,20 +46,19 @@ export default function DashboardSidebar() {
     navigate(path);
   };
 
-  // Opciones del panel (sidebar)
+  // Opciones del panel (sidebar) - Orden estándar
   const panelPages = [
-    ...(isAdmin
-      ? [
-          { path: "/usuarios", icon: <FaUser />, label: "Usuarios y Roles" },
-          { path: "/configuracion", icon: <FaCog />, label: "Configuración" },
-
-        ]
-      : []),
     { path: "/dashboard", icon: <FaHome />, label: "Dashboard" },
     { path: "/calendario", icon: <FaCalendarAlt />, label: "Calendario y Rutas" },
     { path: "/mapa", icon: <FaMapMarkerAlt />, label: "Puntos de Acopio" },
     { path: "/ranking", icon: <FaChartBar />, label: "Ranking por Colonia" },
     { path: "/notificaciones", icon: <FaBell />, label: "Notificaciones" },
+    ...(isAdmin
+      ? [
+          { path: "/usuarios", icon: <FaUser />, label: "Usuarios y Roles" },
+          { path: "/configuracion", icon: <FaCog />, label: "Configuración" },
+        ]
+      : []),
   ];
 
   const logoutOption = {

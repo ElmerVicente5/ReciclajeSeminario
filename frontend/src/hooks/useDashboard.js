@@ -31,8 +31,8 @@ export function useDashboard(fechaInicio, fechaFin) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         rol = (payload.rol || payload.role || "USER").toUpperCase();
-        console.log("Payload del token:", payload);
-        console.log("Rol detectado:", rol);
+        // console.log("Payload del token:", payload);
+        // console.log("Rol detectado:", rol);
       } catch (decodeError) {
         console.warn("No se pudo decodificar el token JWT:", decodeError);
       }
@@ -41,7 +41,7 @@ export function useDashboard(fechaInicio, fechaFin) {
       // GET http://localhost:8000/api/dashboard/?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD
       // con headers Authorization: Bearer <token> y Content-Type: application/json
       const endpoint = `${API_BASE_URL}/dashboard/?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
-      console.log("Probando endpoint:", endpoint);
+    //   console.log("Probando endpoint:", endpoint);
 
       const response = await fetch(endpoint, {
         method: "GET",

@@ -32,7 +32,7 @@ export default function LoginForm({ onLogin }) {
     }
     try {
       const result = await login({ nombreUsuario: email, contrasenia: password });
-      console.log("Login result:", result);
+    //   console.log("Login result:", result);
       if (!result.success) {
         setLocalError("Correo o contraseña incorrectos.");
         return;
@@ -44,7 +44,7 @@ export default function LoginForm({ onLogin }) {
         onLogin(result.user);
       }
     } catch (err) {
-      console.error("Error en login:", err);
+    //   console.error("Error en login:", err);
       setLocalError("Error inesperado al intentar ingresar.");
     }
   };
@@ -138,7 +138,7 @@ export default function LoginForm({ onLogin }) {
           </span>
         </button>
      
-        <div style={{ textAlign: "center", marginTop: 8 }}>
+        {/* <div style={{ textAlign: "center", marginTop: 8 }}>
           <a
             href="#"
             className={styles.registerLinkBtn}
@@ -147,7 +147,7 @@ export default function LoginForm({ onLogin }) {
           >
             ¿No tienes cuenta? <span style={{ textDecoration: 'underline' }}>Regístrate</span>
           </a>
-        </div>
+        </div> */}
       </form>
       <RecoverPasswordModal
         open={showRecover}
