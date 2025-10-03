@@ -22,6 +22,7 @@ import { routerNotificacionesApp } from "./src/routes/notificaciones.app.route.j
 import { rutasRouter } from "./src/routes/rutas.route.js";
 import { zonasRouter } from "./src/routes/zonas.route.js";
 import  dashboardRouter from './src/routes/dashboard.route.js';
+import clasificacionRouter from './src/routes/clasificacion.route.js';
 app.use(cors({
 
   origin: '*',
@@ -48,6 +49,7 @@ app.use("/api/app/calendario", calendarioRouterApp);
 app.use("/api/rutas", rutasRouter);
 app.use("/api/zonas", zonasRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/clasificacion", clasificacionRouter);
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {
