@@ -35,7 +35,7 @@ const register = async (req,res)=>{
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const {nombreUsuario,contrasenia,nombreCompleto} = req.body;
+    const {nombreUsuario,contrasenia,nombreCompleto, colonia} = req.body;
         const usuarioEncontrado = await buscarUsuarioPorNombre(nombreUsuario);
         if(usuarioEncontrado){
             return res.status(400).json({message: 'Usuario ya existe'});
@@ -46,8 +46,7 @@ const register = async (req,res)=>{
         }
     
     try {
-        const result = await crearUsuario(nombreCompleto, nombreUsuario, contrasenia);
-       
+        const result = await crearUsuario(nombreCompleto, nombreUsuario, contrasenia, colonia);
         return res.status(200).json(result);
     } catch (error) {
         return res.status(error.status).json({message: error.message});
