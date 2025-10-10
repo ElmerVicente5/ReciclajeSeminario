@@ -7,7 +7,9 @@ import {router} from './src/routes/route.js';
 import calendarioRouter from "./src/routes/calendario.route.js";
 import { calendarioRouterApp } from "./src/routes/calendario.route.js";
 import acopioRouter from "./src/routes/acopio.route.js";
-import {routerRankingPorZona } from "./src/routes/rankingPorZona.route.js";
+import { routerRankingPorZona } from "./src/routes/rankingPorZona.route.js";
+import dashboardRouter from "./src/routes/dashboard.route.js";
+
 import { routerRankinZonas } from "./src/routes/rankinZonas.route.js";
 import { initializeDatabase} from './src/config/db.js';
 import { specs, swaggerUi } from './src/config/swagger.config.js';
@@ -46,6 +48,7 @@ app.use("/api/app/ranking", routerRankingPorZonaApp);
 app.use("/api/app/calendario", calendarioRouterApp);
 app.use("/api/rutas", rutasRouter);
 app.use("/api/zonas", zonasRouter);
+app.use("/api/dashboard", dashboardRouter);
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {
