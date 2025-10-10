@@ -28,6 +28,7 @@ model usuarios {
   zona_id         Int?
   dispositivos    dispositivos[]
   notificaciones  notificaciones[]
+  puntosusuario   puntosusuario[]
   roles           roles?           @relation(fields: [rol_id], references: [id], onUpdate: NoAction)
   zonas           zonas?           @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
 
@@ -164,6 +165,7 @@ model tiporesiduo {
   color_contenedor     String?
   fecha_registro       DateTime?              @default(now()) @db.Timestamp(6)
   eventospuntosporzona eventospuntosporzona[]
+  puntosusuario        puntosusuario[]
 
   @@index([nombre], map: "uq_tiporesiduo_nombre")
 }
@@ -181,4 +183,13 @@ model zonas {
 
   @@index([codigo], map: "uq_zonas_codigo")
   @@index([nombre], map: "uq_zonas_nombre")
+}
+
+model puntosusuario {
+  id              Int         @id @default(autoincrement())
+  id_usuario      Int
+  id_tipo_residuo Int
+  total_puntos    Int?
+  tiporesiduo     tiporesiduo @relation(fields: [id_tipo_residuo], references: [id], onDelete: Cascade, map: "fk_tipo_residuo")
+  usuarios        usuarios    @relation(fields: [id_usuario], references: [id], onDelete: Cascade, map: "fk_usuario")
 }

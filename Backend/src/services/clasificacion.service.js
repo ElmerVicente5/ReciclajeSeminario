@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import fs from "fs";
+import { asignarPuntosUsuario } from "./puntosPorUsuario.service.js";
 
 /**
  * Servicio para clasificación de residuos usando IA (OpenAI Vision)
@@ -27,7 +28,7 @@ class ClasificacionService {
    * @param {string} mimeType - Tipo MIME de la imagen
    * @returns {Promise<Object>} Resultado de la clasificación
    */
-  async clasificarImagen(filePath, mimeType) {
+  async clasificarImagen(filePath, mimeType,idUsuario) {
     try {
       const dataUrl = this.fileToDataURL(filePath, mimeType);
 
@@ -96,6 +97,8 @@ class ClasificacionService {
           throw new Error("No se pudo parsear el JSON de la respuesta");
         }
       }
+
+      const result = await asignarPuntosUsuario(idUsuario, parsed);
 
       return {
         success: true,

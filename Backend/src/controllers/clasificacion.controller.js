@@ -1,4 +1,4 @@
-import clasificacionService from "../services/clasificacion.service.js";
+import  clasificacionService  from "../services/clasificacion.service.js";
 
 /**
  * Controlador para la clasificación de residuos con IA
@@ -29,10 +29,21 @@ class ClasificacionController {
           ? req.file.mimetype
           : "image/jpeg";
 
+      // Extraer idUsuario del body
+      const { idUsuario } = req.body;
+      
+      if (!idUsuario) {
+        return res.status(400).json({
+          success: false,
+          error: "ID de usuario es requerido",
+        });
+      }
+
       // Clasificar la imagen usando el servicio
       const resultado = await clasificacionService.clasificarImagen(
         filePath,
-        mime
+        mime,
+        idUsuario
       );
 
       // Responder con el resultado

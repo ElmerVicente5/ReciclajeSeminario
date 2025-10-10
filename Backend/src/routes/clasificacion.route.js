@@ -41,11 +41,16 @@ const upload = multer({
  *             type: object
  *             required:
  *               - file
+ *               - idUsuario
  *             properties:
  *               file:
  *                 type: string
  *                 format: binary
  *                 description: Imagen del residuo a clasificar (JPG, PNG, etc.)
+ *               idUsuario:
+ *                 type: integer
+ *                 description: ID del usuario que realiza la clasificación
+ *                 example: 123
  *     responses:
  *       200:
  *         description: Clasificación exitosa
