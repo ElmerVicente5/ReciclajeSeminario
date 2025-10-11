@@ -2,14 +2,15 @@ FROM node:22
 
 WORKDIR /app
 
-COPY package.json .
+COPY package.json package-lock.json ./
 
 RUN npm install
 
 COPY . .
 
-RUN npx prisma db pull
-# correr el cliente de prisma
-RUN npx prisma generate
+# Solo generar el cliente de Prisma si existe schema.prisma
+RUN if [ -f prisma/schema.prisma ]; then npx prisma generate; fi
 
 EXPOSE 8000
+
+CMD ["npm", "start"]

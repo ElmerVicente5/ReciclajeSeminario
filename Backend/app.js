@@ -7,9 +7,7 @@ import {router} from './src/routes/route.js';
 import calendarioRouter from "./src/routes/calendario.route.js";
 import { calendarioRouterApp } from "./src/routes/calendario.route.js";
 import acopioRouter from "./src/routes/acopio.route.js";
-import { routerRankingPorZona } from "./src/routes/rankingPorZona.route.js";
-import dashboardRouter from "./src/routes/dashboard.route.js";
-
+import {routerRankingPorZona } from "./src/routes/rankingPorZona.route.js";
 import { routerRankinZonas } from "./src/routes/rankinZonas.route.js";
 import { initializeDatabase} from './src/config/db.js';
 import { specs, swaggerUi } from './src/config/swagger.config.js';
@@ -23,9 +21,12 @@ import { routerNotificacionesApp } from "./src/routes/notificaciones.app.route.j
  
 import { rutasRouter } from "./src/routes/rutas.route.js";
 import { zonasRouter } from "./src/routes/zonas.route.js";
+import  dashboardRouter from './src/routes/dashboard.route.js';
+import clasificacionRouter from './src/routes/clasificacion.route.js';
+import routerPuntosPorUsuario from "./src/routes/puntosPorUsuaro.route.js";
 app.use(cors({
 
-  origin: 'http://localhost:5173',
+  origin: '*',
   methods: ['GET', 'POST','PUT','DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-api-key' , 'authorization']
 }));
@@ -49,6 +50,8 @@ app.use("/api/app/calendario", calendarioRouterApp);
 app.use("/api/rutas", rutasRouter);
 app.use("/api/zonas", zonasRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/clasificacion", clasificacionRouter);
+app.use("/api/puntos", routerPuntosPorUsuario);
 initializeDatabase()
   .then(() => {
     app.listen(port,  () => {

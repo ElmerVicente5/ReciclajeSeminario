@@ -25,8 +25,8 @@ const crearNotificacion = async (req, res) => {
 
 const obtenerTodasLasNotificaciones = async (req, res) => {
     try{
-        const notificaciones = await obtenerTodasLasNotificacionesServicio();   
-        res.status(200).json(notificaciones);
+        const notificaciones = await obtenerTodasLasNotificacionesServicio();
+        res.status(200).json({...notificaciones});
     }catch(error){
         res.status(500).json({message: error.message});
     }
