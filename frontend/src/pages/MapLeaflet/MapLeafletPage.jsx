@@ -4,7 +4,7 @@ import styles from "./MapLeafletPage.module.css";
 import { useAcopio } from "../../hooks/useAcopio";
 import { isAuthenticated } from "../../services/api";
 import { Button, Modal, Spinner } from "react-bootstrap";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrashAlt } from "react-icons/fa"; // Usa iconos de react-icons
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
 import AcopioForm from "./AcopioForm";
 
@@ -21,6 +21,8 @@ export default function MapLeafletPage() {
   const [showMap, setShowMap] = useState(false); // Estado para el modal del mapa
   const [showForm, setShowForm] = useState(false);
   const [editingAcopio, setEditingAcopio] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [acopioToDelete, setAcopioToDelete] = useState(null);
 
   // Estado para filtro de zona
   const [zonaFiltro, setZonaFiltro] = useState(0); // 0 = todas
@@ -93,17 +95,26 @@ export default function MapLeafletPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (acopio) => {
-    if (window.confirm(`¿Está seguro de eliminar "${acopio.nombre}"?`)) {
-      try {
-        // TODO: Implementar cuando el backend tenga DELETE
-        console.warn('⚠️ Función de eliminar pendiente de implementación en backend');
-        alert("Función de eliminar pendiente de implementación en backend");
-      } catch (error) {
-        console.error('Error al eliminar:', error);
-        alert("Error al eliminar el centro de acopio");
-      }
+  // Visual modal para confirmar eliminación
+  const handleDelete = (acopio) => {
+    setAcopioToDelete(acopio);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (acopioToDelete) {
+      // TODO: Implementar cuando el backend tenga DELETE
+      // await deleteAcopio(acopioToDelete.id);
+      setShowDeleteModal(false);
+      // Puedes agregar aquí una notificación simple si tienes otra función de toast global
+      // Ejemplo: toast("Centro de acopio eliminado correctamente", { type: "success" });
+      setAcopioToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setAcopioToDelete(null);
   };
 
   const handleCloseForm = () => {
@@ -149,6 +160,26 @@ export default function MapLeafletPage() {
     fetchPuntos();
   };
 
+  // Estilos verdes holográficos para el modal de confirmación
+  const holoBtnStyle = {
+    background: "linear-gradient(90deg, #43ea7c 0%, #168126 100%)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "18px",
+    boxShadow: "0 0 12px 2px #43ea7c88, 0 0 24px 2px #16812644",
+    fontWeight: 600,
+    padding: "8px 22px",
+    margin: "0 6px 6px 0",
+    letterSpacing: "0.5px",
+    transition: "transform 0.15s, box-shadow 0.15s"
+  };
+
+  const holoModalStyle = {
+    background: "linear-gradient(120deg, #e0ffe0 0%, #43ea7c 100%)",
+    borderRadius: "22px",
+    boxShadow: "0 0 24px 2px #43ea7c44, 0 0 32px 4px #16812622"
+  };
+
   return (
     <div className={`${styles.pageBg} container-fluid`} style={{ position: "relative" }}>
       <LoadingOverlay loading={loading} error={error} />
@@ -189,10 +220,10 @@ export default function MapLeafletPage() {
                 Agregar
               </Button>
             </div>
-            {/* Elimina el botón de ver mapa interactivo */}
           </div>
           <div className="row">
-            <div className="col-12 col-lg-7 d-flex flex-column" style={{ minHeight: 350 }}>
+            {/* Tabla arriba */}
+            <div className="col-12">
               <div className={styles.cardScrollContainer}>
                 <table className={`table table-striped table-bordered ${styles.acopioTable}`}>
                   <thead className={styles.acopioTableHeader}>
@@ -245,7 +276,7 @@ export default function MapLeafletPage() {
                                   title="Editar centro"
                                   className="d-flex align-items-center"
                                 >
-                                  <i className="fas fa-edit"></i>
+                                  <FaEdit size={16} />
                                 </Button>
                                 <Button
                                   variant="outline-danger"
@@ -254,7 +285,7 @@ export default function MapLeafletPage() {
                                   title="Eliminar centro"
                                   className="d-flex align-items-center"
                                 >
-                                  <i className="fas fa-trash"></i>
+                                  <FaTrashAlt size={16} />
                                 </Button>
                               </div>
                             </td>
@@ -266,8 +297,8 @@ export default function MapLeafletPage() {
                 </table>
               </div>
             </div>
-            {/* Mapa al lado derecho */}
-            <div className="col-12 col-lg-5 d-flex flex-column" style={{ minHeight: 350 }}>
+            {/* Mapa abajo */}
+            <div className="col-12">
               <div className={styles.mapaContainer}>
                 <MapLeaflet puntos={puntosFiltrados} />
               </div>
@@ -308,6 +339,24 @@ export default function MapLeafletPage() {
         editingAcopio={editingAcopio}
         onSuccess={handleFormSuccess}
       />
+      <Modal show={showDeleteModal} onHide={cancelDelete} centered>
+        <div style={holoModalStyle}>
+          <Modal.Header closeButton style={{ border: "none", background: "transparent" }}>
+            <Modal.Title style={{ color: "#168126", fontWeight: 700 }}>Confirmar eliminación</Modal.Title>
+          </Modal.Header>
+          <Modal.Body style={{ textAlign: "center", fontSize: "1.08rem", color: "#168126", background: "transparent" }}>
+            ¿Está seguro de eliminar el centro de acopio <b>{acopioToDelete?.nombre}</b>?
+          </Modal.Body>
+          <Modal.Footer style={{ border: "none", background: "transparent", justifyContent: "center" }}>
+            <Button style={holoBtnStyle} onClick={cancelDelete}>
+              Cancelar
+            </Button>
+            <Button style={holoBtnStyle} onClick={confirmDelete}>
+              Eliminar
+            </Button>
+          </Modal.Footer>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Table, Button } from "react-bootstrap";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
 // Recibe calendarioHook y onEdit
 export default function CalendarioTable({ calendarioHook, onEdit }) {
@@ -36,12 +37,14 @@ export default function CalendarioTable({ calendarioHook, onEdit }) {
               <td>{c.frecuencia}</td>
               <td>{c.notas}</td>
               <td>
-                <Button size="sm" variant="outline-warning" className="me-1" onClick={() => { handleEdit(c); onEdit(); }}>
-                  Editar
-                </Button>
-                <Button size="sm" variant="outline-danger" onClick={() => handleDelete(c.id)}>
-                  Eliminar
-                </Button>
+                <div className="d-flex flex-row gap-2 justify-content-center">
+                  <Button size="sm" variant="outline-warning" className="d-flex align-items-center" onClick={() => { handleEdit(c); onEdit(); }}>
+                    <FaEdit size={15} />
+                  </Button>
+                  <Button size="sm" variant="outline-danger" className="d-flex align-items-center" onClick={() => handleDelete(c.id)}>
+                    <FaTrashAlt size={15} />
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}

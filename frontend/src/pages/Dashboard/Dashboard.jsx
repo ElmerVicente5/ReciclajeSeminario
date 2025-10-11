@@ -85,13 +85,18 @@ export default function Dashboard() {
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "10px", // <--- reduce el espacio entre tarjetas
+          gap: "10px",
           alignItems: "start",
           marginBottom: "0",
           minHeight: "220px"
         }}>
           {/* Usuarios Totales */}
-          <div className={styles.card} style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center" }}>
+          <div
+            className={styles.card}
+            style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center", cursor: "pointer" }}
+            onClick={() => navigate("/usuarios")}
+            title="Ver usuarios"
+          >
             <FaUser size={22} color="#2196f3" />
             <div className={styles.cardValue} style={{ fontSize: "1.05rem" }}>
               {dashboardData?.usuarios?.total ?? 0}
@@ -99,7 +104,12 @@ export default function Dashboard() {
             <div className={styles.cardLabel} style={{ fontSize: "0.85rem" }}>Usuarios Totales</div>
           </div>
           {/* Notificaciones Enviadas */}
-          <div className={styles.card} style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center" }}>
+          <div
+            className={styles.card}
+            style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center", cursor: "pointer" }}
+            onClick={() => navigate("/notificaciones")}
+            title="Ver notificaciones"
+          >
             <FaChartLine size={22} color="#1bb934" />
             <div className={styles.cardValue} style={{ fontSize: "1.05rem" }}>
               {dashboardData?.notificaciones?.enviadas ?? 0}
@@ -107,7 +117,12 @@ export default function Dashboard() {
             <div className={styles.cardLabel} style={{ fontSize: "0.85rem" }}>Notificaciones Enviadas</div>
           </div>
           {/* Centros de Acopio */}
-          <div className={styles.card} style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center" }}>
+          <div
+            className={styles.card}
+            style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center", cursor: "pointer" }}
+            onClick={() => navigate("/mapa")}
+            title="Ver centros de acopio"
+          >
             <FaWarehouse size={22} color="#8e44ad" />
             <div className={styles.cardValue} style={{ fontSize: "1.05rem" }}>
               {dashboardData?.centros_acopio ?? 0}
@@ -115,7 +130,12 @@ export default function Dashboard() {
             <div className={styles.cardLabel} style={{ fontSize: "0.85rem" }}>Centros de Acopio</div>
           </div>
           {/* Rutas */}
-          <div className={styles.card} style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center" }}>
+          <div
+            className={styles.card}
+            style={{ minWidth: 0, padding: "8px 4px", fontSize: "0.92rem", flexDirection: "column", alignItems: "center", cursor: "pointer" }}
+            onClick={() => navigate("/calendario")}
+            title="Ver rutas"
+          >
             <FaRoute size={22} color="#16a085" />
             <div className={styles.cardValue} style={{ fontSize: "1.05rem" }}>
               {dashboardData?.rutas ?? 0}
@@ -124,67 +144,113 @@ export default function Dashboard() {
           </div>
         </div>
         {/* Segunda fila: 2 gráficos compactos */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "10px", // <--- reduce el espacio entre gráficos
-          alignItems: "start",
-          marginTop: "6px", // <--- reduce el espacio entre filas
-          minHeight: "220px"
-        }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "18px",
+            alignItems: "stretch",
+            marginTop: "16px",
+            minHeight: "260px"
+          }}
+        >
           {/* Clasificación de residuos */}
-          <div className={styles.chartCard} style={{ padding: "8px 4px", minWidth: 0, maxWidth: "100%", textAlign: "center" }}>
-            <h3 style={{ marginTop: 0, fontSize: "1rem", marginBottom: "6px", textAlign: "center" }}>Clasificación de residuos</h3>
+          <div
+            className={styles.chartCard}
+            style={{
+              background: "#fff",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+              borderRadius: 10,
+              padding: "18px 12px",
+              minWidth: 0,
+              maxWidth: "100%",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: 260
+            }}
+          >
+            <h3 style={{ margin: 0, fontSize: "1.08rem", marginBottom: "12px", fontWeight: 600, color: "#219150" }}>
+              Clasificación de residuos
+            </h3>
             {residuosLabels.length ? (
-              <Doughnut
-                className={styles.doughnutChartCanvas}
-                data={{
-                  labels: residuosLabels,
-                  datasets: [{
-                    label: "Cantidad",
-                    data: residuosData,
-                    backgroundColor: ["#66bb6a","#81c784","#a5d6a7","#c8e6c9"],
-                    borderWidth: 2,
-                  }],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: { legend: { position: "bottom" } }
-                }}
-              />
+              <div style={{ width: "100%", maxWidth: 260, margin: "0 auto" }}>
+                <Doughnut
+                  data={{
+                    labels: residuosLabels,
+                    datasets: [{
+                      label: "Cantidad",
+                      data: residuosData,
+                      backgroundColor: ["#fff", "#168126", "#000", "#43ea7c"],
+                      borderColor: "#168126",
+                      borderWidth: 2,
+                    }],
+                  }}
+                  options={{
+                    responsive: true,
+                    plugins: { legend: { position: "bottom" } },
+                    maintainAspectRatio: false
+                  }}
+                  style={{ height: 180, width: "100%" }}
+                />
+              </div>
             ) : (
               <p className={styles.noData}>No hay datos para mostrar</p>
             )}
           </div>
           {/* Puntos por Zona */}
-          <div className={styles.chartCard} style={{ padding: "8px 4px", minWidth: 0, maxWidth: "100%", textAlign: "center" }}>
-            <h3 style={{ marginTop: 0, fontSize: "1rem", marginBottom: "6px", textAlign: "center" }}>Puntos por Zona</h3>
+          <div
+            className={styles.chartCard}
+            style={{
+              background: "#fff",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+              borderRadius: 10,
+              padding: "18px 12px",
+              minWidth: 0,
+              maxWidth: "100%",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: 260,
+              cursor: "pointer"
+            }}
+            onClick={() => navigate("/ranking")}
+            title="Ver ranking por colonia"
+          >
+            <h3 style={{ margin: 0, fontSize: "1.08rem", marginBottom: "12px", fontWeight: 600, color: "#1b7bb9" }}>
+              Puntos por Zona
+            </h3>
             {zonasLabels.length ? (
-              <Bar
-                className={styles.barChartCanvas}
-                data={{
-                  labels: ["Puntos"],
-                  datasets: zonasLabels.map((zona, i) => ({
-                    label: zona,
-                    data: [zonasData[i]],
-                    backgroundColor: colores[i % colores.length],
-                    borderRadius: 6,
-                  })),
-                }}
-                options={{
-                  indexAxis: "y",
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  aspectRatio: 2,
-                  plugins: {
-                    legend: { position: "right" },
-                  },
-                  scales: {
-                    x: { beginAtZero: true },
-                    y: { display: false },
-                  },
-                }}
-              />
+              <div style={{ width: "100%", maxWidth: 320, margin: "0 auto" }}>
+                <Bar
+                  data={{
+                    labels: zonasLabels,
+                    datasets: [{
+                      label: "Puntos",
+                      data: zonasData,
+                      backgroundColor: colores,
+                      borderRadius: 6,
+                    }],
+                  }}
+                  options={{
+                    indexAxis: "y",
+                    responsive: true,
+                    plugins: {
+                      legend: { display: false },
+                    },
+                    maintainAspectRatio: false,
+                    scales: {
+                      x: { beginAtZero: true, ticks: { font: { size: 13 } } },
+                      y: { ticks: { font: { size: 13 } } },
+                    },
+                  }}
+                  style={{ height: 180, width: "100%" }}
+                />
+              </div>
             ) : (
               <p className={styles.noData}>No hay datos para mostrar</p>
             )}
