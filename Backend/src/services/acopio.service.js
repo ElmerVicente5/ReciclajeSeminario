@@ -57,3 +57,62 @@ export const obtenerListadoAcopioCoordenadas = async () => {
         throw error;
     }
 };
+
+
+
+// Insertar un nuevo acopio
+export const insertarAcopio = async (data) => {
+    try {
+        const nuevoAcopio = await prisma.centrosacopio.create({
+            data: {
+                tipo: data.tipo,
+                nombre: data.nombre,
+                latitud: data.latitud,
+                longitud: data.longitud,
+                direccion: data.direccion,
+                zona_id: data.zona_id,
+                horario: data.horario,
+            },
+        });
+        return nuevoAcopio;
+    } catch (error) {
+        console.error("Error al insertar acopio:", error);
+        throw error;
+    }
+};
+
+// Editar un acopio existente
+export const editarAcopio = async (id, data) => {
+    try {
+        const acopioActualizado = await prisma.centrosacopio.update({
+            where: { id: id },
+            data: {
+                tipo: data.tipo,
+                nombre: data.nombre,
+                latitud: data.latitud,
+                longitud: data.longitud,
+                direccion: data.direccion,
+                zona_id: data.zona_id,
+                horario: data.horario,
+            },
+        });
+        return acopioActualizado;
+    } catch (error) {
+        console.error("Error al editar acopio:", error);
+        throw error;
+    }
+};
+
+
+// Eliminar un acopio
+export const eliminarAcopio = async (id) => {
+    try {
+        await prisma.centrosacopio.delete({
+            where: { id: id },
+        });
+        return true;
+    } catch (error) {
+        console.error("Error al eliminar acopio:", error);
+        throw error;
+    }
+};

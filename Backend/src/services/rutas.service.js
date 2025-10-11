@@ -39,10 +39,19 @@ export const listarRutasPorZona = async () => {
 
 }
 
-export const crearRuta = async ({ nombre, zona_id }) => {
+export const crearRuta = async ({ nombre, zona_id, inicio_latitud, inicio_longitud, fin_latitud, fin_longitud, puntos_intermedios }) => {
     try {
         const nuevaRuta = await prisma.rutas.create({
-            data: { nombre, zona_id, activo: true }
+            data: { 
+                nombre,
+                zona_id,
+                activo: true,
+                inicio_latitud: inicio_latitud ? parseFloat(inicio_latitud) : null,
+                inicio_longitud: inicio_longitud ? parseFloat(inicio_longitud) : null,
+                fin_latitud: fin_latitud ? parseFloat(fin_latitud) : null,
+                fin_longitud: fin_longitud ? parseFloat(fin_longitud) : null,
+                puntos_intermedios: puntos_intermedios ? puntos_intermedios : null
+            }
         });
         return nuevaRuta;
     } catch (error) {
@@ -51,16 +60,23 @@ export const crearRuta = async ({ nombre, zona_id }) => {
     }
 }
 
-export const actualizarRuta = async ({ id, nombre, zona_id , activo}) => {
+export const actualizarRuta = async ({ id, nombre, zona_id, activo, inicio_latitud, inicio_longitud, fin_latitud, fin_longitud, puntos_intermedios }) => {
     try {
-        if(activo == "false"){
-            activo = false;
-        }else{
-            activo = true;
-        }
+        if(activo === "false" || activo === false) activo = false;
+        else activo = true;
+
         const ruta = await prisma.rutas.update({
-            where: { id },
-            data: { nombre, zona_id: parseInt(zona_id), activo: Boolean(activo) }
+            where: { id: parseInt(id) },
+            data: { 
+                nombre,
+                zona_id: parseInt(zona_id),
+                activo: Boolean(activo),
+                inicio_latitud: inicio_latitud ? parseFloat(inicio_latitud) : null,
+                inicio_longitud: inicio_longitud ? parseFloat(inicio_longitud) : null,
+                fin_latitud: fin_latitud ? parseFloat(fin_latitud) : null,
+                fin_longitud: fin_longitud ? parseFloat(fin_longitud) : null,
+                puntos_intermedios: puntos_intermedios ? puntos_intermedios : null
+            }
         });
         return ruta;
     } catch (error) {

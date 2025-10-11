@@ -93,6 +93,8 @@ const usersValidation = [
   *     summary: Obtener usuarios
   *     tags:
   *       - Auth
+  *     security:
+  *       - bearerAuth: []
   *     responses:
   *       200:
   *         description: Usuarios encontrados
@@ -108,6 +110,8 @@ const usersValidation = [
   *     summary: Obtener usuario por ID
   *     tags:
   *       - Auth
+  *     security:
+  *       - bearerAuth: []
   *     parameters:
   *       - in: path
   *         name: id
@@ -132,6 +136,8 @@ const usersValidation = [
   *     summary: Actualizar usuario
   *     tags:
   *       - Auth
+  *     security:
+  *       - bearerAuth: []
   *     parameters:
   *       - in: path
   *         name: id
@@ -175,6 +181,8 @@ const usersValidation = [
   *     summary: Eliminar usuario
   *     tags:
   *       - Auth
+  *     security:
+  *       - bearerAuth: []
   *     parameters:
   *       - in: path
   *         name: id
@@ -199,6 +207,8 @@ const usersValidation = [
   *     summary: Crear rol
   *     tags:
   *       - Roles
+  *     security:
+  *       - bearerAuth: []
   *     requestBody:
   *       required: true
   *       content:
@@ -223,6 +233,8 @@ const usersValidation = [
   *     summary: Actualizar rol
   *     tags:
   *       - Roles
+  *     security:
+  *       - bearerAuth: []
   *     parameters:
   *       - in: path
   *         name: id
@@ -254,6 +266,8 @@ const usersValidation = [
   *     summary: Eliminar rol
   *     tags:
   *       - Roles
+  *     security:
+  *       - bearerAuth: []
   *     parameters:
   *       - in: path
   *         name: id
@@ -278,6 +292,8 @@ const usersValidation = [
   *     summary: Obtener listado de roles
   *     tags:
   *       - Roles
+  *     security:
+  *       - bearerAuth: []
   *     responses:
   *       200:
   *         description: Listado de roles obtenido correctamente
@@ -293,6 +309,8 @@ const usersValidation = [
   *     summary: Obtener rol por ID
   *     tags:
   *       - Roles
+  *     security:
+  *       - bearerAuth: []
   *     parameters:
   *       - in: path
   *         name: id

@@ -54,7 +54,7 @@ const rutasRouter = express.Router();
  * 
  * 
  */
-rutasRouter.get('/obtenerRutas', verifyToken, getRutas);
+rutasRouter.get('/obtenerRutas',  getRutas);
 
 const crearRutasValidation = [
   body('nombre').notEmpty().withMessage('El nombre es requerido'),
@@ -67,6 +67,8 @@ const crearRutasValidation = [
  *     summary: Crear ruta
  *     tags:
  *       - Rutas
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -78,9 +80,35 @@ const crearRutasValidation = [
  *                 type: string
  *               zona_id:
  *                 type: number
+ *               inicio_latitud:
+ *                 type: number
+ *                 description: Latitud del punto de inicio
+ *               inicio_longitud:
+ *                 type: number
+ *                 description: Longitud del punto de inicio
+ *               fin_latitud:
+ *                 type: number
+ *                 description: Latitud del punto final
+ *               fin_longitud:
+ *                 type: number
+ *                 description: Longitud del punto final
+ *               puntos_intermedios:
+ *                 type: array
+ *                 description: Lista de puntos intermedios [{lat, lng}]
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     lat:
+ *                       type: number
+ *                     lng:
+ *                       type: number
  *     responses:
- *       200:
+ *       201:
  *         description: Ruta creada exitosamente
+ *       400:
+ *         description: Error de validación
+ *       401:
+ *         description: No autorizado
  *       500:
  *         description: Error interno del servidor
  */
@@ -98,6 +126,8 @@ const actualizarRutasValidation = [
  *     summary: Actualizar ruta
  *     tags:
  *       - Rutas
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -113,9 +143,35 @@ const actualizarRutasValidation = [
  *                 type: number
  *               activo:
  *                 type: boolean
+ *               inicio_latitud:
+ *                 type: number
+ *                 description: Latitud del punto de inicio
+ *               inicio_longitud:
+ *                 type: number
+ *                 description: Longitud del punto de inicio
+ *               fin_latitud:
+ *                 type: number
+ *                 description: Latitud del punto final
+ *               fin_longitud:
+ *                 type: number
+ *                 description: Longitud del punto final
+ *               puntos_intermedios:
+ *                 type: array
+ *                 description: Lista de puntos intermedios [{lat, lng}]
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     lat:
+ *                       type: number
+ *                     lng:
+ *                       type: number
  *     responses:
  *       200:
  *         description: Ruta actualizada exitosamente
+ *       400:
+ *         description: Error de validación
+ *       401:
+ *         description: No autorizado
  *       500:
  *         description: Error interno del servidor
  */

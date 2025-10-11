@@ -9,10 +9,11 @@ datasource db {
 }
 
 model roles {
-  id       Int        @id @default(autoincrement())
-  nombre   String
-  usuarios usuarios[]
+  id             Int        @id @default(autoincrement())
+  nombre         String
   fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+  usuarios       usuarios[]
+
   @@index([nombre], map: "roles_nombre")
 }
 
@@ -27,6 +28,7 @@ model usuarios {
   zona_id         Int?
   dispositivos    dispositivos[]
   notificaciones  notificaciones[]
+  puntosusuario   puntosusuario[]
   roles           roles?           @relation(fields: [rol_id], references: [id], onUpdate: NoAction)
   zonas           zonas?           @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
 
@@ -40,7 +42,7 @@ model audiencianotificaciones {
   notificacion_id Int
   tipo_objetivo   String
   objetivo_id     Int?
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+  fecha_registro  DateTime?      @default(now()) @db.Timestamp(6)
   notificaciones  notificaciones @relation(fields: [notificacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([notificacion_id], map: "idx_audiencianotificaciones_notificacion")
@@ -48,31 +50,31 @@ model audiencianotificaciones {
 }
 
 model calendariorecoleccion {
-  id          Int      @id @default(autoincrement())
-  ruta_id     Int
-  dia_semana  Int      @db.SmallInt
-  hora_inicio DateTime @db.Time(6)
-  hora_fin    DateTime @db.Time(6)
-  frecuencia  String?
-  notas       String?
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
-  rutas       rutas    @relation(fields: [ruta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id             Int       @id @default(autoincrement())
+  ruta_id        Int
+  dia_semana     Int       @db.SmallInt
+  hora_inicio    DateTime  @db.Time(6)
+  hora_fin       DateTime  @db.Time(6)
+  frecuencia     String?
+  notas          String?
+  fecha_registro DateTime? @default(now()) @db.Timestamp(6)
+  rutas          rutas     @relation(fields: [ruta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([dia_semana], map: "idx_calendario_dia")
   @@index([ruta_id], map: "idx_calendario_ruta")
 }
 
 model centrosacopio {
-  id        Int     @id @default(autoincrement())
-  tipo      String?
-  nombre    String
-  latitud   Float?
-  longitud  Float?
-  direccion String?
-  zona_id   Int?
-  horario   String?
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
-  zonas     zonas?  @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
+  id             Int       @id @default(autoincrement())
+  tipo           String?
+  nombre         String
+  latitud        Float?
+  longitud       Float?
+  direccion      String?
+  zona_id        Int?
+  horario        String?
+  fecha_registro DateTime? @default(now()) @db.Timestamp(6)
+  zonas          zonas?    @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
 
   @@index([zona_id], map: "idx_centrosacopio_zona")
 }
@@ -83,7 +85,7 @@ model dispositivos {
   plataforma       String?
   registrado_en    DateTime? @default(now()) @db.Timestamp(6)
   ultima_actividad DateTime? @db.Timestamp(6)
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+  fecha_registro   DateTime? @default(now()) @db.Timestamp(6)
   usuarios         usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([ultima_actividad], map: "idx_dispositivos_ultimaactividad")
@@ -116,7 +118,7 @@ model notificaciones {
   creado_por              Int?
   programada_en           DateTime?                 @db.Timestamp(6)
   enviada_en              DateTime?                 @db.Timestamp(6)
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+  fecha_registro          DateTime?                 @default(now()) @db.Timestamp(6)
   audiencianotificaciones audiencianotificaciones[]
   usuarios                usuarios?                 @relation(fields: [creado_por], references: [id], onUpdate: NoAction)
 
@@ -130,7 +132,7 @@ model puntosporzona {
   periodo        String
   puntos         Int       @default(0)
   actualizado_en DateTime? @default(now()) @db.Timestamp(6)
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+  fecha_registro DateTime? @default(now()) @db.Timestamp(6)
   zonas          zonas     @relation(fields: [zona_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([periodo], map: "idx_puntos_periodo")
@@ -142,8 +144,13 @@ model rutas {
   nombre                String
   zona_id               Int?
   activo                Boolean?                @default(true)
+  fecha_registro        DateTime?               @default(now()) @db.Timestamp(6)
+  inicio_latitud        Float?
+  inicio_longitud       Float?
+  fin_latitud           Float?
+  fin_longitud          Float?
+  puntos_intermedios    Json?                   @db.Json
   calendariorecoleccion calendariorecoleccion[]
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
   zonas                 zonas?                  @relation(fields: [zona_id], references: [id], onUpdate: NoAction)
 
   @@index([activo], map: "idx_rutas_activo")
@@ -156,8 +163,10 @@ model tiporesiduo {
   categoria            String?
   reciclable           Boolean?
   color_contenedor     String?
+  fecha_registro       DateTime?              @default(now()) @db.Timestamp(6)
   eventospuntosporzona eventospuntosporzona[]
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+  puntosusuario        puntosusuario[]
+
   @@index([nombre], map: "uq_tiporesiduo_nombre")
 }
 
@@ -165,12 +174,22 @@ model zonas {
   id                   Int                    @id @default(autoincrement())
   nombre               String
   codigo               String                 @unique
+  fecha_registro       DateTime?              @default(now()) @db.Timestamp(6)
   centrosacopio        centrosacopio[]
   eventospuntosporzona eventospuntosporzona[]
   puntosporzona        puntosporzona[]
   rutas                rutas[]
   usuarios             usuarios[]
-  fecha_registro DateTime?  @default(now()) @db.Timestamp(6)
+
   @@index([codigo], map: "uq_zonas_codigo")
   @@index([nombre], map: "uq_zonas_nombre")
+}
+
+model puntosusuario {
+  id              Int         @id @default(autoincrement())
+  id_usuario      Int
+  id_tipo_residuo Int
+  total_puntos    Int?
+  tiporesiduo     tiporesiduo @relation(fields: [id_tipo_residuo], references: [id], onDelete: Cascade, map: "fk_tipo_residuo")
+  usuarios        usuarios    @relation(fields: [id_usuario], references: [id], onDelete: Cascade, map: "fk_usuario")
 }

@@ -35,7 +35,7 @@ const zonasRouter = Router();
  *       500:
  *         description: Error interno del servidor
  */
-zonasRouter.get('/obtenerZonas', verifyToken, getZonas);
+zonasRouter.get('/obtenerZonas',  getZonas);
 
 const crearZonasValidation = [
   body('nombre').notEmpty().withMessage('El nombre es requerido'),
@@ -48,6 +48,8 @@ const crearZonasValidation = [
  *     summary: Crear zona
  *     tags:
  *       - Zonas
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -83,6 +85,8 @@ const actualizarZonasValidation = [
  *     summary: Actualizar zona
  *     tags:
  *       - Zonas
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -118,6 +122,8 @@ const eliminarZonasValidation = [
  *     summary: Eliminar zona
  *     tags:
  *       - Zonas
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
