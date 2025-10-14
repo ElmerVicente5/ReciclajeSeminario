@@ -49,7 +49,7 @@ const register = async (req,res)=>{
         const result = await crearUsuario(nombreCompleto, nombreUsuario, contrasenia, colonia);
         return res.status(200).json(result);
     } catch (error) {
-        return res.status(error.status).json({message: error.message});
+        return res.status(500).json({message: error.message});
     }   
 }
 export {

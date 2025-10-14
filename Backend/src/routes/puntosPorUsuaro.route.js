@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { obtenerMisPuntosController } from '../controllers/puntorPorusuario.controller.js';
-import { verifyToken } from '../middlewares/middleware.js';
+import { obtenerMisPuntosController, obtenerPuntosPorCategoriaController } from '../controllers/puntorPorusuario.controller.js';
+import { verifyTokenApp } from '../middlewares/middleware.app.js';
 
 const routerPuntosPorUsuario = Router();
 
@@ -135,6 +135,101 @@ const routerPuntosPorUsuario = Router();
  *                   type: string
  *                   example: "Error al obtener puntos del usuario"
  */
-routerPuntosPorUsuario.get('/obtenerMisPuntos/:idUsuario',obtenerMisPuntosController);
+routerPuntosPorUsuario.get('/obtenerMisPuntos/:idUsuario',verifyTokenApp,obtenerMisPuntosController);
+/**
+ * @swagger
+ * /api/puntos/obtenerPuntosPorCategoria/{idUsuario}:
+ *   get:
+ *     summary: Obtiene los puntos acumulados de un usuario por categoría
+ *     description: Retorna los puntos acumulados de un usuario por categoría. Solo requiere el ID del usuario en la URL.
+ *     tags:
+ *       - Puntos por Usuario
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: idUsuario      
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario (solo número)
+ *         example: 123
+ *     responses:
+ *       200:
+ *         description: Puntos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     idUsuario:
+ *                       type: integer
+ *                       example: 123
+ *                     puntosPorCategoria:
+ *                       type: object
+ *                       properties:
+ *                         RECICLABLE:
+ *                           type: integer
+ *                           example: 10
+ *                         NO_RECICLABLE:
+ *                           type: integer
+ *                           example: 2
+ *                         ORGANICO:
+ *                           type: integer
+ *                           example: 5
+ *                         INCIERTO:
+ *                           type: integer
+ *                           example: 1
+ *                 message:
+ *                   type: string
+ *                   description: Mensaje informativo (solo cuando no hay datos)
+ *                   example: "No se encontraron puntos para este usuario"
+ *       400:
+ *         description: ID de usuario inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "ID de usuario inválido"  
+ *       401:
+ *         description: Token de autenticación inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Token inválido"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Error al obtener los puntos por categoría del usuario"   
+ */
+routerPuntosPorUsuario.get('/obtenerPuntosPorCategoria/:idUsuario',verifyTokenApp,obtenerPuntosPorCategoriaController);
 
 export default routerPuntosPorUsuario;

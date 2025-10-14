@@ -61,6 +61,8 @@ const registerValidation = [
   *                 type: string
   *               contrasenia:
   *                 type: string
+  *               colonia:
+  *                 type: string
   *              
   *     responses:
   *       200:
