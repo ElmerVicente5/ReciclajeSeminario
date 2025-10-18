@@ -1,209 +1,217 @@
-import { useState, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Row, Col, Badge } from 'react-bootstrap';
-import { useAcopio } from "../../hooks/useAcopio";
+import { useState, useEffect } from "react";
+import { Modal, Button, Form, Alert, Row, Col } from "react-bootstrap";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css"; // Asegúrate de importar el CSS de Leaflet
+import L from "leaflet";
+import useAcopio from "../../hooks/useAcopio";
+import { obtenerZonas } from "../../services/api"; // Importa la función para obtener zonas
+
+// Configurar el ícono del marcador
+const markerIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 export default function AcopioForm({ show, onHide, editingAcopio = null, onSuccess }) {
   const { crearAcopio, actualizarAcopio, validarDatosAcopio, loading, error } = useAcopio();
-  
+  const [zonas, setZonas] = useState([]);
   const [formData, setFormData] = useState({
-    tipo: '',
-    nombre: '',
-    latitud: '',
-    longitud: '',
-    direccion: '',
-    zona_id: '',
-    horario: ''
+    tipo: "",
+    nombre: "",
+    latitud: "",
+    longitud: "",
+    direccion: "",
+    zona_id: "",
+    horario: "",
   });
-  
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-
-  // Tipos de centro predefinidos
-  const tiposCentro = [
-    'Centro de Reciclaje',
-    'Punto de Acopio',
-    'Centro de Compostaje',
-    'Estación de Transferencia',
-    'Centro de Clasificación'
-  ];
-
-  // Determinar si estamos en modo edición
+  const [mapCenter, setMapCenter] = useState([0, 0]);
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(""); // Estado para la notificación de éxito
   const isEditMode = editingAcopio && editingAcopio.id;
 
-  // Cargar datos si está editando
+  // Cargar zonas al abrir el formulario
+  useEffect(() => {
+    if (show) {
+      const fetchZonas = async () => {
+        try {
+          const res = await obtenerZonas();
+          const zonasArray = Array.isArray(res) ? res : (Array.isArray(res.zonas) ? res.zonas : []);
+          setZonas(zonasArray);
+        } catch (err) {
+          console.error("Error al cargar zonas:", err);
+          setZonas([]);
+        }
+      };
+      fetchZonas();
+    }
+  }, [show]);
+
+  // Limpia el mensaje de éxito al cerrar el formulario
+  useEffect(() => {
+    if (!show) {
+      setSuccessMessage(""); // Limpia el mensaje cuando el formulario se cierra
+    }
+  }, [show]);
+
+  // Cargar datos si está en modo edición
   useEffect(() => {
     if (show) {
       if (isEditMode) {
-        console.log('Cargando datos para editar:', editingAcopio);
         setFormData({
-          tipo: editingAcopio.tipo || '',
-          nombre: editingAcopio.nombre || '',
-          latitud: editingAcopio.latitud ? String(editingAcopio.latitud) : '',
-          longitud: editingAcopio.longitud ? String(editingAcopio.longitud) : '',
-          direccion: editingAcopio.direccion || '',
-          zona_id: editingAcopio.zona_id ? String(editingAcopio.zona_id) : '',
-          horario: editingAcopio.horario || ''
+          tipo: editingAcopio.tipo || "",
+          nombre: editingAcopio.nombre || "",
+          latitud: editingAcopio.latitud ? String(editingAcopio.latitud) : "",
+          longitud: editingAcopio.longitud ? String(editingAcopio.longitud) : "",
+          direccion: editingAcopio.direccion || "",
+          zona_id: editingAcopio.zona_id ? String(editingAcopio.zona_id) : "",
+          horario: editingAcopio.horario || "",
         });
+        setMarkerPosition([editingAcopio.latitud, editingAcopio.longitud]);
+        setMapCenter([editingAcopio.latitud, editingAcopio.longitud]);
       } else {
         setFormData({
-          tipo: '',
-          nombre: '',
-          latitud: '',
-          longitud: '',
-          direccion: '',
-          zona_id: '',
-          horario: ''
+          tipo: "",
+          nombre: "",
+          latitud: "",
+          longitud: "",
+          direccion: "",
+          zona_id: "",
+          horario: "",
         });
+        setMarkerPosition(null);
+        setMapCenter([0, 0]);
       }
       setErrors({});
     }
   }, [editingAcopio, show, isEditMode]);
 
+  // Solicitar permisos de geolocalización
+  useEffect(() => {
+    if (show && !isEditMode) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setMapCenter([latitude, longitude]);
+        },
+        () => {
+          console.warn("No se pudo obtener la ubicación del usuario.");
+        }
+      );
+    }
+  }, [show, isEditMode]);
+
   // Manejar cambios en el formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
-    // Limpiar error del campo cuando se modifica
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: null
+        [name]: null,
       }));
     }
   };
 
   // Validar formulario
   const validateForm = () => {
-    const submitData = {
+    const validation = validarDatosAcopio({
       ...formData,
       latitud: formData.latitud ? parseFloat(formData.latitud) : null,
       longitud: formData.longitud ? parseFloat(formData.longitud) : null,
-      zona_id: formData.zona_id ? parseInt(formData.zona_id) : null
-    };
-
-    const validation = validarDatosAcopio(submitData);
-    
+      zona_id: formData.zona_id ? parseInt(formData.zona_id) : null,
+    });
     if (!validation.valido) {
       const newErrors = {};
-      validation.errores.forEach(error => {
-        if (error.includes('nombre')) newErrors.nombre = error;
-        if (error.includes('latitud')) newErrors.latitud = error;
-        if (error.includes('longitud')) newErrors.longitud = error;
-        if (error.includes('zona')) newErrors.zona_id = error;
-        if (error.includes('horario')) newErrors.horario = error;
+      validation.errores.forEach((error) => {
+        if (error.includes("nombre")) newErrors.nombre = error;
+        if (error.includes("tipo")) newErrors.tipo = error;
+        if (error.includes("latitud")) newErrors.latitud = error;
+        if (error.includes("longitud")) newErrors.longitud = error;
+        if (error.includes("zona")) newErrors.zona_id = error;
       });
       setErrors(newErrors);
       return false;
     }
-
-    setErrors({});
     return true;
   };
 
-  // Manejar submit del formulario
+  // Manejar envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
-    setSubmitting(true);
-    
+    const payload = {
+      tipo: formData.tipo,
+      nombre: formData.nombre.trim(),
+      latitud: formData.latitud ? parseFloat(formData.latitud) : null,
+      longitud: formData.longitud ? parseFloat(formData.longitud) : null,
+      direccion: formData.direccion || null,
+      zona_id: formData.zona_id ? parseInt(formData.zona_id) : null,
+      horario: formData.horario || null,
+    };
+
     try {
-      const submitData = {
-        tipo: formData.tipo || null,
-        nombre: formData.nombre.trim(),
-        latitud: formData.latitud ? parseFloat(formData.latitud) : null,
-        longitud: formData.longitud ? parseFloat(formData.longitud) : null,
-        direccion: formData.direccion || null,
-        zona_id: formData.zona_id ? parseInt(formData.zona_id) : null,
-        horario: formData.horario || null
-      };
-
-      let result;
       if (isEditMode) {
-        result = await actualizarAcopio(editingAcopio.id, submitData);
+        await actualizarAcopio(editingAcopio.id, payload);
       } else {
-        result = await crearAcopio(submitData);
+        await crearAcopio(payload);
+        setSuccessMessage("Centro de acopio creado exitosamente."); // Establece el mensaje de éxito
+        setTimeout(() => setSuccessMessage(""), 5000); // Limpia el mensaje después de 5 segundos
       }
-      
-      console.log('Resultado:', result);
       onSuccess && onSuccess();
-    } catch (error) {
-      console.error('Error al guardar centro de acopio:', error);
-    } finally {
-      setSubmitting(false);
+    } catch (err) {
+      console.error("Error al guardar el centro de acopio:", err);
     }
   };
 
+  // Componente para manejar eventos del mapa
+  function MapClickHandler() {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setMarkerPosition([lat, lng]);
+        setFormData((prev) => ({
+          ...prev,
+          latitud: lat.toFixed(6),
+          longitud: lng.toFixed(6),
+        }));
+      },
+    });
+    return null;
+  }
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" className="acopio-form-modal">
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title className="d-flex align-items-center">
-          <i className="fas fa-map-marker-alt me-2"></i>
-          {isEditMode ? `Editar Centro: ${editingAcopio?.nombre}` : 'Agregar Nuevo Centro de Acopio'}
+    <Modal show={show} onHide={onHide} size="lg" centered>
+      <Modal.Header closeButton>
+        <Modal.Title>
+          {isEditMode ? `Editar Centro: ${editingAcopio?.nombre}` : "Agregar Nuevo Centro de Acopio"}
         </Modal.Title>
       </Modal.Header>
-      
       <Modal.Body>
-        {/* Advertencia sobre APIs no implementadas */}
-        <Alert variant="warning" className="mb-3">
-          <div className="d-flex align-items-center">
-            <i className="fas fa-exclamation-triangle me-2"></i>
-            <div>
-              <strong>Nota de Desarrollo:</strong> Las operaciones de crear, editar y eliminar están preparadas 
-              pero requieren que el backend implemente las APIs correspondientes.
-            </div>
-          </div>
-        </Alert>
-
+        {successMessage && (
+          <Alert variant="success" onClose={() => setSuccessMessage("")} dismissible>
+            <i className="fas fa-check-circle me-2"></i>
+            {successMessage}
+          </Alert>
+        )}
         {error && (
-          <Alert variant="danger" className="mb-3">
+          <Alert variant="danger">
             <i className="fas fa-exclamation-circle me-2"></i>
             {error}
           </Alert>
         )}
-
-        {/* Información del centro actual en modo edición */}
-        {isEditMode && (
-          <Alert variant="info" className="mb-3">
-            <h6 className="alert-heading mb-2 d-flex align-items-center">
-              <i className="fas fa-info-circle me-2"></i>
-              Editando Centro Existente
-            </h6>
-            <Row className="g-2">
-              <Col md={4}>
-                <small><strong>ID:</strong> {editingAcopio.id}</small>
-              </Col>
-              <Col md={4}>
-                <small><strong>Zona:</strong> {editingAcopio.zonas?.nombre || `ID: ${editingAcopio.zona_id}`}</small>
-              </Col>
-              <Col md={4}>
-                <small><strong>Estado:</strong> 
-                  <Badge bg={editingAcopio.estado === 'Activo' ? 'success' : 
-                             editingAcopio.estado === 'Saturado' ? 'warning' : 'danger'} 
-                         className="ms-1">
-                    {editingAcopio.estado}
-                  </Badge>
-                </small>
-              </Col>
-            </Row>
-          </Alert>
-        )}
-        
         <Form onSubmit={handleSubmit}>
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Nombre del Centro *
-                  <i className="fas fa-building ms-1 text-muted"></i>
-                </Form.Label>
+                <Form.Label>Nombre del Centro *</Form.Label>
                 <Form.Control
                   type="text"
                   name="nombre"
@@ -212,41 +220,63 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
                   isInvalid={!!errors.nombre}
                   placeholder="Ej: Centro Norte de Reciclaje"
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.nombre}
-                </Form.Control.Feedback>
+                <Form.Control.Feedback type="invalid">{errors.nombre}</Form.Control.Feedback>
               </Form.Group>
             </Col>
-            
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Tipo de Centro
-                  <i className="fas fa-tags ms-1 text-muted"></i>
-                </Form.Label>
-                <Form.Select
+                <Form.Label>Tipo de Centro *</Form.Label>
+                <Form.Control
+                  type="text"
                   name="tipo"
                   value={formData.tipo}
                   onChange={handleChange}
-                >
-                  <option value="">Seleccione un tipo</option>
-                  {tiposCentro.map(tipo => (
-                    <option key={tipo} value={tipo}>
-                      {tipo}
-                    </option>
-                  ))}
-                </Form.Select>
+                  isInvalid={!!errors.tipo}
+                  placeholder="Ej: Punto limpio"
+                />
+                <Form.Control.Feedback type="invalid">{errors.tipo}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
-
+          <Row>
+            <Col md={12}>
+              <Form.Group className="mb-3">
+                <Form.Label>Zona *</Form.Label>
+                <Form.Select
+                  name="zona_id"
+                  value={formData.zona_id}
+                  onChange={handleChange}
+                  isInvalid={!!errors.zona_id}
+                >
+                  <option value="">Seleccione una zona</option>
+                  {zonas.map((zona) => (
+                    <option key={zona.id} value={zona.id}>
+                      {zona.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.zona_id}</Form.Control.Feedback>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12}>
+              <Form.Group className="mb-3">
+                <Form.Label>Seleccionar ubicación en el mapa</Form.Label>
+                <div style={{ height: "300px", width: "100%" }}>
+                  <MapContainer center={mapCenter} zoom={13} style={{ height: "100%", width: "100%" }}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    {markerPosition && <Marker position={markerPosition} icon={markerIcon} />}
+                    <MapClickHandler />
+                  </MapContainer>
+                </div>
+              </Form.Group>
+            </Col>
+          </Row>
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Latitud
-                  <i className="fas fa-globe-americas ms-1 text-muted"></i>
-                </Form.Label>
+                <Form.Label>Latitud</Form.Label>
                 <Form.Control
                   type="number"
                   step="0.000001"
@@ -256,22 +286,12 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
                   isInvalid={!!errors.latitud}
                   placeholder="-17.7835"
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.latitud}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  <i className="fas fa-info-circle me-1"></i>
-                  Valor entre -90 y 90
-                </Form.Text>
+                <Form.Control.Feedback type="invalid">{errors.latitud}</Form.Control.Feedback>
               </Form.Group>
             </Col>
-            
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Longitud
-                  <i className="fas fa-globe-americas ms-1 text-muted"></i>
-                </Form.Label>
+                <Form.Label>Longitud</Form.Label>
                 <Form.Control
                   type="number"
                   step="0.000001"
@@ -281,136 +301,20 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
                   isInvalid={!!errors.longitud}
                   placeholder="-63.1821"
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.longitud}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  <i className="fas fa-info-circle me-1"></i>
-                  Valor entre -180 y 180
-                </Form.Text>
+                <Form.Control.Feedback type="invalid">{errors.longitud}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
-
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  ID de Zona
-                  <i className="fas fa-map ms-1 text-muted"></i>
-                </Form.Label>
-                <Form.Control
-                  type="number"
-                  name="zona_id"
-                  value={formData.zona_id}
-                  onChange={handleChange}
-                  isInvalid={!!errors.zona_id}
-                  placeholder="1"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.zona_id}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  <i className="fas fa-info-circle me-1"></i>
-                  ID numérico de la zona existente
-                </Form.Text>
-              </Form.Group>
-            </Col>
-            
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold">
-                  Horario de Atención
-                  <i className="fas fa-clock ms-1 text-muted"></i>
-                </Form.Label>
-                <Form.Control
-                  type="text"
-                  name="horario"
-                  value={formData.horario}
-                  onChange={handleChange}
-                  isInvalid={!!errors.horario}
-                  placeholder="08:00-17:00"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.horario}
-                </Form.Control.Feedback>
-                <Form.Text className="text-muted">
-                  <i className="fas fa-info-circle me-1"></i>
-                  Formato: HH:MM-HH:MM
-                </Form.Text>
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-bold">
-              Dirección
-              <i className="fas fa-map-marker-alt ms-1 text-muted"></i>
-            </Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              name="direccion"
-              value={formData.direccion}
-              onChange={handleChange}
-              placeholder="Dirección completa del centro de acopio..."
-            />
-          </Form.Group>
-
-          {/* Información adicional */}
-          <Alert variant="light" className="mb-0">
-            <Row>
-              <Col md={6}>
-                <small>
-                  <i className="fas fa-star text-warning me-1"></i>
-                  <strong>Campos obligatorios:</strong> Solo el nombre es obligatorio.
-                </small>
-              </Col>
-              <Col md={6}>
-                <small>
-                  <i className="fas fa-map text-info me-1"></i>
-                  <strong>Coordenadas:</strong> Útiles para mostrar en el mapa.
-                </small>
-              </Col>
-            </Row>
-          </Alert>
+          <div className="text-end">
+            <Button variant="secondary" onClick={onHide} className="me-2">
+              Cancelar
+            </Button>
+            <Button type="submit" variant="success" disabled={loading}>
+              {isEditMode ? "Actualizar Centro" : "Crear Centro"}
+            </Button>
+          </div>
         </Form>
       </Modal.Body>
-      
-      <Modal.Footer className="d-flex justify-content-between">
-        <div>
-          <small className="text-muted">
-            <i className="fas fa-database me-1"></i>
-            {isEditMode ? 'Editando registro existente' : 'Creando nuevo registro'}
-          </small>
-        </div>
-        <div>
-          <Button variant="secondary" onClick={onHide} disabled={submitting} className="me-2">
-            <i className="fas fa-times me-1"></i>
-            Cancelar
-          </Button>
-          <Button 
-            variant={isEditMode ? "warning" : "success"}
-            onClick={handleSubmit}
-            disabled={submitting || loading}
-            className="d-flex align-items-center"
-          >
-            {submitting ? (
-              <>
-                <div className="spinner-border spinner-border-sm me-2" role="status">
-                  <span className="visually-hidden">Cargando...</span>
-                </div>
-                {isEditMode ? 'Actualizando...' : 'Creando...'}
-              </>
-            ) : (
-              <>
-                <i className={`fas ${isEditMode ? 'fa-save' : 'fa-plus'} me-2`}></i>
-                {isEditMode ? 'Actualizar Centro' : 'Crear Centro'}
-              </>
-            )}
-          </Button>
-        </div>
-      </Modal.Footer>
     </Modal>
   );
 }

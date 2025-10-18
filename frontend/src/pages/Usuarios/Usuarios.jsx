@@ -206,20 +206,34 @@ export default function Usuarios() {
     };
   }, []);
 
+  const titleFontStyle = {
+    fontSize: "12px",
+    fontFamily: "Arial, sans-serif",
+    fontWeight: "bold",
+  };
+
+  const dataFontStyle = {
+    fontSize: "12px", // Cambiado a 12px
+    fontFamily: "Arial, sans-serif",
+    fontWeight: "normal",
+  };
+
+  const globalFontStyle = {
+    fontSize: "12px",
+    fontFamily: "Arial, sans-serif",
+  };
+
   return (
-    <div className={`${styles.pageBg} container-fluid`}>
+    <div className={`${styles.pageBg} container-fluid`} style={dataFontStyle}>
       <div className={`${styles.usuariosContainer} row mx-auto`} style={{ position: "relative" }}>
         <LoadingOverlay loading={loading || editandoUsuario} error={error} />
-        
-            {/* Debug info
-            <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '12px', background: '#f0f0f0', padding: '5px', zIndex: 50 }}>
-            Debug: Usuarios: {usuarios?.length || 0}, Loading: {loading ? 'Sí' : 'No'}, Error: {error || 'Ninguno'}
-            </div> */}
         
         <div className="col-12">
           <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
             <FaUser className={styles.usuariosHeaderIcon} />
-            <h1 className={styles.panelTitle}>Admin: {currentUser}</h1>
+            <h1 className={styles.panelTitle} style={titleFontStyle}>
+              Admin: {currentUser}
+            </h1>
           </div>
           {/* Filtros */}
           <div className="row mb-3">
@@ -230,6 +244,7 @@ export default function Usuarios() {
                 placeholder="Buscar por nombre o usuario"
                 value={filtroNombre}
                 onChange={e => setFiltroNombre(e.target.value)}
+                style={dataFontStyle}
               />
             </div>
             <div className="col-6 col-md-4 mb-2 mb-md-0">
@@ -237,6 +252,7 @@ export default function Usuarios() {
                 className="form-select"
                 value={filtroRol}
                 onChange={e => setFiltroRol(e.target.value)}
+                style={dataFontStyle}
               >
                 <option value="">Todos los roles</option>
                 {roles.map(r => (
@@ -253,7 +269,7 @@ export default function Usuarios() {
                 <Button
                   variant="success"
                   className={styles.usuariosBtn}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, ...dataFontStyle }}
                   onClick={() => setShowRegisterModal(true)}
                 >
                   <FaPlus />
@@ -269,7 +285,7 @@ export default function Usuarios() {
                 <Button
                   variant="primary"
                   className={styles.usuariosBtn}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, ...dataFontStyle }}
                   onClick={() => window.dispatchEvent(new CustomEvent("openAddRolModal"))}
                 >
                   <FaPlus />
@@ -277,14 +293,6 @@ export default function Usuarios() {
                 </Button>
               </OverlayTrigger>
             </div>
-          </div>
-          <div className={`d-flex flex-wrap justify-content-center align-items-center ${styles.usuariosActions}`}>
-            {/* ELIMINAR - Ya no necesitamos mostrar error aquí porque LoadingOverlay lo maneja */}
-            {/* {error && (
-              <div className={styles.error}>
-                {error}
-              </div>
-            )} */}
           </div>
           <div className="row">
             <div className="col-12 col-lg-7 d-flex flex-column" style={{ height: "70vh", minHeight: 350 }}>
@@ -300,22 +308,23 @@ export default function Usuarios() {
                   >
                     <thead className={styles.usuariosTableHeader}>
                       <tr>
-                        <th className={styles.usuariosTableHeaderCell}>Usuario</th>
-                        <th>Correo</th>
-                        <th className={styles.usuariosTableHeaderCell}>Acciones</th>
+                        <th className={styles.usuariosTableHeaderCell} style={titleFontStyle}>Usuario</th>
+                        <th className={styles.usuariosTableHeaderCell} style={titleFontStyle}>Correo</th>
+                        <th className={styles.usuariosTableHeaderCell} style={titleFontStyle}>Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {usuariosFiltrados.map((u) => (
                         <tr key={u.id} className={styles.usuariosTableRow}>
-                          <td>{u.nombre_completo}</td>
-                          <td>{u.nombre_usuario}</td>
+                          <td style={dataFontStyle}>{u.nombre_completo}</td>
+                          <td style={dataFontStyle}>{u.nombre_usuario}</td>
                           <td className="d-flex gap-2">
                             <OverlayTrigger placement="top" overlay={<Tooltip>Ver detalles</Tooltip>}>
                               <Button
                                 size="sm"
                                 variant="outline-info"
                                 className={styles.usuariosBtnEdit}
+                                style={dataFontStyle}
                                 onClick={() => setDetalleUsuario(u)}
                               >
                                 <FaInfoCircle />
@@ -326,6 +335,7 @@ export default function Usuarios() {
                                 size="sm"
                                 variant="outline-primary"
                                 className={styles.usuariosBtnEdit}
+                                style={dataFontStyle}
                                 onClick={() => handleEdit(u)}
                               >
                                 <FaEdit />
@@ -336,6 +346,7 @@ export default function Usuarios() {
                                 size="sm"
                                 variant="outline-danger"
                                 className={styles.usuariosBtnDelete}
+                                style={dataFontStyle}
                                 onClick={async () => {
                                   const result = await Swal.fire({
                                     title: '¿Estás seguro?',
@@ -364,129 +375,12 @@ export default function Usuarios() {
                 </div>
               </div>
             </div>
-            {/* Roles panel al lado */}
             <div className="col-12 col-lg-5 d-flex flex-column" style={{ height: "70vh", minHeight: 350 }}>
               <div style={{ flex: 1, overflowY: "auto", maxHeight: "100%" }}>
                 <Roles />
               </div>
             </div>
           </div>
-          {/* Modal de RegisterModal */}
-          <RegisterModal
-            open={showRegisterModal}
-            onClose={() => setShowRegisterModal(false)}
-            userType="admin" // Crear administradores desde panel admin
-            onUserCreated={() => {
-              setShowRegisterModal(false);
-              cargarUsuarios(); // Recargar usuarios después de crear uno nuevo
-            }}
-          />
-
-          {/* Modal de detalles */}
-          <Modal show={!!detalleUsuario} onHide={() => setDetalleUsuario(null)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Detalles de Usuario</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {detalleUsuario && (
-                <div>
-                  <p><strong>ID:</strong> {detalleUsuario.id}</p>
-                  <p><strong>Nombre completo:</strong> {detalleUsuario.nombre_completo}</p>
-                  <p><strong>Correo:</strong> {detalleUsuario.nombre_usuario}</p>
-                  <p><strong>Rol:</strong> {detalleUsuario.roles?.nombre || detalleUsuario.rol_id}</p>
-                  <p><strong>Zona:</strong> {detalleUsuario.zonas?.nombre || detalleUsuario.zona_id || "Sin zona"}</p>
-                  <p><strong>Estado:</strong> {detalleUsuario.estado}</p>
-                  <p><strong>Fecha registro:</strong> {detalleUsuario.fecha_registro}</p>
-                </div>
-              )}
-            </Modal.Body>
-          </Modal>
-
-          {/* Modal de edición de usuario - MANTENER */}
-          <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton className={styles.usuariosModalHeader}>
-              <Modal.Title className={styles.usuariosModalTitle}>
-                {editMode ? "Editar Usuario" : "Nuevo Usuario"}
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body className={styles.usuariosModalBody}>
-              <Form>
-                <Form.Group className="mb-2">
-                  <Form.Label>Nombre completo</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={form.nombre_completo}
-                    onChange={(e) => setForm({ ...form, nombre_completo: e.target.value })}
-                    style={{ borderRadius: 6 }}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Nombre de usuario</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={form.nombre_usuario}
-                    onChange={(e) => setForm({ ...form, nombre_usuario: e.target.value })}
-                    style={{ borderRadius: 6 }}
-                  />
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Rol</Form.Label>
-                  <Form.Select
-                    value={form.rol_id}
-                    onChange={(e) => setForm({ ...form, rol_id: e.target.value })}
-                    style={{ borderRadius: 6 }}
-                  >
-                    <option value="">Seleccione...</option>
-                    {roles.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.nombre}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Zona</Form.Label>
-                  <Form.Select
-                    value={form.zona_id}
-                    onChange={(e) => setForm({ ...form, zona_id: e.target.value })}
-                    style={{ borderRadius: 6 }}
-                  >
-                    <option value="">Seleccione...</option>
-                    {zonasLoading && <option disabled>Cargando zonas...</option>}
-                    {zonasError && <option disabled>Error al cargar zonas</option>}
-                    {Array.isArray(zonas) && zonas.length > 0 ? (
-                      zonas.map((z) => (
-                        <option key={z.id} value={z.id}>
-                          {z.nombre} ({z.codigo})
-                        </option>
-                      ))
-                    ) : (
-                      !zonasLoading && !zonasError && <option disabled>No hay zonas disponibles</option>
-                    )}
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group className="mb-2">
-                  <Form.Label>Estado</Form.Label>
-                  <Form.Select
-                    value={form.estado}
-                    onChange={(e) => setForm({ ...form, estado: e.target.value })}
-                    style={{ borderRadius: 6 }}
-                  >
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
-                  </Form.Select>
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer className={styles.usuariosModalFooter}>
-              <Button variant="secondary" onClick={() => setShowModal(false)} className={styles.usuariosBtn}>
-                Cancelar
-              </Button>
-              <Button variant="primary" onClick={handleSave} className={styles.usuariosBtn}>
-                {editMode ? "Guardar" : "Crear"}
-              </Button>
-            </Modal.Footer>
-          </Modal>
         </div>
       </div>
     </div>

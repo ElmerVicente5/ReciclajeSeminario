@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
 import styles from "./MapLeafletPage.module.css";
-import { useAcopio } from "../../hooks/useAcopio";
 import { isAuthenticated } from "../../services/api";
-import { Button, Modal, Spinner } from "react-bootstrap";
-import { FaPlus, FaEdit, FaTrashAlt } from "react-icons/fa"; // Usa iconos de react-icons
+import { Button, Modal } from "react-bootstrap";
+import { FaPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
 import AcopioForm from "./AcopioForm";
+import useAcopio from "../../hooks/useAcopio";
 
 export default function MapLeafletPage() {
   if (!isAuthenticated()) {
@@ -14,56 +14,29 @@ export default function MapLeafletPage() {
     return null;
   }
 
-  const { getAcopio } = useAcopio();
+  const { getAcopio, eliminarAcopio, loading, error } = useAcopio();
   const [puntos, setPuntos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [showMap, setShowMap] = useState(false); // Estado para el modal del mapa
+  const [showMap, setShowMap] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingAcopio, setEditingAcopio] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [acopioToDelete, setAcopioToDelete] = useState(null);
+  const [zonaFiltro, setZonaFiltro] = useState(0);
 
-  // Estado para filtro de zona
-  const [zonaFiltro, setZonaFiltro] = useState(0); // 0 = todas
-
-  // Obtén los puntos desde la API
+  // Cargar puntos al montar
   useEffect(() => {
     const fetchPuntos = async () => {
-      setLoading(true);
-      setError("");
       try {
         const data = await getAcopio();
-        setPuntos(
-          data.map((p) => ({
-            id: p.id,
-            latitud: p.latitud,
-            longitud: p.longitud,
-            zona_id: p.zona_id,
-            horario: p.horario,
-            tipo: p.tipo,
-            nombre: p.nombre,
-            direccion: p.direccion,
-            estado: p.estado,
-            zonas: p.zonas,
-            estadoClass:
-              p.estado === "Activo"
-                ? styles.activo
-                : p.estado === "Saturado"
-                ? styles.saturado
-                : styles.fuera,
-          }))
-        );
-      } catch (error) {
-        setError("Error al cargar puntos de acopio.");
-        setPuntos([]);
+        setPuntos(data);
+      } catch (err) {
+        console.error(err);
       }
-      setLoading(false);
     };
     fetchPuntos();
-  }, []); // <-- Solo se ejecuta una vez al montar
+  }, [getAcopio]);
 
-  // Filtrado por zona usando el objeto zonas si existe
+  // Filtrar puntos por zona
   const puntosFiltrados =
     zonaFiltro === 0
       ? puntos
@@ -71,7 +44,7 @@ export default function MapLeafletPage() {
           p.zonas?.id ? p.zonas.id === zonaFiltro : p.zona_id === zonaFiltro
         );
 
-  // Opciones de zonas para el filtro (siempre desde los datos)
+  // Opciones de zonas para el filtro
   const zonasUnicas = [
     ...new Map(
       puntos
@@ -90,12 +63,10 @@ export default function MapLeafletPage() {
   };
 
   const handleEdit = (acopio) => {
-    console.log('Editando acopio:', acopio);
     setEditingAcopio(acopio);
     setShowForm(true);
   };
 
-  // Visual modal para confirmar eliminación
   const handleDelete = (acopio) => {
     setAcopioToDelete(acopio);
     setShowDeleteModal(true);
@@ -103,12 +74,14 @@ export default function MapLeafletPage() {
 
   const confirmDelete = async () => {
     if (acopioToDelete) {
-      // TODO: Implementar cuando el backend tenga DELETE
-      // await deleteAcopio(acopioToDelete.id);
-      setShowDeleteModal(false);
-      // Puedes agregar aquí una notificación simple si tienes otra función de toast global
-      // Ejemplo: toast("Centro de acopio eliminado correctamente", { type: "success" });
-      setAcopioToDelete(null);
+      try {
+        await eliminarAcopio(acopioToDelete.id);
+        setPuntos((prev) => prev.filter((p) => p.id !== acopioToDelete.id));
+        setShowDeleteModal(false);
+        setAcopioToDelete(null);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -119,45 +92,17 @@ export default function MapLeafletPage() {
 
   const handleCloseForm = () => {
     setShowForm(false);
-    setTimeout(() => {
-      setEditingAcopio(null);
-    }, 300);
+    setEditingAcopio(null);
   };
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = async () => {
     handleCloseForm();
-    // Refrescar datos
-    const fetchPuntos = async () => {
-      setLoading(true);
-      try {
-        const data = await getAcopio();
-        setPuntos(
-          data.map((p) => ({
-            id: p.id,
-            latitud: p.latitud,
-            longitud: p.longitud,
-            zona_id: p.zona_id,
-            horario: p.horario,
-            tipo: p.tipo,
-            nombre: p.nombre,
-            direccion: p.direccion,
-            estado: p.estado,
-            zonas: p.zonas,
-            estadoClass:
-              p.estado === "Activo"
-                ? styles.activo
-                : p.estado === "Saturado"
-                ? styles.saturado
-                : styles.fuera,
-          }))
-        );
-      } catch (error) {
-        setError("Error al cargar puntos de acopio.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPuntos();
+    try {
+      const data = await getAcopio();
+      setPuntos(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Estilos verdes holográficos para el modal de confirmación
@@ -171,13 +116,41 @@ export default function MapLeafletPage() {
     padding: "8px 22px",
     margin: "0 6px 6px 0",
     letterSpacing: "0.5px",
-    transition: "transform 0.15s, box-shadow 0.15s"
+    transition: "transform 0.15s, box-shadow 0.15s",
   };
 
   const holoModalStyle = {
     background: "linear-gradient(120deg, #e0ffe0 0%, #43ea7c 100%)",
     borderRadius: "22px",
-    boxShadow: "0 0 24px 2px #43ea7c44, 0 0 32px 4px #16812622"
+    boxShadow: "0 0 24px 2px #43ea7c44, 0 0 32px 4px #16812622",
+  };
+
+  const tableStyles = {
+    fontSize: "12px", // Ajustar el tamaño de fuente a 12px
+    textAlign: "left",
+  };
+
+  const columnWidths = {
+    id: "30px",
+    nombre: "200px",
+    tipo: "120px",
+    horario: "180px",
+    direccion: "250px",
+    zona: "150px",
+    estado: "50px",
+    acciones: "150px",
+  };
+
+  const numberStyles = {
+    fontWeight: "normal", // Quitar el estilo bold para los números
+    textAlign: "center",
+    fontSize: "12px", // Ajustar el tamaño de fuente a 12px
+  };
+
+  const nameStyles = {
+    fontWeight: "normal", // Quitar el estilo bold para los nombres
+    textAlign: "center",
+    fontSize: "12px", // Ajustar el tamaño de fuente a 12px
   };
 
   return (
@@ -195,6 +168,7 @@ export default function MapLeafletPage() {
                 className={`form-select ${styles.filtroSelect}`}
                 value={zonaFiltro}
                 onChange={(e) => setZonaFiltro(Number(e.target.value))}
+                style={tableStyles}
               >
                 <option value={0}>Todas las zonas</option>
                 {zonasUnicas.map((z) => (
@@ -213,6 +187,7 @@ export default function MapLeafletPage() {
                   display: "flex",
                   alignItems: "center",
                   gap: 8,
+                  ...tableStyles,
                 }}
                 onClick={handleAgregar}
               >
@@ -225,17 +200,17 @@ export default function MapLeafletPage() {
             {/* Tabla arriba */}
             <div className="col-12">
               <div className={styles.cardScrollContainer}>
-                <table className={`table table-striped table-bordered ${styles.acopioTable}`}>
+                <table className={`table table-striped table-bordered ${styles.acopioTable}`} style={tableStyles}>
                   <thead className={styles.acopioTableHeader}>
                     <tr>
-                      <th>ID</th>
-                      <th>Nombre</th>
-                      <th>Tipo</th>
-                      <th>Horario</th>
-                      <th>Dirección</th>
-                      <th>Zona</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
+                      <th style={{ width: columnWidths.id }}>ID</th>
+                      <th style={{ width: columnWidths.nombre }}>Nombre</th>
+                      <th style={{ width: columnWidths.tipo }}>Tipo</th>
+                      <th style={{ width: columnWidths.horario }}>Horario</th>
+                      <th style={{ width: columnWidths.direccion }}>Dirección</th>
+                      <th style={{ width: columnWidths.zona }}>Zona</th>
+                      <th style={{ width: columnWidths.estado }}>Estado</th>
+                      <th style={{ width: columnWidths.acciones }}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -246,52 +221,45 @@ export default function MapLeafletPage() {
                         </td>
                       </tr>
                     ) : (
-                      puntosFiltrados.map((p) => {
-                        const zonaNombre = p.zonas?.nombre || `Zona ${p.zona_id}`;
-                        const zonaCodigo = p.zonas?.codigo;
-                        return (
-                          <tr key={p.id} className={styles.acopioTableRow}>
-                            <td>{p.id}</td>
-                            <td>
-                              <div className={styles.puntoNombre}>{p.nombre}</div>
-                            </td>
-                            <td>{p.tipo}</td>
-                            <td>{p.horario}</td>
-                            <td>{p.direccion}</td>
-                            <td>
-                              {zonaNombre}
-                              {zonaCodigo && (
-                                <span> | <b>Código:</b> {zonaCodigo}</span>
-                              )}
-                            </td>
-                            <td>
-                              <span className={p.estadoClass}>{p.estado}</span>
-                            </td>
-                            <td>
-                              <div className="btn-group btn-group-sm" role="group">
-                                <Button
-                                  variant="outline-primary"
-                                  size="sm"
-                                  onClick={() => handleEdit(p)}
-                                  title="Editar centro"
-                                  className="d-flex align-items-center"
-                                >
-                                  <FaEdit size={16} />
-                                </Button>
-                                <Button
-                                  variant="outline-danger"
-                                  size="sm"
-                                  onClick={() => handleDelete(p)}
-                                  title="Eliminar centro"
-                                  className="d-flex align-items-center"
-                                >
-                                  <FaTrashAlt size={16} />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
+                      puntosFiltrados.map((p) => (
+                        <tr key={p.id} className={styles.acopioTableRow} style={tableStyles}>
+                          <td style={numberStyles}>{p.id}</td>
+                          <td style={nameStyles}>
+                            <div className={styles.puntoNombre}>{p.nombre || "N/A"}</div>
+                          </td>
+                          <td>{p.tipo || "N/A"}</td>
+                          <td>{p.horario || "N/A"}</td>
+                          <td>{p.direccion || "N/A"}</td>
+                          <td>{p.zonas?.nombre || `Zona ${p.zona_id || "N/A"}`}</td>
+                          <td>
+                            <span className={p.estadoClass}>{p.estado || "N/A"}</span>
+                          </td>
+                          <td>
+                            <div className="btn-group btn-group-sm" role="group">
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={() => handleEdit(p)}
+                                title="Editar centro"
+                                className="d-flex align-items-center"
+                                style={tableStyles}
+                              >
+                                <FaEdit size={16} />
+                              </Button>
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => handleDelete(p)}
+                                title="Eliminar centro"
+                                className="d-flex align-items-center"
+                                style={tableStyles}
+                              >
+                                <FaTrashAlt size={16} />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
                     )}
                   </tbody>
                 </table>
@@ -313,19 +281,19 @@ export default function MapLeafletPage() {
             dialogClassName={styles.mapaModal}
           >
             <Modal.Header closeButton>
-              <Modal.Title>
+              <Modal.Title style={tableStyles}>
                 Mapa Interactivo de Puntos de Acopio
               </Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{ padding: 0 }}>
+            <Modal.Body style={{ padding: 0, fontSize: "12px" }}>
               <div className={styles.mapaContainer}>
                 <MapLeaflet puntos={puntosFiltrados} />
               </div>
               <div className="text-center py-3">
-                <Button variant="secondary" onClick={() => setShowMap(false)}>
+                <Button variant="secondary" onClick={() => setShowMap(false)} style={{ fontSize: "12px" }}>
                   Cerrar mapa
                 </Button>
-                <span className="ms-3 text-muted" style={{ fontSize: "1rem" }}>
+                <span className="ms-3 text-muted" style={{ fontSize: "12px" }}>
                   Puedes cerrar el mapa con el botón o la X arriba.
                 </span>
               </div>
@@ -342,16 +310,18 @@ export default function MapLeafletPage() {
       <Modal show={showDeleteModal} onHide={cancelDelete} centered>
         <div style={holoModalStyle}>
           <Modal.Header closeButton style={{ border: "none", background: "transparent" }}>
-            <Modal.Title style={{ color: "#168126", fontWeight: 700 }}>Confirmar eliminación</Modal.Title>
+            <Modal.Title style={{ color: "#168126", fontWeight: 700, ...tableStyles }}>
+              Confirmar eliminación
+            </Modal.Title>
           </Modal.Header>
-          <Modal.Body style={{ textAlign: "center", fontSize: "1.08rem", color: "#168126", background: "transparent" }}>
+          <Modal.Body style={{ textAlign: "center", fontSize: "1.08rem", color: "#168126", background: "transparent", ...tableStyles }}>
             ¿Está seguro de eliminar el centro de acopio <b>{acopioToDelete?.nombre}</b>?
           </Modal.Body>
           <Modal.Footer style={{ border: "none", background: "transparent", justifyContent: "center" }}>
-            <Button style={holoBtnStyle} onClick={cancelDelete}>
+            <Button style={{ ...holoBtnStyle, ...tableStyles }} onClick={cancelDelete}>
               Cancelar
             </Button>
-            <Button style={holoBtnStyle} onClick={confirmDelete}>
+            <Button style={{ ...holoBtnStyle, ...tableStyles }} onClick={confirmDelete}>
               Eliminar
             </Button>
           </Modal.Footer>

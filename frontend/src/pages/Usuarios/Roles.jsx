@@ -7,6 +7,18 @@ import { isAuthenticated } from "../../services/api";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
 import Swal from 'sweetalert2';
 
+const titleFontStyle = {
+  fontSize: "12px",
+  fontFamily: "Arial, sans-serif",
+  fontWeight: "bold",
+};
+
+const dataFontStyle = {
+  fontSize: "10px",
+  fontFamily: "Arial, sans-serif",
+  fontWeight: "normal",
+};
+
 export default function Roles() {
   if (!isAuthenticated()) {
     window.location.href = "/login";
@@ -64,12 +76,9 @@ export default function Roles() {
   return (
     <div className={styles.rolesBox} style={{ position: "relative" }}>
       <LoadingOverlay loading={rolesLoading || localLoading} error={rolesError || localError} />
-      <h2 className={styles.panelTitle} style={{ textAlign: 'center', marginBottom: 24 }}>Roles</h2>
-      
-      {/* Debug info */}
-      {/* <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
-        Debug: Roles: {roles?.length || 0}, Loading: {rolesLoading ? 'Sí' : 'No'}, Error: {rolesError || 'Ninguno'}
-      </div> */}
+      <h2 className={styles.panelTitle} style={{ textAlign: 'center', marginBottom: 24, ...titleFontStyle }}>
+        Roles
+      </h2>
       
       {/* Filtro */}
       <div className="row mb-3">
@@ -80,6 +89,7 @@ export default function Roles() {
             placeholder="Buscar rol por nombre"
             value={filtroNombre}
             onChange={e => setFiltroNombre(e.target.value)}
+            style={dataFontStyle}
           />
         </div>
       </div>
@@ -95,21 +105,21 @@ export default function Roles() {
         >
           <thead className={styles.usuariosTableHeader}>
             <tr>
-              <th className={styles.usuariosTableHeaderCell}>Rol</th>
-              <th className={styles.usuariosTableHeaderCell}>Acciones</th>
+              <th className={styles.usuariosTableHeaderCell} style={titleFontStyle}>Rol</th>
+              <th className={styles.usuariosTableHeaderCell} style={titleFontStyle}>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {rolesFiltrados.map((r) => (
               <tr key={r.id} className={styles.usuariosTableRow}>
-                <td>{r.nombre}</td>
+                <td style={dataFontStyle}>{r.nombre}</td>
                 <td className="d-flex gap-2">
-                  {/* ...existing botones... */}
                   <OverlayTrigger placement="top" overlay={<Tooltip>Ver detalles</Tooltip>}>
                     <Button
                       size="sm"
                       variant="outline-info"
                       className={styles.usuariosBtnEdit}
+                      style={dataFontStyle}
                       onClick={() => setDetalleRol(r)}
                     >
                       <FaInfoCircle />
@@ -120,6 +130,7 @@ export default function Roles() {
                       size="sm"
                       variant="outline-primary"
                       className={styles.usuariosBtnEdit}
+                      style={dataFontStyle}
                       onClick={() => {
                         setShowModal(true);
                         setEditMode(true);
@@ -134,6 +145,7 @@ export default function Roles() {
                       size="sm"
                       variant="outline-danger"
                       className={styles.usuariosBtnDelete}
+                      style={dataFontStyle}
                       onClick={async () => {
                         const result = await Swal.fire({
                           title: '¿Estás seguro?',
@@ -163,9 +175,9 @@ export default function Roles() {
       {/* Modal de detalles */}
       <Modal show={!!detalleRol} onHide={() => setDetalleRol(null)}>
         <Modal.Header closeButton>
-          <Modal.Title>Detalles de Rol</Modal.Title>
+          <Modal.Title style={titleFontStyle}>Detalles de Rol</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={dataFontStyle}>
           {detalleRol && (
             <div>
               <p><strong>ID:</strong> {detalleRol.id}</p>
@@ -177,28 +189,28 @@ export default function Roles() {
       {/* Modal crear/editar */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton className={styles.usuariosModalHeader}>
-          <Modal.Title className={styles.usuariosModalTitle}>
+          <Modal.Title className={styles.usuariosModalTitle} style={titleFontStyle}>
             {editMode ? "Editar Rol" : "Nuevo Rol"}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className={styles.usuariosModalBody}>
+        <Modal.Body className={styles.usuariosModalBody} style={dataFontStyle}>
           <Form>
             <Form.Group className="mb-2">
-              <Form.Label>Nombre</Form.Label>
+              <Form.Label style={titleFontStyle}>Nombre</Form.Label>
               <Form.Control
                 type="text"
                 value={form.nombre}
                 onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                style={{ borderRadius: 6 }}
+                style={{ borderRadius: 6, ...dataFontStyle }}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer className={styles.usuariosModalFooter}>
-          <Button variant="secondary" onClick={() => setShowModal(false)} className={styles.usuariosBtn}>
+          <Button variant="secondary" onClick={() => setShowModal(false)} className={styles.usuariosBtn} style={dataFontStyle}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={handleSave} className={styles.usuariosBtn}>
+          <Button variant="primary" onClick={handleSave} className={styles.usuariosBtn} style={dataFontStyle}>
             {editMode ? "Guardar" : "Crear"}
           </Button>
         </Modal.Footer>

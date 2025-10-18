@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
+import DataTable from 'react-data-table-component'; // Importar la librería
+
+const globalFontStyle = {
+  fontSize: "10px",
+  fontFamily: "Arial, sans-serif",
+};
 
 export default function CalendarioForm({ show, onHide, calendarioHook, editingHorario = null }) {
   const [formData, setFormData] = useState({
@@ -20,7 +26,6 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
     { value: 1, label: 'Lunes' },
     { value: 2, label: 'Martes' },
     { value: 3, label: 'Miércoles' },
-    { value: 4, label: 'Jueves' },
     { value: 5, label: 'Viernes' },
     { value: 6, label: 'Sábado' }
   ];
@@ -149,12 +154,12 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
   return (
     <Modal show={show} onHide={onHide} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>
+        <Modal.Title style={globalFontStyle}>
           {editingHorario ? 'Editar Horario' : 'Agregar Nuevo Horario'}
         </Modal.Title>
       </Modal.Header>
       
-      <Modal.Body>
+      <Modal.Body style={globalFontStyle}>
         {calendarioHook.error && (
           <Alert variant="danger" className="mb-3">
             {calendarioHook.error}
@@ -165,12 +170,13 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
           <div className="row">
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Ruta *</Form.Label>
+                <Form.Label style={globalFontStyle}>Ruta *</Form.Label>
                 <Form.Select
                   name="ruta_id"
                   value={formData.ruta_id}
                   onChange={handleChange}
                   isInvalid={!!errors.ruta_id}
+                  style={globalFontStyle}
                 >
                   <option value="">Seleccione una ruta</option>
                   {calendarioHook.rutas.map(ruta => (
@@ -193,12 +199,13 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
             
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Día de la Semana *</Form.Label>
+                <Form.Label style={globalFontStyle}>Día de la Semana *</Form.Label>
                 <Form.Select
                   name="dia_semana"
                   value={formData.dia_semana}
                   onChange={handleChange}
                   isInvalid={!!errors.dia_semana}
+                  style={globalFontStyle}
                 >
                   <option value="">Seleccione un día</option>
                   {diasSemana.map(dia => (
@@ -221,7 +228,7 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
                 {(() => {
                   const rutaSeleccionada = calendarioHook.rutas.find(r => r.id == formData.ruta_id);
                   return rutaSeleccionada && (
-                    <Alert variant="info" className="py-2">
+                    <Alert variant="info" className="py-2" style={globalFontStyle}>
                       <small>
                         <strong>Ruta seleccionada:</strong> {rutaSeleccionada.nombre}
                         {rutaSeleccionada.zona && <span> - Zona: {rutaSeleccionada.zona}</span>}
@@ -239,13 +246,14 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
           <div className="row">
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Hora de Inicio *</Form.Label>
+                <Form.Label style={globalFontStyle}>Hora de Inicio *</Form.Label>
                 <Form.Control
                   type="time"
                   name="hora_inicio"
                   value={formData.hora_inicio}
                   onChange={handleChange}
                   isInvalid={!!errors.hora_inicio}
+                  style={globalFontStyle}
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.hora_inicio}
@@ -255,13 +263,14 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
             
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Hora de Fin *</Form.Label>
+                <Form.Label style={globalFontStyle}>Hora de Fin *</Form.Label>
                 <Form.Control
                   type="time"
                   name="hora_fin"
                   value={formData.hora_fin}
                   onChange={handleChange}
                   isInvalid={!!errors.hora_fin}
+                  style={globalFontStyle}
                 />
                 <Form.Control.Feedback type="invalid">
                   {errors.hora_fin}
@@ -273,11 +282,12 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
           <div className="row">
             <div className="col-md-6">
               <Form.Group className="mb-3">
-                <Form.Label>Frecuencia</Form.Label>
+                <Form.Label style={globalFontStyle}>Frecuencia</Form.Label>
                 <Form.Select
                   name="frecuencia"
                   value={formData.frecuencia}
                   onChange={handleChange}
+                  style={globalFontStyle}
                 >
                   {frecuencias.map(freq => (
                     <option key={freq} value={freq}>
@@ -290,7 +300,7 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
           </div>
 
           <Form.Group className="mb-3">
-            <Form.Label>Notas</Form.Label>
+            <Form.Label style={globalFontStyle}>Notas</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -298,19 +308,21 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
               value={formData.notas}
               onChange={handleChange}
               placeholder="Notas adicionales sobre este horario..."
+              style={globalFontStyle}
             />
           </Form.Group>
         </Form>
       </Modal.Body>
       
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide} disabled={submitting}>
+        <Button variant="secondary" onClick={onHide} disabled={submitting} style={globalFontStyle}>
           Cancelar
         </Button>
         <Button 
           variant="success" 
           onClick={handleSubmit}
           disabled={submitting || calendarioHook.loading || calendarioHook.rutas.length === 0}
+          style={globalFontStyle}
         >
           {submitting ? 'Guardando...' : editingHorario ? 'Actualizar' : 'Crear Horario'}
         </Button>

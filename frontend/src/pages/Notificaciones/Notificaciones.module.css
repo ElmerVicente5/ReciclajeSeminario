@@ -20,7 +20,7 @@
   font-weight: bold;
   text-align: center;
   border-radius: 12px 12px 0 0;
-  font-size: 1.25rem;
+  font-size: 12px; /* Ajustar el tamaño de fuente a 12px */
   letter-spacing: 0.5px;
   margin-bottom: 0;
 }
@@ -43,12 +43,12 @@
 
 .notificacionFecha {
   color: #2563eb;
-  font-size: 0.95rem;
+  font-size: 12px; /* Ajustar el tamaño de fuente a 12px */
   font-weight: 500;
 }
 
 .listadoTitulo {
-  font-size: 1.1rem;
+  font-size: 12px; /* Ajustar el tamaño de fuente a 12px */
   color: #2563eb;
   font-weight: 600;
   margin-bottom: 12px;
@@ -56,7 +56,7 @@
 }
 
 .notificacionAutor {
-  font-size: 0.98rem;
+  font-size: 12px; /* Ajustar el tamaño de fuente a 12px */
   font-weight: 500;
   color: #2563eb;
   margin-right: 8px;

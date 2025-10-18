@@ -242,16 +242,17 @@ export default function Notificaciones() {
 
     // Burbuja tipo Facebook para nueva notificación
     const popover = (
-        <Popover id="popover-notificacion" style={{ minWidth: 260 }}>
-            <Popover.Header as="h3">Nueva Notificación</Popover.Header>
+        <Popover id="popover-notificacion" style={{ minWidth: 260, fontSize: "12px" }}>
+            <Popover.Header as="h3" style={{ fontSize: "12px" }}>Nueva Notificación</Popover.Header>
             <Popover.Body>
-                <Badge bg="secondary" className="me-2">{toastBubble.autor}</Badge>
-                <div className="mb-2">{toastBubble.mensaje}</div>
-                <div className="text-end text-muted" style={{ fontSize: "0.9rem" }}>{toastBubble.fecha}</div>
+                <Badge bg="secondary" className="me-2" style={{ fontSize: "12px" }}>{toastBubble.autor}</Badge>
+                <div className="mb-2" style={{ fontSize: "12px" }}>{toastBubble.mensaje}</div>
+                <div className="text-end text-muted" style={{ fontSize: "12px" }}>{toastBubble.fecha}</div>
                 <Button
                     size="sm"
                     variant="primary"
                     className="mt-2 w-100"
+                    style={{ fontSize: "12px" }}
                     onClick={() => setToastBubble({ ...toastBubble, show: false })}
                 >
                     Ver mensaje
@@ -447,6 +448,7 @@ export default function Notificaciones() {
                         onChange={e => setTitulo(e.target.value)}
                         maxLength={120}
                         className="mb-2"
+                        style={{ fontSize: "12px" }}
                         disabled={loading}
                       />
                       <Form.Control
@@ -457,17 +459,19 @@ export default function Notificaciones() {
                         onChange={e => setCuerpo(e.target.value)}
                         maxLength={240}
                         className="mb-2"
+                        style={{ fontSize: "12px" }}
                         disabled={loading}
                       />
                       
                       <div className="row">
                         <div className="col-md-6">
                           <Form.Group className="mb-2">
-                            <Form.Label>Tipo de Notificación</Form.Label>
+                            <Form.Label style={{ fontSize: "12px" }}>Tipo de Notificación</Form.Label>
                             <Form.Select
                               value={tipo}
                               onChange={e => setTipo(e.target.value)}
                               disabled={loading}
+                              style={{ fontSize: "12px" }}
                             >
                               <option value="ALERTA">🚨 Alerta</option>
                               <option value="NOTIFICACION">📢 Notificación</option>
@@ -492,7 +496,7 @@ export default function Notificaciones() {
                       <div className="row">
                         <div className="col-md-6">
                           <Form.Group className="mb-2">
-                            <Form.Label>Audiencia</Form.Label>
+                            <Form.Label style={{ fontSize: "12px" }}>Audiencia</Form.Label>
                             <Form.Select
                               value={tipoAudiencia}
                               onChange={e => {
