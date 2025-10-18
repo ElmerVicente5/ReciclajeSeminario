@@ -98,7 +98,11 @@ class ClasificacionService {
         }
       }
 
-      const result = await asignarPuntosUsuario(idUsuario, parsed);
+      if (!idUsuario) {
+ await asignarPuntosUsuario(idUsuario, parsed);
+      }
+        
+      
 
       return {
         success: true,
