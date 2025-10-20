@@ -1,41 +1,87 @@
 import { PrismaClient } from '../generated/prisma/client.js';
 const prisma = new PrismaClient();
-export async function rankingZonas(userId= null) {
-    // Agrupamos por zona y sumamos puntos
+
+export async function rankingZonas(userId = null) {
     try {
-        const rows = await prisma.eventospuntosporzona.groupBy({
-            by: ['zona_id'],
-            _sum: { puntos: true },
-            orderBy: { _sum: { puntos: 'desc' } },
-          })
-        if(rows.length === 0){
-            return [];
-        }
-          // Traemos los nombres de las zonas
-          const zonas = await prisma.zonas.findMany({
-            where: { id: { in: rows.map(r => r.zona_id) } },
-            select: { id: true, nombre: true },
-          })
-          const nameById = Object.fromEntries(zonas.map(z => [z.id, z.nombre]))
-          
-          // obtener la zona del usuario si el usaerId es proporcionado
-          let userZonaId = null;
-          if(userId){
+        // Agrupar puntosusuario por usuario y sumar sus puntos
+        const puntosPorUsuario = await prisma.puntosusuario.groupBy({
+            by: ['id_usuario'],
+            _sum: {
+                total_puntos: true
+            }
+        });
+
+        //Obtener los usuarios con sus zonas
+        const usuariosConZona = await prisma.usuarios.findMany({
+            where: {
+                id: {
+                    in: puntosPorUsuario.map(p => p.id_usuario)
+                }
+            },
+            select: {
+                id: true,
+                zona_id: true
+            }
+        });
+
+        // mapa usuario->zona
+        const zonaByUsuario = Object.fromEntries(
+            usuariosConZona.map(u => [u.id, u.zona_id])
+        );
+
+        //Agrupar puntos por zona
+        const puntosPorZona = {};
+        puntosPorUsuario.forEach(p => {
+            const zonaId = zonaByUsuario[p.id_usuario];
+            if (zonaId) {
+                puntosPorZona[zonaId] = (puntosPorZona[zonaId] || 0) + (p._sum.total_puntos || 0);
+            }
+        });
+
+        //Obtener nombres de las zonas
+        const zonasIds = Object.keys(puntosPorZona).map(id => parseInt(id));
+        const zonas = await prisma.zonas.findMany({
+            where: {
+                id: {
+                    in: zonasIds
+                }
+            },
+            select: {
+                id: true,
+                nombre: true
+            }
+        });
+
+        //Incluir zonas sin puntos
+        const todasLasZonas = await prisma.zonas.findMany({
+            select: {
+                id: true,
+                nombre: true
+            }
+        });
+
+        let userZonaId = null;
+        if (userId) {
             const user = await prisma.usuarios.findUnique({
                 where: { id: userId },
-                select: { zona_id: true },
+                select: { zona_id: true }
             });
             userZonaId = user?.zona_id || null;
-          }
-          
-          // Unimos resultados
-          return rows.map(r => ({
-            zona_id: r.zona_id,
-            zona: nameById[r.zona_id] ?? '(sin nombre)',
-            total_puntos: Number(r._sum.puntos ?? 0),
-            is_user_zona: userId ? r.zona_id === userZonaId : false
-          }))
+        }
+
+        //Construir el ranking final
+        const ranking = todasLasZonas.map(zona => ({
+            zona_id: zona.id,
+            zona: zona.nombre,
+            total_puntos: puntosPorZona[zona.id] || 0,
+            is_user_zona: userId ? zona.id === userZonaId : false
+        }));
+
+        //Ordenar por puntos
+        return ranking.sort((a, b) => b.total_puntos - a.total_puntos);
+
     } catch (error) {
+        console.error('Error en rankingZonas:', error);
         throw error;
     }
-  }
+}
