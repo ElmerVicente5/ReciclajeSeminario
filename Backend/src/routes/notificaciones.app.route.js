@@ -18,6 +18,8 @@ const routerNotificacionesApp = Router();
  *     summary: Crear notificacion
  *     tags:
  *       - App
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -78,6 +80,8 @@ routerNotificacionesApp.post('/crear', verifyTokenApp, crearNotificacionValidati
  *     summary: Obtener todas las notificaciones
  *     tags:
  *       - App
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *      200:
  *       description: Notificaciones obtenidas exitosamente
