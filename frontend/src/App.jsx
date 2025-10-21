@@ -11,7 +11,7 @@ import Usuarios from "./pages/Usuarios/Usuarios";
 import Configuracion from "./pages/Configuracion/Configuracion";
 import Notificaciones from "./pages/Notificaciones/Notificaciones";
 import Roles from "./pages/Roles/Roles";
-
+import ZonaPanel from "./pages/Zonas/ZonaPanel";
 function App() {
   // Layout que incluye el sidebar/navbar
   const Layout = ({ children }) => (
@@ -93,6 +93,15 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/zonas" element={
+          <PrivateRoute>
+            <Layout>
+              <ZonaPanel />
+            </Layout>
+          </PrivateRoute>
+      } />
+         
+      
         <Route
           path="/configuracion"
           element={

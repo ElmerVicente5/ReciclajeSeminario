@@ -34,7 +34,8 @@ export default function Roles() {
   const [editMode, setEditMode] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
-
+  const [onDelete, setOnDelete] = useState(false);
+  const [onEdit, setOnEdit] = useState(false);
   const [filtroNombre, setFiltroNombre] = useState("");
   const [detalleRol, setDetalleRol] = useState(null);
 
