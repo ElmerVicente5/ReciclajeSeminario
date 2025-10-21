@@ -5,12 +5,12 @@ import {
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaChartBar,
-  FaFileAlt,
   FaCog,
   FaBars,
   FaTimes,
   FaUser,
   FaBell,
+  FaUserCog,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
@@ -55,7 +55,8 @@ export default function DashboardSidebar() {
     { path: "/notificaciones", icon: <FaBell />, label: "Notificaciones" },
     ...(isAdmin
       ? [
-          { path: "/usuarios", icon: <FaUser />, label: "Usuarios y Roles" },
+          { path: "/usuarios", icon: <FaUser />, label: "Usuario" },
+          { path: "/roles", icon: <FaUserCog />, label: "Roles" },
           { path: "/configuracion", icon: <FaCog />, label: "Configuración" },
         ]
       : []),

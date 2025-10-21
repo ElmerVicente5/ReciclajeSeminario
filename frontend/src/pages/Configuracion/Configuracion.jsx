@@ -1,6 +1,6 @@
 import { Tabs, Tab } from "react-bootstrap";
 import Usuarios from "../Usuarios/Usuarios";
-import Roles from "../Usuarios/Roles";
+import Roles from "../Roles/Roles";
 import ZonaPanel from "../Zonas/ZonaPanel";
 import RutaPanel from "../Rutas/RutaPanel";
 import styles from "./Configuracion.module.css";

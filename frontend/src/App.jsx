@@ -10,6 +10,7 @@ import Ranking from "./pages/Ranking/Ranking";
 import Usuarios from "./pages/Usuarios/Usuarios";
 import Configuracion from "./pages/Configuracion/Configuracion";
 import Notificaciones from "./pages/Notificaciones/Notificaciones";
+import Roles from "./pages/Roles/Roles";
 
 function App() {
   // Layout que incluye el sidebar/navbar
@@ -78,6 +79,16 @@ function App() {
             <PrivateRoute>
               <Layout>
                 <Usuarios />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/roles"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Roles />
               </Layout>
             </PrivateRoute>
           }
