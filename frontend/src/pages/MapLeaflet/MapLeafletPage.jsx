@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import MapLeaflet from "../../components/MapLeaflet/MapLeaflet";
 import styles from "./MapLeafletPage.module.css";
 import { isAuthenticated } from "../../services/api";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Pagination } from "react-bootstrap";
 import { FaPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
 import LoadingOverlay from "../../components/Common/LoadingOverlay";
 import AcopioForm from "./AcopioForm";
@@ -22,6 +22,19 @@ export default function MapLeafletPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [acopioToDelete, setAcopioToDelete] = useState(null);
   const [zonaFiltro, setZonaFiltro] = useState(0);
+  // Paginación para la tabla de puntos (debe estar dentro del componente)
+  const rowsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
+  // Filtrar puntos por zona (declaración única)
+  const puntosFiltrados =
+    zonaFiltro === 0
+      ? puntos
+      : puntos.filter((p) =>
+          p.zonas?.id ? p.zonas.id === zonaFiltro : p.zona_id === zonaFiltro
+        );
+  const totalPages = Math.ceil(puntosFiltrados.length / rowsPerPage);
+  const paginatedData = puntosFiltrados.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const handlePageChange = (page) => setCurrentPage(page);
 
   // Cargar puntos al montar
   useEffect(() => {
@@ -36,13 +49,7 @@ export default function MapLeafletPage() {
     fetchPuntos();
   }, [getAcopio]);
 
-  // Filtrar puntos por zona
-  const puntosFiltrados =
-    zonaFiltro === 0
-      ? puntos
-      : puntos.filter((p) =>
-          p.zonas?.id ? p.zonas.id === zonaFiltro : p.zona_id === zonaFiltro
-        );
+  // ...existing code...
 
   // Opciones de zonas para el filtro
   const zonasUnicas = [
@@ -125,9 +132,46 @@ export default function MapLeafletPage() {
     boxShadow: "0 0 24px 2px #43ea7c44, 0 0 32px 4px #16812622",
   };
 
+
+  // Estilos empresariales tipo Ranking
   const tableStyles = {
-    fontSize: "12px", // Ajustar el tamaño de fuente a 12px
+    fontSize: "15px",
+    color: "#263238",
+    fontFamily: "Segoe UI, Arial, sans-serif",
+    background: "#fff",
+    borderRadius: 14,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+    border: "1px solid #e0e0e0",
     textAlign: "left",
+  };
+  const thStyle = {
+    background: '#f0fdf4',
+    color: '#16a34a',
+    fontWeight: 700,
+    fontSize: '15px',
+    borderBottom: '2px solid #16a34a',
+    textAlign: 'center',
+    borderRight: '1px solid #e5e7eb',
+    letterSpacing: 0.2,
+    verticalAlign: 'middle',
+  };
+  const tdStyle = {
+    borderRight: '1px solid #e5e7eb',
+    background: '#fff',
+    color: '#263238',
+    fontSize: '15px',
+    verticalAlign: 'middle',
+    textAlign: 'center',
+    padding: '8px 6px',
+  };
+  const actionBtnStyle = {
+    borderRadius: 6,
+    fontWeight: 600,
+    fontSize: '14px',
+    padding: '4px 10px',
+    boxShadow: '0 1px 4px rgba(56,142,60,0.08)',
+    border: 'none',
+    transition: 'background 0.2s',
   };
 
   const columnWidths = {
@@ -154,153 +198,138 @@ export default function MapLeafletPage() {
   };
 
   return (
-    <div className={`${styles.pageBg} container-fluid`} style={{ position: "relative" }}>
+    <div className="container py-4 relative" style={{ background: '#f4f6f8', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
       <LoadingOverlay loading={loading} error={error} />
-      <div className={`${styles.usuariosContainer} row mx-auto`}>
-        <div className="col-12">
-          <div className={`d-flex align-items-center ${styles.usuariosHeader}`}>
-            <h1 className={styles.panelTitle}>Puntos de Acopio</h1>
-          </div>
-          {/* Filtros y botón agregar */}
-          <div className="row mb-3">
-            <div className="col-12 col-md-4 mb-2 mb-md-0 d-flex align-items-center">
-              <select
-                className={`form-select ${styles.filtroSelect}`}
-                value={zonaFiltro}
-                onChange={(e) => setZonaFiltro(Number(e.target.value))}
-                style={tableStyles}
-              >
-                <option value={0}>Todas las zonas</option>
-                {zonasUnicas.map((z) => (
-                  <option key={z.id} value={z.id}>
-                    {z.nombre}
-                  </option>
-                ))}
-              </select>
-              <Button
-                variant="success"
-                className="ms-2"
-                style={{
-                  borderRadius: 8,
-                  fontWeight: 500,
-                  padding: "8px 18px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  ...tableStyles,
-                }}
-                onClick={handleAgregar}
-              >
-                <FaPlus />
-                Agregar
-              </Button>
-            </div>
-          </div>
-          <div className="row">
-            {/* Tabla arriba */}
-            <div className="col-12">
-              <div className={styles.cardScrollContainer}>
-                <table className={`table table-striped table-bordered ${styles.acopioTable}`} style={tableStyles}>
-                  <thead className={styles.acopioTableHeader}>
-                    <tr>
-                      <th style={{ width: columnWidths.id }}>ID</th>
-                      <th style={{ width: columnWidths.nombre }}>Nombre</th>
-                      <th style={{ width: columnWidths.tipo }}>Tipo</th>
-                      <th style={{ width: columnWidths.horario }}>Horario</th>
-                      <th style={{ width: columnWidths.direccion }}>Dirección</th>
-                      <th style={{ width: columnWidths.zona }}>Zona</th>
-                      <th style={{ width: columnWidths.estado }}>Estado</th>
-                      <th style={{ width: columnWidths.acciones }}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {!loading && !error && puntosFiltrados.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="text-center">
-                          No hay puntos disponibles.
-                        </td>
-                      </tr>
-                    ) : (
-                      puntosFiltrados.map((p) => (
-                        <tr key={p.id} className={styles.acopioTableRow} style={tableStyles}>
-                          <td style={numberStyles}>{p.id}</td>
-                          <td style={nameStyles}>
-                            <div className={styles.puntoNombre}>{p.nombre || "N/A"}</div>
-                          </td>
-                          <td>{p.tipo || "N/A"}</td>
-                          <td>{p.horario || "N/A"}</td>
-                          <td>{p.direccion || "N/A"}</td>
-                          <td>{p.zonas?.nombre || `Zona ${p.zona_id || "N/A"}`}</td>
-                          <td>
-                            <span className={p.estadoClass}>{p.estado || "N/A"}</span>
-                          </td>
-                          <td>
-                            <div className="btn-group btn-group-sm" role="group">
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                onClick={() => handleEdit(p)}
-                                title="Editar centro"
-                                className="d-flex align-items-center"
-                                style={tableStyles}
-                              >
-                                <FaEdit size={16} />
-                              </Button>
-                              <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={() => handleDelete(p)}
-                                title="Eliminar centro"
-                                className="d-flex align-items-center"
-                                style={tableStyles}
-                              >
-                                <FaTrashAlt size={16} />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {/* Mapa abajo */}
-            <div className="col-12">
-              <div className={styles.mapaContainer}>
-                <MapLeaflet puntos={puntosFiltrados} />
-              </div>
-            </div>
-          </div>
-          {/* Modal para el mapa interactivo */}
-          <Modal
-            show={showMap}
-            onHide={() => setShowMap(false)}
-            size="xl"
-            centered
-            dialogClassName={styles.mapaModal}
+      <div className="mb-4 d-flex gap-3 flex-wrap align-items-center justify-content-between" style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', padding: '24px 20px', border: '1px solid #e0e0e0' }}>
+        <h2 className="mb-0" style={{ fontWeight: 700, color: '#263238', fontSize: '1.5rem', letterSpacing: 0.5 }}>Puntos de Acopio</h2>
+        <div className="d-flex align-items-center gap-2">
+          <select
+            className="form-select"
+            value={zonaFiltro}
+            onChange={(e) => setZonaFiltro(Number(e.target.value))}
+            style={{ fontSize: '15px', borderRadius: 8, minWidth: 180 }}
           >
-            <Modal.Header closeButton>
-              <Modal.Title style={tableStyles}>
-                Mapa Interactivo de Puntos de Acopio
-              </Modal.Title>
-            </Modal.Header>
-            <Modal.Body style={{ padding: 0, fontSize: "12px" }}>
-              <div className={styles.mapaContainer}>
-                <MapLeaflet puntos={puntosFiltrados} />
-              </div>
-              <div className="text-center py-3">
-                <Button variant="secondary" onClick={() => setShowMap(false)} style={{ fontSize: "12px" }}>
-                  Cerrar mapa
-                </Button>
-                <span className="ms-3 text-muted" style={{ fontSize: "12px" }}>
-                  Puedes cerrar el mapa con el botón o la X arriba.
-                </span>
-              </div>
-            </Modal.Body>
-          </Modal>
+            <option value={0}>Todas las zonas</option>
+            {zonasUnicas.map((z) => (
+              <option key={z.id} value={z.id}>{z.nombre}</option>
+            ))}
+          </select>
+          <Button
+            style={{ background: '#388e3c', color: '#fff', fontWeight: 600, fontSize: '1.08rem', borderRadius: 8, padding: '10px 28px', boxShadow: '0 1px 4px rgba(56,142,60,0.08)', border: 'none', transition: 'background 0.2s' }}
+            onClick={handleAgregar}
+          >
+            <FaPlus className="me-2" />Agregar
+          </Button>
         </div>
       </div>
+      <div className="mb-4" style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', border: '1px solid #e0e0e0', padding: '18px 16px' }}>
+        {/* Aquí podrías agregar más filtros si lo deseas */}
+      </div>
+      <div className="row g-4">
+        <div className="col-12">
+          <div style={{ ...tableStyles, padding: 0 }}>
+            <table className="table table-bordered mb-0" style={{ background: '#fff', borderRadius: 14, fontSize: '15px' }}>
+              <thead>
+                <tr>
+                  <th style={{ ...thStyle, width: columnWidths.id }}>ID</th>
+                  <th style={{ ...thStyle, width: columnWidths.nombre }}>Nombre</th>
+                  <th style={{ ...thStyle, width: columnWidths.tipo }}>Tipo</th>
+                  <th style={{ ...thStyle, width: columnWidths.horario }}>Horario</th>
+                  <th style={{ ...thStyle, width: columnWidths.direccion }}>Dirección</th>
+                  <th style={{ ...thStyle, width: columnWidths.zona }}>Zona</th>
+                  <th style={{ ...thStyle, width: columnWidths.estado }}>Estado</th>
+                  <th style={{ ...thStyle, width: columnWidths.acciones }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!loading && !error && paginatedData.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center" style={{ color: '#388e3c', background: '#f0fdf4', border: '1px solid #16a34a', borderRadius: 10 }}>No hay puntos disponibles.</td>
+                  </tr>
+                ) : (
+                  paginatedData.map((p) => (
+                    <tr key={p.id} style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', color: '#263238', transition: 'background 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                    >
+                      <td style={tdStyle}>{p.id}</td>
+                      <td style={tdStyle}><div>{p.nombre || "N/A"}</div></td>
+                      <td style={tdStyle}>{p.tipo || "N/A"}</td>
+                      <td style={tdStyle}>{p.horario || "N/A"}</td>
+                      <td style={tdStyle}>{p.direccion || "N/A"}</td>
+                      <td style={tdStyle}>{p.zonas?.nombre || `Zona ${p.zona_id || "N/A"}`}</td>
+                      <td style={tdStyle}><span className={p.estadoClass}>{p.estado || "N/A"}</span></td>
+                      <td style={tdStyle}>
+                        <div className="d-flex flex-row gap-2 justify-content-center">
+                          <Button size="sm" style={{ ...actionBtnStyle, background: '#f0fdf4', color: '#16a34a', border: '1px solid #16a34a' }} onClick={() => handleEdit(p)}>
+                            <FaEdit size={15} />
+                          </Button>
+                          <Button size="sm" style={{ ...actionBtnStyle, background: '#fff0f0', color: '#d42d2d', border: '1px solid #d42d2d' }} onClick={() => handleDelete(p)}>
+                            <FaTrashAlt size={15} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            {/* Paginación visual */}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center align-items-center mt-3">
+                <Pagination>
+                  <Pagination.First onClick={() => handlePageChange(1)} disabled={currentPage === 1} />
+                  <Pagination.Prev onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <Pagination.Item
+                      key={i + 1}
+                      active={currentPage === i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                  <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} />
+                </Pagination>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Mapa abajo */}
+        <div className="col-12">
+          <div className={styles.mapaContainer}>
+            <MapLeaflet puntos={paginatedData} />
+          </div>
+        </div>
+      </div>
+      {/* Modal para el mapa interactivo */}
+      <Modal
+        show={showMap}
+        onHide={() => setShowMap(false)}
+        size="xl"
+        centered
+        dialogClassName={styles.mapaModal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title style={tableStyles}>
+            Mapa Interactivo de Puntos de Acopio
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ padding: 0, fontSize: "12px" }}>
+          <div className={styles.mapaContainer}>
+            <MapLeaflet puntos={paginatedData} />
+          </div>
+          <div className="text-center py-3">
+            <Button variant="secondary" onClick={() => setShowMap(false)} style={{ fontSize: "12px" }}>
+              Cerrar mapa
+            </Button>
+            <span className="ms-3 text-muted" style={{ fontSize: "12px" }}>
+              Puedes cerrar el mapa con el botón o la X arriba.
+            </span>
+          </div>
+        </Modal.Body>
+      </Modal>
       <AcopioForm
         show={showForm}
         onHide={handleCloseForm}

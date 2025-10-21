@@ -87,27 +87,28 @@ export default function Calendar() {
   };
 
   return (
-    <div className="container-fluid px-2 px-md-4 py-3" style={{ position: "relative" }}>
+    <div className="container-fluid px-2 px-md-4 py-4" style={{ position: 'relative', background: '#f4f6f8', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
       <LoadingOverlay loading={isLoading} error={hasError} />
-      
-      <div className="mb-3 d-flex gap-2 flex-wrap align-items-center justify-content-between">
-        <h2 className="mb-0">Gestión de Horarios</h2>
-        <button className="btn btn-success" onClick={handleAdd}>
+      <div className="mb-4 d-flex gap-3 flex-wrap align-items-center justify-content-between" style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', padding: '24px 20px', border: '1px solid #e0e0e0' }}>
+        <h2 className="mb-0" style={{ fontWeight: 700, color: '#263238', fontSize: '1.5rem', letterSpacing: 0.5 }}>Gestión de Horarios</h2>
+        <button className="btn" style={{ background: '#388e3c', color: '#fff', fontWeight: 600, fontSize: '1.08rem', borderRadius: 8, padding: '10px 28px', boxShadow: '0 1px 4px rgba(56,142,60,0.08)', border: 'none', transition: 'background 0.2s' }} onClick={handleAdd}>
           <i className="fas fa-plus me-2"></i>
           Agregar horario
         </button>
       </div>
-      
-      <CalendarioFilters calendarioHook={calendarioHook} />
-      
+      <div className="mb-4" style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', border: '1px solid #e0e0e0', padding: '18px 16px' }}>
+        <CalendarioFilters calendarioHook={calendarioHook} />
+      </div>
       {/* Mapa arriba, tabla abajo, ambos col-12 */}
       <div className="row g-4">
         <div className="col-12">
-          <CalendarioMap calendarioHook={calendarioHook} />
+          <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', border: '1px solid #e0e0e0', padding: '18px 16px' }}>
+            <CalendarioMap calendarioHook={calendarioHook} />
+          </div>
         </div>
         <div className="col-12">
           {!isLoading && !hasError && calendario.length === 0 && (
-            <div className="alert alert-info">
+            <div className="alert alert-info" style={{ fontSize: '1.08rem', color: '#388e3c', background: '#f0fdf4', border: '1px solid #16a34a', borderRadius: 10 }}>
               <i className="fas fa-info-circle me-2"></i>
               No hay horarios registrados. Haga clic en "Agregar horario" para crear el primero.
             </div>
@@ -121,24 +122,22 @@ export default function Calendar() {
           />
         </div>
       </div>
-      
       <CalendarioForm
         show={showForm}
         onHide={handleCloseForm}
         calendarioHook={calendarioHook}
         editingHorario={editingHorario}
       />
-      
       {/* Modal de confirmación visual para eliminar */}
       <Modal show={showDeleteModal} onHide={cancelDelete} centered>
         <div style={holoModalStyle}>
-          <Modal.Header closeButton style={{ border: "none", background: "transparent" }}>
-            <Modal.Title style={{ color: "#168126", fontWeight: 700 }}>Confirmar eliminación</Modal.Title>
+          <Modal.Header closeButton style={{ border: 'none', background: 'transparent' }}>
+            <Modal.Title style={{ color: '#168126', fontWeight: 700 }}>Confirmar eliminación</Modal.Title>
           </Modal.Header>
-          <Modal.Body style={{ textAlign: "center", fontSize: "1.08rem", color: "#168126", background: "transparent" }}>
+          <Modal.Body style={{ textAlign: 'center', fontSize: '1.08rem', color: '#168126', background: 'transparent' }}>
             ¿Está seguro de eliminar este horario?
           </Modal.Body>
-          <Modal.Footer style={{ border: "none", background: "transparent", justifyContent: "center" }}>
+          <Modal.Footer style={{ border: 'none', background: 'transparent', justifyContent: 'center' }}>
             <Button style={holoBtnStyle} onClick={cancelDelete}>
               Cancelar
             </Button>

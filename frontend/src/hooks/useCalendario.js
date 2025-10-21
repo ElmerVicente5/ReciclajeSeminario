@@ -3,14 +3,27 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:8000';
 
-// Cliente para Admin (con token)
+// Cliente para Admin (con token dinámico)
 const apiAdmin = axios.create({
   baseURL: BASE_URL,
   headers: {
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
   }
 });
+
+// Interceptor para agregar el token dinámicamente en cada request
+apiAdmin.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete config.headers['Authorization'];
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Cliente público (sin token)
 const apiPublic = axios.create({
@@ -140,7 +153,7 @@ export function useCalendario() {
     setError(null);
     try {
       // Validar datos requeridos
-      if (!horarioData.ruta_id || !horarioData.dia_semana !== 0 && !horarioData.dia_semana || !horarioData.hora_inicio || !horarioData.hora_fin) {
+      if (!horarioData.ruta_id || (!horarioData.dia_semana && horarioData.dia_semana !== 0) || !horarioData.hora_inicio || !horarioData.hora_fin) {
         throw new Error('Todos los campos obligatorios deben ser completados');
       }
 
@@ -155,11 +168,25 @@ export function useCalendario() {
         throw new Error('El día de la semana debe estar entre 0 (Domingo) y 6 (Sábado)');
       }
 
+      // Validar que no exista cruce de horario en la misma ruta y día
+      const cruza = calendario.some(h =>
+        h.ruta_id === parseInt(horarioData.ruta_id) &&
+        h.dia_semana === parseInt(horarioData.dia_semana) &&
+        (
+          // Cruce de horas: inicio o fin dentro del rango existente
+          (horarioData.hora_inicio >= h.hora_inicio && horarioData.hora_inicio < h.hora_fin) ||
+          (horarioData.hora_fin > h.hora_inicio && horarioData.hora_fin <= h.hora_fin) ||
+          // O el horario existente está dentro del nuevo
+          (horarioData.hora_inicio <= h.hora_inicio && horarioData.hora_fin >= h.hora_fin)
+        )
+      );
+      if (cruza) {
+        throw new Error('Ya existe un horario para esa ruta y día que cruza con el rango ingresado.');
+      }
+
       const response = await apiAdmin.post('/api/calendario/insert', horarioData);
-      
       // Refrescar la lista después de crear
       await obtenerCalendarioCompleto();
-      
       return response.data;
     } catch (err) {
       const errorMessage = err.response?.data?.errors?.[0]?.msg || 
@@ -172,7 +199,7 @@ export function useCalendario() {
     } finally {
       setLoading(false);
     }
-  }, [obtenerCalendarioCompleto]);
+  }, [obtenerCalendarioCompleto, calendario]);
 
   const getCalendarioCompleto = async () => {
     setLoading(true);
