@@ -94,7 +94,7 @@ export async function rankingZonas(userId = null, fechaInicio = null, fechaFin =
         if (userId) {
             const user = await prisma.usuarios.findUnique({
                 where: { id: userId },
-                select: { zona_id: true },
+                select: { zona_id: true }
             });
             userZonaId = user?.zona_id || null;
         }
@@ -115,6 +115,7 @@ export async function rankingZonas(userId = null, fechaInicio = null, fechaFin =
         return ranking.sort((a, b) => b.total_puntos - a.total_puntos);
 
     } catch (error) {
+        console.error('Error en rankingZonas:', error);
         throw error;
     }
 }
