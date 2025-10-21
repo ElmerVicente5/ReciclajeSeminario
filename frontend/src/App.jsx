@@ -92,7 +92,16 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/notificaciones" element={<Notificaciones />} />
+        <Route
+          path="/notificaciones"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Notificaciones />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
