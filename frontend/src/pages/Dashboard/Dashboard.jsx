@@ -87,7 +87,7 @@ export default function Dashboard() {
       <DashboardSidebar onLogout={handleLogout} />
       <main className={styles.mainContent} style={{ position: 'relative', padding: '32px 24px', maxWidth: 1400, margin: '0 auto' }}>
         <LoadingOverlay loading={loading} error={error} />
-        <h1 className={styles.title} style={{ fontSize: '1.6rem', marginBottom: '24px', color: '#263238', fontWeight: 700, letterSpacing: 1 }}>Panel Prici</h1>
+        <h1 className={styles.title} style={{ fontSize: '1.6rem', marginBottom: '24px', color: '#263238', fontWeight: 700, letterSpacing: 1 }}>Panel Principal</h1>
         {/* Filtros de fecha */}
         <div className={styles.filterContainer} style={{ marginBottom: '24px', gap: '16px', padding: '12px 16px', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', border: '1px solid #e0e0e0' }}>
           <label className={styles.dateLabel} style={{ fontSize: '1rem', fontWeight: 500, color: '#388e3c' }}>

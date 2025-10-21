@@ -3,7 +3,7 @@ import styles from "./LoginForm.module.css";
 import { validateEmail, validateStrongPassword, validateRequired } from "../../utils/validation";
 import { useRegister } from "../../hooks/useRegister";
 
-export default function RegisterModal({ open, onClose }) {
+export default function RegisterModal({ show, onHide, onSuccess }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +16,7 @@ export default function RegisterModal({ open, onClose }) {
   const { register, loading, error: backendError } = useRegister();
 
   useEffect(() => {
-    if (!open) {
+    if (!show) {
       setName("");
       setEmail("");
       setPassword("");
@@ -26,9 +26,9 @@ export default function RegisterModal({ open, onClose }) {
       setShowPassword(false);
       setShowConfirm(false);
     }
-  }, [open]);
+  }, [show]);
 
-  if (!open) return null;
+  if (!show) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,18 +54,21 @@ export default function RegisterModal({ open, onClose }) {
       return;
     }
 
-    // Enviar al backend
+    // Enviar al backend - especificar que es registro administrativo
     const result = await register({
       nombreCompleto: name,
       nombreUsuario: email,
       contrasenia: password,
-    });
+    }, 'admin');
 
     if (result.success) {
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        onClose();
+        if (onSuccess) {
+          onSuccess();
+        }
+        onHide();
       }, 1500);
     } else {
       setError(backendError || "Error en el registro.");
@@ -144,7 +147,7 @@ export default function RegisterModal({ open, onClose }) {
             <div style={{ textAlign: 'center', width: '100%' }}>
               <a
                 href="#"
-                onClick={e => { e.preventDefault(); onClose(); }}
+                onClick={e => { e.preventDefault(); onHide(); }}
                 className={styles.registerLinkBtn}
                 style={{ marginTop: 18, display: 'inline-block' }}
               >

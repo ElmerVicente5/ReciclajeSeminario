@@ -11,10 +11,12 @@ import {
   FaTimes,
   FaUser,
   FaBell,
+  FaRoute,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useState } from "react";
+import { Dropdown } from "react-bootstrap";
 
 export default function DashboardSidebar() {
   const navigate = useNavigate();
@@ -53,13 +55,17 @@ export default function DashboardSidebar() {
     { path: "/mapa", icon: <FaMapMarkerAlt />, label: "Puntos de Acopio" },
     { path: "/ranking", icon: <FaChartBar />, label: "Ranking por Colonia" },
     { path: "/notificaciones", icon: <FaBell />, label: "Notificaciones" },
-    ...(isAdmin
-      ? [
-          { path: "/usuarios", icon: <FaUser />, label: "Usuarios y Roles" },
-          { path: "/configuracion", icon: <FaCog />, label: "Configuración" },
-        ]
-      : []),
+   
   ];
+
+  const adminOptions = [
+    { path: "/configuracion", icon: <FaCog />, label: "Configuración" },
+  ];
+  const adminOptionModule = [
+    { path: "/roles", icon: <FaUser />, label: "Roles" },
+    { path: "/zonas", icon: <FaMapMarkerAlt />, label: "Zonas" },
+    { path: "/rutas", icon: <FaRoute />, label: "Rutas" },
+  ]
 
   const logoutOption = {
     path: "/login",
@@ -70,6 +76,33 @@ export default function DashboardSidebar() {
       localStorage.removeItem("user");
       handleNavigation("/login");
     },
+  };
+
+  // Dropdown for admin configurations
+  const AdminDropdown = () => {
+    return (
+      <Dropdown >
+        <Dropdown.Toggle
+          id="admin-dropdown"
+          className={`${styles.menuItem} w-100 `}
+
+        >
+          <span > <FaCog /> Configuración</span>
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu style={{ width: "100%" }}>
+          {adminOptionModule.map((item, index) => (
+            <Dropdown.Item 
+              key={index} 
+              onClick={() => handleNavigation(item.path)}
+              style={{ textAlign: "left", padding: "10px 20px" }}
+            >
+              {item.icon} <span>{item.label}</span>
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown>
+    );
   };
 
   if (isMobile) {
@@ -170,6 +203,9 @@ export default function DashboardSidebar() {
             {item.icon} <span>{item.label}</span>
           </button>
         ))}
+         
+        {/* New dropdown for admin modules */}
+        {isAdmin && <AdminDropdown />}
         <button
           className={`${styles.menuItem} w-100 mb-2`}
           title={logoutOption.label}
@@ -177,6 +213,7 @@ export default function DashboardSidebar() {
         >
           {logoutOption.icon} <span>{logoutOption.label}</span>
         </button>
+     
       </nav>
     </aside>
   );

@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { obtenerZonas, crearZona, actualizarZona, eliminarZona } from "../../services/api";
 import { Button, Table, Modal, Form, Spinner } from "react-bootstrap";
-
+import styles from "./Zonas.module.css";
+import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
+import ZonasFilter from "./ZonasFilter";
+import ZonasTable from "./ZonasTable";
+import Swal from "sweetalert2";
 export default function ZonaPanel() {
   const [zonas, setZonas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -9,7 +14,16 @@ export default function ZonaPanel() {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState({ nombre: "", codigo: "", id: null });
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroCodigo, setFiltroCodigo] = useState("");
+  const [onDelete, setOnDelete] = useState(false);
 
+  const zonasFiltradasCodigo = useMemo(() => {
+    return zonas.filter(z =>
+      filtroCodigo === "" || z.codigo.toLowerCase().includes(filtroCodigo.toLowerCase())
+    );
+  }, [zonas, filtroCodigo]);
+  
   const refreshZonas = async () => {
     setLoading(true);
     setError("");
@@ -47,12 +61,23 @@ export default function ZonaPanel() {
     setEditMode(true);
     setShowModal(true);
   };
+  const handleDelete = async (zona) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminará la zona "${zona.nombre}" permanentemente`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
 
-  const handleDelete = async (id) => {
-    await eliminarZona(id);
-    refreshZonas();
+    if (result.isConfirmed) {
+      await eliminarZona(zona.id);
+      refreshZonas();
+    }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Para actualizar, enviar id, nombre y codigo (PUT)
@@ -68,91 +93,83 @@ export default function ZonaPanel() {
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className={`${styles.pageBg} container-fluid`}>
       {/* Loading/Error overlay */}
-      {(loading || error) && (
-        <div style={{
-          position: "absolute",
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(255,255,255,0.6)",
-          zIndex: 100,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-          <Spinner animation="border" variant={error ? "danger" : "primary"} />
+      <div className={`${styles.usuariosContainer} mx-auto`}>
+        {(loading || error) && (
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(255,255,255,0.6)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            loading
+          </div>
+        )}
+
+        {/* Header */}
+        
+        <div className={styles.usuariosHeader}>
+          <div className="d-flex align-items-center flex-wrap gap-3">
+            <FaUser className={styles.usuariosHeaderIcon} />
+            <div className="flex-grow-1">
+              <h1 className={styles.panelTitle}>Panel de Administración</h1>
+              <p className="mb-0 text-muted" style={{ fontSize: "var(--font-size-small)", opacity: 0.8 }}>
+                Gestión de zonas
+              </p>
+            </div>
+          </div>
         </div>
-      )}
-      <div className="mb-2 d-flex gap-2">
-        <Button variant="success" size="sm" onClick={handleAdd}>
-          Agregar zona
-        </Button>
+
+        <ZonasFilter
+          filtroCodigo={filtroCodigo}
+          setFiltroCodigo={setFiltroCodigo}
+          onAddZona={() => {
+            setShowModal(true);
+            setEditMode(false);
+            setForm({ nombre: "", codigo: "", id: null });
+          }}
+        />
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <ZonasTable
+          zonas={zonasFiltradasCodigo}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        /> 
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>{editMode ? "Editar zona" : "Agregar zona"}</Modal.Title>
+          </Modal.Header>
+          <Form onSubmit={handleSubmit}>
+            <Modal.Body>
+              <Form.Group className="mb-2">
+                <Form.Label>Nombre</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-2">
+                <Form.Label>Código</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="codigo"
+                  value={form.codigo}
+                  onChange={e => setForm(f => ({ ...f, codigo: e.target.value }))}
+                  required
+                />
+              </Form.Group>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant={editMode ? "warning" : "success"} type="submit">
+                {editMode ? "Actualizar" : "Agregar"}
+              </Button>
+              <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
+                Cancelar
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal>
       </div>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <Table striped bordered hover size="sm" className="mb-0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Código</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {zonas.map((z) => (
-            <tr key={z.id}>
-              <td>{z.id}</td>
-              <td>{z.nombre}</td>
-              <td>{z.codigo}</td>
-              <td>
-                <Button size="sm" variant="outline-warning" className="me-1" onClick={() => handleEdit(z)}>
-                  Editar
-                </Button>
-                <Button size="sm" variant="outline-danger" onClick={() => handleDelete(z.id)}>
-                  Eliminar
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{editMode ? "Editar zona" : "Agregar zona"}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-2">
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control
-                type="text"
-                name="nombre"
-                value={form.nombre}
-                onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label>Código</Form.Label>
-              <Form.Control
-                type="text"
-                name="codigo"
-                value={form.codigo}
-                onChange={e => setForm(f => ({ ...f, codigo: e.target.value }))}
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant={editMode ? "warning" : "success"} type="submit">
-              {editMode ? "Actualizar" : "Agregar"}
-            </Button>
-            <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
-              Cancelar
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
     </div>
   );
 }
