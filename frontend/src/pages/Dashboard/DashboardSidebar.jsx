@@ -12,6 +12,7 @@ import {
   FaUser,
   FaBell,
   FaRoute,
+  FaUserCog
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
@@ -55,7 +56,8 @@ export default function DashboardSidebar() {
     { path: "/mapa", icon: <FaMapMarkerAlt />, label: "Puntos de Acopio" },
     { path: "/ranking", icon: <FaChartBar />, label: "Ranking por Colonia" },
     { path: "/notificaciones", icon: <FaBell />, label: "Notificaciones" },
-   
+    { path: "/usuarios", icon: <FaUser />, label: "Usuarios" },
+    { path: "/roles", icon: <FaUserCog />, label: "Roles" },
   ];
 
   const adminOptions = [

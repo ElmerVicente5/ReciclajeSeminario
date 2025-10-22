@@ -75,6 +75,7 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
     { value: 1, label: 'Lunes' },
     { value: 2, label: 'Martes' },
     { value: 3, label: 'Miércoles' },
+    { value: 4, label: 'Jueves' },
     { value: 5, label: 'Viernes' },
     { value: 6, label: 'Sábado' }
   ];
@@ -91,9 +92,10 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
   // Cargar datos si está editando
   useEffect(() => {
     if (editingHorario) {
+      console.log('Cargando datos para editar:', editingHorario);
       setFormData({
         ruta_id: editingHorario.ruta_id || '',
-        dia_semana: editingHorario.dia_semana || '',
+        dia_semana: editingHorario.dia_semana?.toString() || '',
         hora_inicio: editingHorario.hora_inicio?.substring(0, 5) || '',
         hora_fin: editingHorario.hora_fin?.substring(0, 5) || '',
         frecuencia: editingHorario.frecuencia || 'Semanal',
@@ -186,15 +188,22 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
         dia_semana: parseInt(formData.dia_semana)
       };
 
-      if (editingHorario) {
+      console.log('FormData antes de convertir:', formData);
+      console.log('SubmitData después de convertir:', submitData);
+
+      if (editingHorario && editingHorario.id) {
+        console.log('Actualizando horario con ID:', editingHorario.id, submitData);
         await calendarioHook.actualizarHorario(editingHorario.id, submitData);
       } else {
+        console.log('Creando nuevo horario:', submitData);
         await calendarioHook.crearHorario(submitData);
       }
       
       onHide();
     } catch (error) {
       console.error('Error al guardar horario:', error);
+      // Asegurar que el error se muestre al usuario
+      setErrors({ submit: error.message || 'Error al guardar el horario' });
     } finally {
       setSubmitting(false);
     }
@@ -212,6 +221,11 @@ export default function CalendarioForm({ show, onHide, calendarioHook, editingHo
           {calendarioHook.error && (
             <Alert variant="danger" className="mb-3">
               {calendarioHook.error}
+            </Alert>
+          )}
+          {errors.submit && (
+            <Alert variant="danger" className="mb-3">
+              {errors.submit}
             </Alert>
           )}
           <Form onSubmit={handleSubmit}>
