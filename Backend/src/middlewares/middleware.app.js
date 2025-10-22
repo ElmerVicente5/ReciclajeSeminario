@@ -2,7 +2,11 @@ import {configJwt} from '../config/config.jwt.js';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '../generated/prisma/client.js';
 async function verifyTokenApp(req,res,next){
-    const token = req.headers['authorization']
+    let token = req.headers['authorization']
+    //console.log('token',token);
+
+    token = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+    //console.log('token parseado',token);
     if(!token){
         return res.status(401).json({message: 'No autorizado'});
     }
@@ -26,6 +30,7 @@ async function verifyTokenApp(req,res,next){
         req.userId = decoded.id;
         next();
     } catch (error) {
+        console.error('Error en verifyTokenApp:', error);
         return res.status(401).json({message: 'Unauthorized'});
     }
 }

@@ -117,4 +117,58 @@ async function obtenerMisPuntos(idUsuario){
     }
 }
 
-export { asignarPuntosUsuario, obtenerMisPuntos };
+
+async function obtenerPuntosPorCategoria(idUsuario) {
+    try {
+      // Agrupar puntos del usuario por categoría del tipo de residuo
+      const resultados = await prisma.puntosusuario.groupBy({
+        by: ['id_tipo_residuo'],
+        where: {
+          id_usuario: parseInt(idUsuario),
+        },
+        _sum: {
+          total_puntos: true,
+        },
+      });
+  
+      // Obtener los detalles de cada tipo de residuo (para acceder a su categoría)
+      const tiposResiduoIds = resultados.map(r => r.id_tipo_residuo);
+  
+      const tiposResiduo = await prisma.tiporesiduo.findMany({
+        where: { id: { in: tiposResiduoIds } },
+        select: {
+          id: true,
+          categoria: true,
+        },
+      });
+  
+      // Inicializar categorías con 0
+      const puntosPorCategoria = {
+        RECICLABLE: 0,
+        NO_RECICLABLE: 0,
+        ORGANICO: 0,
+        INCIERTO: 0,
+      };
+  
+      // Combinar los resultados y sumar por categoría
+      resultados.forEach(registro => {
+        const tipo = tiposResiduo.find(t => t.id === registro.id_tipo_residuo);
+        const categoria = tipo?.categoria || 'INCIERTO';
+        const puntos = registro._sum.total_puntos || 0;
+  
+        if (puntosPorCategoria[categoria] !== undefined) {
+          puntosPorCategoria[categoria] += puntos;
+        } else {
+          puntosPorCategoria[categoria] = puntos;
+        }
+      });
+  
+      return {
+        idUsuario: parseInt(idUsuario),
+        puntosPorCategoria,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+export { asignarPuntosUsuario, obtenerMisPuntos ,obtenerPuntosPorCategoria};

@@ -41,7 +41,6 @@ const upload = multer({
  *             type: object
  *             required:
  *               - file
- *               - idUsuario
  *             properties:
  *               file:
  *                 type: string

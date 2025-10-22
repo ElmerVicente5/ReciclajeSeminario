@@ -26,7 +26,7 @@ import clasificacionRouter from './src/routes/clasificacion.route.js';
 import routerPuntosPorUsuario from "./src/routes/puntosPorUsuaro.route.js";
 app.use(cors({
 
-  origin: '*',
+  origin: 'http://localhost:5173',
   methods: ['GET', 'POST','PUT','DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-api-key' , 'authorization']
 }));

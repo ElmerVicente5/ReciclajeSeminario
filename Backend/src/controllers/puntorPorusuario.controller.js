@@ -1,4 +1,4 @@
-import { obtenerMisPuntos } from '../services/puntosPorUsuario.service.js';
+import { obtenerMisPuntos ,obtenerPuntosPorCategoria} from '../services/puntosPorUsuario.service.js';
 
 const obtenerMisPuntosController = async (req, res) => {
    try {
@@ -42,4 +42,29 @@ const obtenerMisPuntosController = async (req, res) => {
    }
 }
 
-export { obtenerMisPuntosController };
+const obtenerPuntosPorCategoriaController = async (req, res) => {
+    try {
+        const { idUsuario } = req.params;
+        
+    // Validar que el idUsuario sea un número
+    if (!idUsuario || isNaN(parseInt(idUsuario))) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'ID de usuario inválido' 
+        });
+    }
+        
+        const result = await obtenerPuntosPorCategoria(idUsuario);
+        return res.status(200).json(result);
+    }
+    catch (error) {
+        console.error('Error en obtenerPuntosPorCategoriaController:', error);
+        return res.status(500).json({ 
+            success: false,
+            error: 'Error al obtener los puntos por categoría del usuario',
+            details: error.message 
+        });
+    }
+}
+
+export { obtenerMisPuntosController, obtenerPuntosPorCategoriaController };

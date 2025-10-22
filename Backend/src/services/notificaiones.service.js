@@ -1,84 +1,37 @@
 import { PrismaClient } from '../generated/prisma/client.js';
 const prisma = new PrismaClient();
-const TIPOALERTA={
+
+const TIPO_NOTIFICACION = {
     ALERTA: 'ALERTA',
     NOTIFICACION: 'NOTIFICACION',
     INFORMATIVA: 'INFORMATIVA',
     PROMOCIONAL: 'PROMOCIONAL'
-
-}
-const AUDIENCIA = {
-    ZONA: 'ZONA',
-    USUARIO: 'USUARIO',
-    ROL: 'ROL',
-    TODOS: 'TODOS'
 }
 
+// Crear notificación
 export const crearNotificacionServicio = async (notificacion) => {
     try {
-        console.log('Notificación recibida:', JSON.stringify(notificacion, null, 2));
-        
-        let fechaProgramada = null;
-        if (notificacion.programadaEn) {
-            const fecha = new Date(notificacion.programadaEn)
-            if (isNaN(fecha.getTime())) {
-                throw new Error(`Fecha programada inválida: ${notificacion.programadaEn}`);
+        const notificacionCreada = await prisma.notificaciones.create({
+            data: {
+                titulo: notificacion.titulo,
+                cuerpo: notificacion.cuerpo,
+                tipo: notificacion.tipo,
+                creado_por: notificacion.creado_por,
+                fecha_registro: new Date()
             }
-            fechaProgramada = fecha;
-        }
-        
-        const notificacionCreada = await prisma.$transaction(async (tx) => {
-            console.log('Iniciando transacción...');
-            
-            // Crear la notificación principal
-            const notificacionNueva = await tx.notificaciones.create({
-                data: {
-                     titulo: notificacion.titulo,
-                     cuerpo: notificacion.cuerpo,
-                     tipo: TIPOALERTA[notificacion.tipo],
-                     creado_por: notificacion.creadoPor,
-                     programada_en: fechaProgramada,
-                     enviada_en: new Date()
-                }
-            });
-            
-            console.log('Notificación creada con ID:', notificacionNueva.id);
-            console.log('Audiencia recibida:', notificacion.audiencia);
-            
-            // Crear registros de audiencia si se especifican
-            if (notificacion.audiencia && notificacion.audiencia.length > 0) {
-                const audienciaData = notificacion.audiencia.map(aud => ({
-                    notificacion_id: notificacionNueva.id,
-                    tipo_objetivo: aud.tipo_objetivo, // Usar directamente el valor enviado
-                    objetivo_id: aud.objetivo_id || null
-                }));
-                
-                console.log('Creando audiencia:', audienciaData);
-                
-                const audienciaCreada = await tx.audiencianotificaciones.createMany({
-                    data: audienciaData
-                });
-                
-                console.log('Audiencia creada:', audienciaCreada);
-            } else {
-                console.log('No se especificó audiencia');
-            }
-            
-            return true
         });
-        
-        if(!notificacionCreada){
-            throw new Error('No se pudo crear la notificacion');
-        }
+
         return {
-            message: 'Notificacion creada exitosamente',
-        }
+            message: 'Notificación creada exitosamente',
+            data: notificacionCreada
+        };
     } catch (error) {
         console.error('Error en crearNotificacionServicio:', error);
         throw error;
     }
 };
 
+// Obtener todas las notificaciones
 export const obtenerTodasLasNotificacionesServicio = async () => {
     try {
         const notificaciones = await prisma.notificaciones.findMany({
@@ -87,45 +40,131 @@ export const obtenerTodasLasNotificacionesServicio = async () => {
                 titulo: true,
                 cuerpo: true,
                 tipo: true,
-                programada_en: true,
-                enviada_en: true,
-                usuarios:{
+                fecha_registro: true,
+                usuarios: {
                     select: {
                         id: true,
                         nombre_completo: true,
-                        nombre_usuario: true,
-                        roles: {
-                            select: {
-                                id: true,
-                                nombre: true
-                            }
-                        }
+                        nombre_usuario: true
                     }
-                },
-                audiencianotificaciones: {
+                }
+            },
+            orderBy: {
+                fecha_registro: 'desc'
+            }
+        });
+
+        return {
+            message: 'Notificaciones obtenidas exitosamente',
+            data: notificaciones
+        };
+    } catch (error) {
+        console.error('Error en obtenerTodasLasNotificacionesServicio:', error);
+        throw error;
+    }
+};
+
+// Obtener notificación por ID
+export const obtenerNotificacionPorIdServicio = async (id) => {
+    try {
+        const notificacion = await prisma.notificaciones.findUnique({
+            where: { id: parseInt(id) },
+            select: {
+                id: true,
+                titulo: true,
+                cuerpo: true,
+                tipo: true,
+                fecha_registro: true,
+                usuarios: {
                     select: {
                         id: true,
-                        tipo_objetivo: true,
-                        objetivo_id: true
+                        nombre_completo: true,
+                        nombre_usuario: true
                     }
                 }
             }
         });
-        
-        const dataMapped = notificaciones.map(({usuarios, audiencianotificaciones, ...rest})=> {
-            return {
-                ...rest,
-                creado_por: usuarios,
-                audiencia: audiencianotificaciones
+
+        if (!notificacion) {
+            throw new Error('Notificación no encontrada');
+        }
+
+        return {
+            message: 'Notificación obtenida exitosamente',
+            data: notificacion
+        };
+    } catch (error) {
+        console.error('Error en obtenerNotificacionPorIdServicio:', error);
+        throw error;
+    }
+};
+
+// Actualizar notificación
+export const actualizarNotificacionServicio = async (id, datosActualizacion) => {
+    try {
+        // Verificar que la notificación existe
+        const notificacionExistente = await prisma.notificaciones.findUnique({
+            where: { id: parseInt(id) }
+        });
+
+        if (!notificacionExistente) {
+            throw new Error('Notificación no encontrada');
+        }
+
+        const notificacionActualizada = await prisma.notificaciones.update({
+            where: { id: parseInt(id) },
+            data: {
+                titulo: datosActualizacion.titulo,
+                cuerpo: datosActualizacion.cuerpo,
+                tipo: datosActualizacion.tipo
+            },
+            select: {
+                id: true,
+                titulo: true,
+                cuerpo: true,
+                tipo: true,
+                fecha_registro: true,
+                usuarios: {
+                    select: {
+                        id: true,
+                        nombre_completo: true,
+                        nombre_usuario: true
+                    }
+                }
             }
         });
-        
 
-        if(dataMapped.length === 0){
-            return [];
-        }
-        return dataMapped;
+        return {
+            message: 'Notificación actualizada exitosamente',
+            data: notificacionActualizada
+        };
     } catch (error) {
+        console.error('Error en actualizarNotificacionServicio:', error);
+        throw error;
+    }
+};
+
+// Eliminar notificación
+export const eliminarNotificacionServicio = async (id) => {
+    try {
+        // Verificar que la notificación existe
+        const notificacionExistente = await prisma.notificaciones.findUnique({
+            where: { id: parseInt(id) }
+        });
+
+        if (!notificacionExistente) {
+            throw new Error('Notificación no encontrada');
+        }
+
+        await prisma.notificaciones.delete({
+            where: { id: parseInt(id) }
+        });
+
+        return {
+            message: 'Notificación eliminada exitosamente'
+        };
+    } catch (error) {
+        console.error('Error en eliminarNotificacionServicio:', error);
         throw error;
     }
 };
