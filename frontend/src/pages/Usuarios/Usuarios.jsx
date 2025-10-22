@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { Modal, Button } from "react-bootstrap"
 import { FaUser } from "react-icons/fa"
 import useUsuarios from "../../hooks/useUsuarios"
 import useRoles from "../../hooks/useRoles"
@@ -249,6 +250,112 @@ export default function Usuarios() {
           }}
         />
       )}
+
+      {/* Modal de Detalle de Usuario */}
+      <Modal
+        show={!!detalleUsuario}
+        onHide={() => setDetalleUsuario(null)}
+        centered
+        size="md"
+        contentClassName="modern-modal"
+        style={{
+          '--bs-modal-bg': 'var(--color-bg-light)',
+          '--bs-modal-border-color': 'rgba(27, 185, 52, 0.2)'
+        }}
+      >
+        <Modal.Header
+          closeButton
+          closeVariant="white"
+          className="modern-modal-header"
+          style={{
+            background: 'linear-gradient(135deg, var(--color-bg-light), #f8fafc)',
+            borderBottom: '2px solid var(--color-bin-green)',
+            padding: '24px',
+            borderRadius: 'var(--border-radius) var(--border-radius) 0 0',
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: 'var(--font-size-h3)',
+              fontWeight: 'var(--font-weight-bold)',
+              color: 'var(--color-text-dark)',
+              fontFamily: 'var(--font-family-title)'
+            }}
+          >
+            Detalle de Usuario
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="modern-modal-body" style={{ padding: '32px' }}>
+          {detalleUsuario ? (
+            <table className={styles.detalleTable} style={{ width: '100%', margin: 0, borderCollapse: 'collapse', fontSize: 16 }}>
+              <tbody>
+                <tr>
+                  <th style={{ background: '#f1f5f9', color: 'var(--color-text-dark)', width: 180, fontWeight: 600, borderRight: '1px solid #e2e8f0', padding: '10px 14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nombre completo</th>
+                  <td style={{ background: 'var(--color-bg-light)', color: 'var(--color-table-text)', padding: '10px 14px' }}>{detalleUsuario.nombre_completo || detalleUsuario.nombre}</td>
+                </tr>
+                <tr>
+                  <th style={{ background: '#f1f5f9', color: 'var(--color-text-dark)', fontWeight: 600, borderRight: '1px solid #e2e8f0', padding: '10px 14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nombre de usuario</th>
+                  <td style={{ background: 'var(--color-bg-light)', color: 'var(--color-table-text)', padding: '10px 14px' }}>{detalleUsuario.nombre_usuario}</td>
+                </tr>
+                <tr>
+                  <th style={{ background: '#f1f5f9', color: 'var(--color-text-dark)', fontWeight: 600, borderRight: '1px solid #e2e8f0', padding: '10px 14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rol</th>
+                  <td style={{ background: 'var(--color-bg-light)', color: 'var(--color-table-text)', padding: '10px 14px' }}>{detalleUsuario.roles?.nombre || detalleUsuario.rol_id}</td>
+                </tr>
+                <tr>
+                  <th style={{ background: '#f1f5f9', color: 'var(--color-text-dark)', fontWeight: 600, borderRight: '1px solid #e2e8f0', padding: '10px 14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Zona</th>
+                  <td style={{ background: 'var(--color-bg-light)', color: 'var(--color-table-text)', padding: '10px 14px' }}>{detalleUsuario.zonas?.nombre || detalleUsuario.zona_id}</td>
+                </tr>
+                <tr>
+                  <th style={{ background: '#f1f5f9', color: 'var(--color-text-dark)', fontWeight: 600, borderRight: '1px solid #e2e8f0', padding: '10px 14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Estado</th>
+                  <td style={{ background: 'var(--color-bg-light)', color: 'var(--color-table-text)', padding: '10px 14px' }}>{detalleUsuario.estado}</td>
+                </tr>
+                <tr>
+                  <th style={{ background: '#f1f5f9', color: 'var(--color-text-dark)', fontWeight: 600, borderRight: '1px solid #e2e8f0', padding: '10px 14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ID</th>
+                  <td style={{ background: 'var(--color-bg-light)', color: 'var(--color-table-text)', padding: '10px 14px' }}>{detalleUsuario.id}</td>
+                </tr>
+              </tbody>
+            </table>
+          ) : null}
+        </Modal.Body>
+        <Modal.Footer
+          className="modern-modal-footer"
+          style={{
+            background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+            borderTop: '1px solid #e2e8f0',
+            padding: '20px 32px',
+            gap: '12px',
+            borderRadius: '0 0 var(--border-radius) var(--border-radius)',
+          }}
+        >
+          <Button
+            variant="outline-secondary"
+            onClick={() => setDetalleUsuario(null)}
+            className="modern-btn-secondary"
+            style={{
+              background: 'transparent',
+              border: '2px solid var(--color-text-gray)',
+              color: 'var(--color-text-gray)',
+              padding: '12px 24px',
+              borderRadius: 'var(--border-radius)',
+              fontWeight: 'var(--font-weight-medium)',
+              fontSize: 'var(--font-size-p)',
+              transition: 'all var(--transition-fast) ease',
+            }}
+            onMouseEnter={e => {
+              e.target.style.background = 'var(--color-text-gray)';
+              e.target.style.color = 'var(--color-text-white)';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={e => {
+              e.target.style.background = 'transparent';
+              e.target.style.color = 'var(--color-text-gray)';
+              e.target.style.transform = 'translateY(0)';
+            }}
+          >
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   )
 }
