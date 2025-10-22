@@ -195,7 +195,7 @@ export default function Dashboard() {
           >
             <h3 style={{ margin: 0, fontSize: '1.18rem', marginBottom: '18px', fontWeight: 700, color: '#388e3c', letterSpacing: 0.5 }}>
               Clasificación de residuos
-            </h3>
+            </h3>   
             {residuosLabels.length ? (
               <div style={{ width: '100%', maxWidth: 320, margin: '0 auto' }}>
                 <Doughnut
@@ -204,7 +204,7 @@ export default function Dashboard() {
                     datasets: [{
                       label: 'Cantidad',
                       data: residuosData,
-                      backgroundColor: ['#e8f5e9', '#388e3c', '#a5d6a7', '#43ea7c'],
+                      backgroundColor: ['#fff', '#388e3c', '#111', '#43ea7c'],
                       borderColor: '#388e3c',
                       borderWidth: 2,
                     }],
