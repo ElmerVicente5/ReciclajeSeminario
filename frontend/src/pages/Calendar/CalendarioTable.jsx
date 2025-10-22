@@ -46,7 +46,10 @@ const actionBtnStyle = {
 // Recibe calendarioHook y onEdit
 
 export default function CalendarioTable({ calendarioHook, onEdit }) {
-  const { calendario = [], diasSemana = [], handleEdit, handleDelete } = calendarioHook;
+  const { calendario = [] } = calendarioHook;
+  
+  // Array local de días de la semana para mostrar correctamente
+  const diasSemanaLocal = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
   // Paginación
   const rowsPerPage = 8;
@@ -86,18 +89,24 @@ export default function CalendarioTable({ calendarioHook, onEdit }) {
         <tbody>
           {paginatedData.map((c) => (
             <tr key={c.id} style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', color: '#263238' }}>
-              <td style={tdStyle}>{c.ruta_id}</td>
-              <td style={tdStyle}>{diasSemana[c.dia_semana]}</td>
-              <td style={tdStyle}>{c.hora_inicio?.slice(11, 16)}</td>
-              <td style={tdStyle}>{c.hora_fin?.slice(11, 16)}</td>
+              <td style={tdStyle}>
+                {c.rutas ? `${c.rutas.nombre}${c.rutas.zonas ? ` - ${c.rutas.zonas.nombre}` : ''}` : `Ruta ${c.ruta_id}`}
+              </td>
+              <td style={tdStyle}>{diasSemanaLocal[c.dia_semana] || 'Día inválido'}</td>
+              <td style={tdStyle}>
+                {c.hora_inicio?.includes('T') ? c.hora_inicio.slice(11, 16) : c.hora_inicio}
+              </td>
+              <td style={tdStyle}>
+                {c.hora_fin?.includes('T') ? c.hora_fin.slice(11, 16) : c.hora_fin}
+              </td>
               <td style={tdStyle}>{c.frecuencia}</td>
               <td style={tdStyle}>{c.notas}</td>
               <td style={tdStyle}>
                 <div className="d-flex flex-row gap-2 justify-content-center">
-                  <Button size="sm" style={{ ...actionBtnStyle, background: '#f0fdf4', color: '#16a34a', border: '1px solid #16a34a' }} onClick={() => { handleEdit(c); onEdit(); }}>
+                  <Button size="sm" style={{ ...actionBtnStyle, background: '#f0fdf4', color: '#16a34a', border: '1px solid #16a34a' }} onClick={() => onEdit(c)}>
                     <FaEdit size={15} />
                   </Button>
-                  <Button size="sm" style={{ ...actionBtnStyle, background: '#fff0f0', color: '#d42d2d', border: '1px solid #d42d2d' }} onClick={() => handleDelete(c.id)}>
+                  <Button size="sm" style={{ ...actionBtnStyle, background: '#fff0f0', color: '#d42d2d', border: '1px solid #d42d2d' }} onClick={() => calendarioHook.handleDelete(c.id)}>
                     <FaTrashAlt size={15} />
                   </Button>
                 </div>

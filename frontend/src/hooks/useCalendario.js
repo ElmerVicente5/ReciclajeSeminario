@@ -219,16 +219,44 @@ export function useCalendario() {
     setLoading(true);
     setError(null);
     try {
-      // Validar formato de hora si se proporciona
-      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-      if (updateData.hora_inicio && !timeRegex.test(updateData.hora_inicio)) {
-        throw new Error('La hora de inicio debe estar en formato HH:mm');
-      }
-      if (updateData.hora_fin && !timeRegex.test(updateData.hora_fin)) {
-        throw new Error('La hora de fin debe estar en formato HH:mm');
+      console.log('Hook actualizarHorario - Datos recibidos:', { id, updateData });
+      
+      // Validar datos requeridos
+      if (!updateData.ruta_id || (!updateData.dia_semana && updateData.dia_semana !== 0) || !updateData.hora_inicio || !updateData.hora_fin) {
+        throw new Error('Todos los campos obligatorios deben ser completados');
       }
 
+      // Validar formato de hora
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(updateData.hora_inicio) || !timeRegex.test(updateData.hora_fin)) {
+        throw new Error('Las horas deben estar en formato HH:mm');
+      }
+
+      // Validar día de la semana
+      if (updateData.dia_semana < 0 || updateData.dia_semana > 6) {
+        throw new Error('El día de la semana debe estar entre 0 (Domingo) y 6 (Sábado)');
+      }
+
+      // Validar que no exista cruce de horario en la misma ruta y día (excluyendo el horario actual)
+      const cruza = calendario.some(h =>
+        h.id !== parseInt(id) && // Excluir el horario que se está editando
+        h.ruta_id === parseInt(updateData.ruta_id) &&
+        h.dia_semana === parseInt(updateData.dia_semana) &&
+        (
+          // Cruce de horas: inicio o fin dentro del rango existente
+          (updateData.hora_inicio >= h.hora_inicio && updateData.hora_inicio < h.hora_fin) ||
+          (updateData.hora_fin > h.hora_inicio && updateData.hora_fin <= h.hora_fin) ||
+          // O el horario existente está dentro del nuevo
+          (updateData.hora_inicio <= h.hora_inicio && updateData.hora_fin >= h.hora_fin)
+        )
+      );
+      if (cruza) {
+        throw new Error('Ya existe un horario para esa ruta y día que cruza con el rango ingresado.');
+      }
+
+      console.log('Hook actualizarHorario - Enviando al backend:', updateData);
       const response = await apiAdmin.put(`/api/calendario/update/${id}`, updateData);
+      console.log('Hook actualizarHorario - Respuesta del backend:', response.data);
       
       // Refrescar la lista después de actualizar
       await obtenerCalendarioCompleto();
@@ -245,7 +273,7 @@ export function useCalendario() {
     } finally {
       setLoading(false);
     }
-  }, [obtenerCalendarioCompleto]);
+  }, [obtenerCalendarioCompleto, calendario]);
 
   const eliminarHorario = useCallback(async (id) => {
     setLoading(true);
