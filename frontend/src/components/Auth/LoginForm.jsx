@@ -115,14 +115,14 @@ export default function LoginForm({ onLogin }) {
             </button>
           </div>
           <div style={{ textAlign: "right", marginTop: 4 }}>
-            <a
+            {/* <a
               href="#"
               className={styles.registerLinkBtn}
               onClick={e => { e.preventDefault(); setShowRecover(true); }}
               tabIndex={0}
             >
               ¿Olvidaste tu contraseña?
-            </a>
+            </a> */}
           </div>
         </div>
         {(localError || error) && (

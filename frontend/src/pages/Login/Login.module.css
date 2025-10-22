@@ -1,7 +1,7 @@
 .loginLogoMuni {
   position: absolute;
   left: 16%; /* Alineado con el bote verde */
-  top: 32px;
+  top: -20px;
   width: 260px;
   height: auto;
   z-index: 1;
