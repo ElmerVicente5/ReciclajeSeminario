@@ -6,7 +6,6 @@ import L from "leaflet";
 import useAcopio from "../../hooks/useAcopio";
 import { obtenerZonas } from "../../services/api";
 
-// Icono del marcador
 const markerIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -50,12 +49,10 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     }
   }, [show]);
 
-  // Resetear mensaje de éxito al cerrar
   useEffect(() => {
     if (!show) setSuccessMessage("");
   }, [show]);
 
-  // Cargar datos en edición
   useEffect(() => {
     if (show) {
       if (isEditMode) {
@@ -127,7 +124,6 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     }
   };
 
-  // ✅ Validar todo incluyendo coordenadas
   const validateForm = () => {
     const lat = parseFloat(formData.latitud);
     const lng = parseFloat(formData.longitud);
