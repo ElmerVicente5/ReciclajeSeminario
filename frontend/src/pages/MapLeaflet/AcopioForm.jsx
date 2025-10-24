@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Alert, Row, Col } from "react-bootstrap";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css"; // Asegúrate de importar el CSS de Leaflet
+import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import useAcopio from "../../hooks/useAcopio";
-import { obtenerZonas } from "../../services/api"; // Importa la función para obtener zonas
+import { obtenerZonas } from "../../services/api";
 
-// Configurar el ícono del marcador
+// Icono del marcador
 const markerIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -28,12 +28,12 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     horario: "",
   });
   const [errors, setErrors] = useState({});
-  const [mapCenter, setMapCenter] = useState([0, 0]);
+  const [mapCenter, setMapCenter] = useState([14.5367, -91.6761]); // Retalhuleu
   const [markerPosition, setMarkerPosition] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(""); // Estado para la notificación de éxito
+  const [successMessage, setSuccessMessage] = useState("");
   const isEditMode = editingAcopio && editingAcopio.id;
 
-  // Cargar zonas al abrir el formulario
+  // Cargar zonas
   useEffect(() => {
     if (show) {
       const fetchZonas = async () => {
@@ -50,28 +50,37 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     }
   }, [show]);
 
-  // Limpia el mensaje de éxito al cerrar el formulario
+  // Resetear mensaje de éxito al cerrar
   useEffect(() => {
-    if (!show) {
-      setSuccessMessage(""); // Limpia el mensaje cuando el formulario se cierra
-    }
+    if (!show) setSuccessMessage("");
   }, [show]);
 
-  // Cargar datos si está en modo edición
+  // Cargar datos en edición
   useEffect(() => {
     if (show) {
       if (isEditMode) {
+        const lat = parseFloat(editingAcopio.latitud);
+        const lng = parseFloat(editingAcopio.longitud);
+        const latLngValid = !isNaN(lat) && !isNaN(lng);
+
         setFormData({
           tipo: editingAcopio.tipo || "",
           nombre: editingAcopio.nombre || "",
-          latitud: editingAcopio.latitud ? String(editingAcopio.latitud) : "",
-          longitud: editingAcopio.longitud ? String(editingAcopio.longitud) : "",
+          latitud: latLngValid ? String(lat) : "",
+          longitud: latLngValid ? String(lng) : "",
           direccion: editingAcopio.direccion || "",
           zona_id: editingAcopio.zona_id ? String(editingAcopio.zona_id) : "",
           horario: editingAcopio.horario || "",
         });
-        setMarkerPosition([editingAcopio.latitud, editingAcopio.longitud]);
-        setMapCenter([editingAcopio.latitud, editingAcopio.longitud]);
+
+        if (latLngValid) {
+          setMarkerPosition([lat, lng]);
+          setMapCenter([lat, lng]);
+        } else {
+          console.warn("📍 Centro sin coordenadas válidas.");
+          setMarkerPosition(null);
+          setMapCenter([14.5367, -91.6761]);
+        }
       } else {
         setFormData({
           tipo: "",
@@ -83,13 +92,13 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
           horario: "",
         });
         setMarkerPosition(null);
-        setMapCenter([0, 0]);
+        setMapCenter([14.5367, -91.6761]);
       }
       setErrors({});
     }
   }, [editingAcopio, show, isEditMode]);
 
-  // Solicitar permisos de geolocalización
+  // Geolocalización para modo crear
   useEffect(() => {
     if (show && !isEditMode) {
       navigator.geolocation.getCurrentPosition(
@@ -104,7 +113,6 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     }
   }, [show, isEditMode]);
 
-  // Manejar cambios en el formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -119,16 +127,28 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     }
   };
 
-  // Validar formulario
+  // ✅ Validar todo incluyendo coordenadas
   const validateForm = () => {
+    const lat = parseFloat(formData.latitud);
+    const lng = parseFloat(formData.longitud);
+    const zonaId = parseInt(formData.zona_id);
+
     const validation = validarDatosAcopio({
       ...formData,
-      latitud: formData.latitud ? parseFloat(formData.latitud) : null,
-      longitud: formData.longitud ? parseFloat(formData.longitud) : null,
-      zona_id: formData.zona_id ? parseInt(formData.zona_id) : null,
+      latitud: isNaN(lat) ? null : lat,
+      longitud: isNaN(lng) ? null : lng,
+      zona_id: isNaN(zonaId) ? null : zonaId,
     });
+
+    const newErrors = {};
+
+    if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio.";
+    if (!formData.tipo.trim()) newErrors.tipo = "El tipo es obligatorio.";
+    if (isNaN(lat)) newErrors.latitud = "Debe seleccionar la ubicación en el mapa.";
+    if (isNaN(lng)) newErrors.longitud = "Debe seleccionar la ubicación en el mapa.";
+    if (isNaN(zonaId)) newErrors.zona_id = "Debe seleccionar una zona válida.";
+
     if (!validation.valido) {
-      const newErrors = {};
       validation.errores.forEach((error) => {
         if (error.includes("nombre")) newErrors.nombre = error;
         if (error.includes("tipo")) newErrors.tipo = error;
@@ -136,13 +156,12 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
         if (error.includes("longitud")) newErrors.longitud = error;
         if (error.includes("zona")) newErrors.zona_id = error;
       });
-      setErrors(newErrors);
-      return false;
     }
-    return true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // Manejar envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -150,10 +169,10 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     const payload = {
       tipo: formData.tipo,
       nombre: formData.nombre.trim(),
-      latitud: formData.latitud ? parseFloat(formData.latitud) : null,
-      longitud: formData.longitud ? parseFloat(formData.longitud) : null,
+      latitud: parseFloat(formData.latitud),
+      longitud: parseFloat(formData.longitud),
       direccion: formData.direccion || null,
-      zona_id: formData.zona_id ? parseInt(formData.zona_id) : null,
+      zona_id: parseInt(formData.zona_id),
       horario: formData.horario || null,
     };
 
@@ -162,8 +181,8 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
         await actualizarAcopio(editingAcopio.id, payload);
       } else {
         await crearAcopio(payload);
-        setSuccessMessage("Centro de acopio creado exitosamente."); // Establece el mensaje de éxito
-        setTimeout(() => setSuccessMessage(""), 5000); // Limpia el mensaje después de 5 segundos
+        setSuccessMessage("Centro de acopio creado exitosamente.");
+        setTimeout(() => setSuccessMessage(""), 5000);
       }
       onSuccess && onSuccess();
     } catch (err) {
@@ -171,7 +190,6 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
     }
   };
 
-  // Componente para manejar eventos del mapa
   function MapClickHandler() {
     useMapEvents({
       click(e) {
@@ -196,15 +214,13 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
       </Modal.Header>
       <Modal.Body>
         {successMessage && (
-          <Alert variant="success" onClose={() => setSuccessMessage("")} dismissible>
-            <i className="fas fa-check-circle me-2"></i>
-            {successMessage}
+          <Alert variant="success" dismissible onClose={() => setSuccessMessage("")}>
+            ✅ {successMessage}
           </Alert>
         )}
         {error && (
           <Alert variant="danger">
-            <i className="fas fa-exclamation-circle me-2"></i>
-            {error}
+            ⚠️ {error}
           </Alert>
         )}
         <Form onSubmit={handleSubmit}>
@@ -238,6 +254,7 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
               </Form.Group>
             </Col>
           </Row>
+
           <Row>
             <Col md={12}>
               <Form.Group className="mb-3">
@@ -250,19 +267,18 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
                 >
                   <option value="">Seleccione una zona</option>
                   {zonas.map((zona) => (
-                    <option key={zona.id} value={zona.id}>
-                      {zona.nombre}
-                    </option>
+                    <option key={zona.id} value={zona.id}>{zona.nombre}</option>
                   ))}
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">{errors.zona_id}</Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
+
           <Row>
             <Col md={12}>
               <Form.Group className="mb-3">
-                <Form.Label>Seleccionar ubicación en el mapa</Form.Label>
+                <Form.Label>Seleccionar ubicación en el mapa *</Form.Label>
                 <div style={{ height: "300px", width: "100%" }}>
                   <MapContainer center={mapCenter} zoom={13} style={{ height: "100%", width: "100%" }}>
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -270,9 +286,13 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
                     <MapClickHandler />
                   </MapContainer>
                 </div>
+                {(errors.latitud || errors.longitud) && (
+                  <div className="text-danger mt-1">Debe seleccionar una ubicación en el mapa.</div>
+                )}
               </Form.Group>
             </Col>
           </Row>
+
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
@@ -305,6 +325,7 @@ export default function AcopioForm({ show, onHide, editingAcopio = null, onSucce
               </Form.Group>
             </Col>
           </Row>
+
           <div className="text-end">
             <Button variant="secondary" onClick={onHide} className="me-2">
               Cancelar
