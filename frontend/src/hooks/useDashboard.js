@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 
-const API_BASE_URL = "https://reciclajeseminario.onrender.com";
+// Leer la URL base desde variables de entorno Vite: VITE_API_URL
+// Mantener fallback a localhost para desarrollo y añadir la ruta `/api` si no está incluida
+const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'http://localhost:8000';
 
 export function useDashboard(fechaInicio, fechaFin) {
   const [data, setData] = useState(null);
@@ -40,8 +42,8 @@ export function useDashboard(fechaInicio, fechaFin) {
       // Usando el endpoint:
       // GET http://localhost:8000/api/dashboard/?fechaInicio=YYYY-MM-DD&fechaFin=YYYY-MM-DD
       // con headers Authorization: Bearer <token> y Content-Type: application/json
-      const endpoint = `${API_BASE_URL}/dashboard/?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
-    //   console.log("Probando endpoint:", endpoint);
+      const endpoint = `${API_BASE_URL}/api/dashboard/?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
+      console.log("Probando endpoint:", endpoint);
 
       const response = await fetch(endpoint, {
         method: "GET",
