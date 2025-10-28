@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8000';
+// Leer la URL base desde variables de entorno (Vite): VITE_API_URL
+const BASE_URL = import.meta?.env?.VITE_API_URL || 'https://reciclajeseminario.onrender.com';
 
 // Cliente para Admin (con token dinámico)
 const apiAdmin = axios.create({
