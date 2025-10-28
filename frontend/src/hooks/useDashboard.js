@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 
 // Leer la URL base desde variables de entorno Vite: VITE_API_URL
 // Mantener fallback a localhost para desarrollo y añadir la ruta `/api` si no está incluida
-const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}`;
 
 export function useDashboard(fechaInicio, fechaFin) {
   const [data, setData] = useState(null);

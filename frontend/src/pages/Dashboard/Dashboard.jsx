@@ -38,18 +38,33 @@ export default function Dashboard() {
   const [fechaFin, setFechaFin] = useState(getCurrentMonthRange().end);
 
   const { data: dashboardData, loading, error, refresh } = useDashboard(fechaInicio, fechaFin);
+ // console.log(dashboardData);
 
-  // Elimina los returns que rompen el layout
-  // if (error) return <div>{error}</div>;
-  // if (!dashboardData) return null;
 
   // Datos de residuos
-  const residuosLabels = dashboardData?.tipos_residuos?.map(r => r.categoria) || [];
-  const residuosData = dashboardData?.tipos_residuos?.map(r => r.cantidad) || [];
+
+  
+  const colorPorCategoria = {
+    NO_RECICLABLE: "#000000", // negro
+    RECICLABLE: "#FFFFFF",    // blanco
+    ORGANICO: "#008000",      // verde
+    INCIERTO: "#9e9e9e",      // gris
+  };
+  
+  const residuosFiltrados = dashboardData?.tipos_residuos?.filter(
+    (r) => r.categoria !== "INCIERTO"
+  ) || [];
+  
+  // Etiquetas, datos y colores basados en los filtrados
+  const residuosLabels = residuosFiltrados.map(r => r.categoria);
+  const residuosData = residuosFiltrados.map(r => r.cantidad);
+  const residuosColors = residuosFiltrados.map(
+    (r) => colorPorCategoria[r.categoria] || "#ccc"
+  );
 
   // Datos de zonas (ordenados de mayor a menor por puntos)
-  let zonasLabels = dashboardData?.zonas?.map(z => z.zonas.nombre) || [];
-  let zonasData = dashboardData?.zonas?.map(z => z.puntos) || [];
+  let zonasLabels = dashboardData?.zonas?.map(z => z.nombre) || [];
+  let zonasData = dashboardData?.zonas?.map(z => z.total_puntos) || [];
   // Ordenar zonas por puntos descendente
   if (zonasLabels.length && zonasData.length) {
     const zonasOrdenadas = zonasLabels.map((label, idx) => ({ label, puntos: zonasData[idx] }))
@@ -60,8 +75,8 @@ export default function Dashboard() {
 
   // Zona con más puntos
   const zonaTop = dashboardData?.zonas?.length
-    ? dashboardData.zonas.reduce((prev, curr) => (prev.puntos > curr.puntos ? prev : curr))
-    : null;
+  ? dashboardData.zonas.reduce((prev, curr) => (prev.total_puntos > curr.total_puntos ? prev : curr))
+  : null;
 
   const handleFilter = () => refresh();
   const colores = [
@@ -81,6 +96,7 @@ export default function Dashboard() {
     "#388e3c", // Verde reciclaje
     "#43ea7c"  // Verde claro reciclaje
   ];
+
 
   return (
     <div className={styles.dashboardContainer} style={{ background: '#f4f6f8', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
@@ -204,14 +220,21 @@ export default function Dashboard() {
                     datasets: [{
                       label: 'Cantidad',
                       data: residuosData,
-                      backgroundColor: ['#fff', '#388e3c', '#111', '#43ea7c'],
+                      backgroundColor: residuosColors,
                       borderColor: '#388e3c',
                       borderWidth: 2,
                     }],
                   }}
                   options={{
                     responsive: true,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#263238', font: { size: 14, weight: 'bold' } } } },
+                    plugins: { legend: {
+                       position: 'bottom',
+                       align: "start", 
+                       labels: { color: '#263238',
+                         font: { size: 14, weight: 'bold' }
+                         } 
+                        } 
+                      },
                     maintainAspectRatio: false
                   }}
                   style={{ height: 240, width: '100%' }}
