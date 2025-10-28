@@ -3,91 +3,133 @@ const prisma = new PrismaClient();
 
 export const obtenerMetricasDashboard = async (fechaInicio, fechaFin) => {
   try {
-    // Filtro de fechas obligatorio
     const fechaFilter = {
       gte: new Date(fechaInicio),
       lte: new Date(fechaFin),
     };
 
-    // Total de usuarios en rango
+  // usuarios
     const totalUsuarios = await prisma.usuarios.count({
-      where: { fecha_registro: fechaFilter }
-    });
-
-    // Usuarios activos en rango
-    const usuariosActivos = await prisma.usuarios.count({
-      where: { estado: "ACTIVO", fecha_registro: fechaFilter }
-    });
-
-    // Usuarios por rol en rango
-    const usuariosPorRol = await prisma.usuarios.groupBy({
-      by: ["rol_id"],
-      _count: { rol_id: true },
-      where: { fecha_registro: fechaFilter }
-    });
-
-    // Puntos por zona en rango
-    const puntosPorZona = await prisma.puntosporzona.findMany({
-      select: {
-        zonas: { select: { nombre: true } },
-        puntos: true,
-        periodo: true
-      },
-      where: { fecha_registro: fechaFilter }
-    });
-
-    // Eventos por categoría en rango
-    const eventosRaw = await prisma.eventospuntosporzona.findMany({
       where: { fecha_registro: fechaFilter },
-      select: {
-        tiporesiduo: { select: { categoria: true } }
-      }
     });
 
-    const eventosPorCategoria = eventosRaw.reduce((acc, curr) => {
-      const categoria = curr.tiporesiduo?.categoria || "Sin categoría";
-      acc[categoria] = acc[categoria] ? acc[categoria] + 1 : 1;
-      return acc;
-    }, {});
+    const usuariosActivos = await prisma.usuarios.count({
+      where: { estado: "ACTIVO", fecha_registro: fechaFilter },
+    });
 
-    const eventosPorCategoriaArray = Object.entries(eventosPorCategoria).map(
-      ([categoria, cantidad]) => ({ categoria, cantidad })
+    // puntos por zona
+    const usuariosConPuntos = await prisma.usuarios.findMany({
+      where: {
+        zona_id: { not: null },
+        estado: "ACTIVO",
+      },
+      include: {
+        zonas: { select: { id: true, nombre: true } },
+        puntosusuario: {
+          where: { fecha_registro: fechaFilter },
+          select: { total_puntos: true },
+        },
+      },
+    });
+
+    const puntosPorZonaMap = {};
+    for (const usuario of usuariosConPuntos) {
+      if (usuario.zonas) {
+        const zonaId = usuario.zonas.id;
+        const zonaNombre = usuario.zonas.nombre;
+        const puntosUsuario = usuario.puntosusuario.reduce(
+          (sum, p) => sum + (p.total_puntos || 0),
+          0
+        );
+        if (!puntosPorZonaMap[zonaId]) {
+          puntosPorZonaMap[zonaId] = {
+            zona_id: zonaId,
+            nombre: zonaNombre,
+            total_puntos: 0,
+          };
+        }
+        puntosPorZonaMap[zonaId].total_puntos += puntosUsuario;
+      }
+    }
+
+    const puntosPorZona = Object.values(puntosPorZonaMap).filter(
+      (z) => z.total_puntos > 0
     );
 
-    // Notificaciones en rango
-    const notificaciones = {
-      enviadas: await prisma.notificaciones.count({
-        where: { fecha_registro: fechaFilter }
-      }),
-      pendientes: await prisma.notificaciones.count({
-        where: { fecha_registro: fechaFilter, enviada_en: null }
-      })
+    
+    // puntos por tipo de residuo
+    const CATEGORIAS = {
+      RECICLABLE: "RECICLABLE",
+      NO_RECICLABLE: "NO_RECICLABLE",
+      ORGANICO: "ORGANICO",
+      INCIERTO: "INCIERTO",
     };
+    const categoriasValidas = Object.values(CATEGORIAS);
 
-    // Cantidad de centros de acopio en rango
-    const centrosAcopio = await prisma.centrosacopio.count({
-      where: { fecha_registro: fechaFilter }
+    const puntosPorTipo = await prisma.puntosusuario.findMany({
+      where: {
+        fecha_registro: fechaFilter,
+        tiporesiduo: {
+          categoria: {
+            in: categoriasValidas, 
+          },
+        },
+      },
+      select: {
+        total_puntos: true,
+        tiporesiduo: {
+          select: { categoria: true },
+        },
+      },
     });
 
-    // Cantidad de rutas en rango
+    // Agrupamos los puntos por categoría
+    const categoriasMap = {};
+    for (const punto of puntosPorTipo) {
+      const categoria = punto.tiporesiduo?.categoria;
+      if (!categoria) continue;
+      if (!categoriasMap[categoria]) categoriasMap[categoria] = 0;
+      categoriasMap[categoria] += punto.total_puntos || 0;
+    }
+
+    // Aseguramos que todas las categorías válidas aparezcan (aunque sea con 0)
+    const eventosPorCategoriaArray = categoriasValidas.map((categoria) => ({
+      categoria,
+      cantidad: categoriasMap[categoria] || 0,
+    }));
+
+ 
+    const totalNotificaciones = await prisma.notificaciones.count({
+      where: { fecha_registro: fechaFilter },
+    });
+
+    const notificaciones = {
+      enviadas: totalNotificaciones || 0,
+    };
+
+    
+    const centrosAcopio = await prisma.centrosacopio.count({
+      where: { fecha_registro: fechaFilter },
+    });
+
     const rutas = await prisma.rutas.count({
-      where: { fecha_registro: fechaFilter }
+      where: { fecha_registro: fechaFilter },
     });
 
     return {
       usuarios: {
-        total: totalUsuarios,
-        activos: usuariosActivos,
-        inactivos: totalUsuarios - usuariosActivos,
-        porRol: usuariosPorRol
+        total: totalUsuarios || 0,
+        activos: usuariosActivos || 0,
+        inactivos: (totalUsuarios - usuariosActivos) || 0,
       },
-      zonas: puntosPorZona,
-      tipos_residuos: eventosPorCategoriaArray,
+      zonas: puntosPorZona || [],
+      tipos_residuos: eventosPorCategoriaArray || [],
       notificaciones,
-      centros_acopio: centrosAcopio,
-      rutas
+      centros_acopio: centrosAcopio || 0,
+      rutas: rutas || 0,
     };
   } catch (error) {
-    throw error;
+    console.error("Error al obtener métricas del dashboard:", error);
+    throw new Error("Error al obtener métricas del dashboard");
   }
 };

@@ -37,7 +37,6 @@ model usuarios {
   @@index([zona_id], map: "idx_usuarios_zona")
 }
 
-
 model calendariorecoleccion {
   id             Int       @id @default(autoincrement())
   ruta_id        Int
@@ -100,16 +99,16 @@ model eventospuntosporzona {
 }
 
 model notificaciones {
-  id             Int       @id @default(autoincrement())
-  titulo          String
-  cuerpo          String?
-  tipo            String?
-  creado_por      Int?
-  fecha_registro  DateTime? @default(now()) @db.Timestamp(6)
-  usuarios        usuarios? @relation(fields: [creado_por], references: [id], onUpdate: NoAction)
+  id                      Int                       @id @default(autoincrement())
+  titulo                  String
+  cuerpo                  String?
+  tipo                    String?
+  creado_por              Int?
+  fecha_registro          DateTime?                 @default(now()) @db.Timestamp(6)
+  audiencianotificaciones audiencianotificaciones[]
+  usuarios                usuarios?                 @relation(fields: [creado_por], references: [id], onUpdate: NoAction)
 
   @@index([tipo], map: "idx_notificaciones_tipo")
-  @@index([fecha_registro], map: "idx_notificaciones_fecha")
 }
 
 model puntosporzona {
@@ -179,4 +178,16 @@ model puntosusuario {
   fecha_registro  DateTime?   @default(now()) @db.Timestamp(6)
   tiporesiduo     tiporesiduo @relation(fields: [id_tipo_residuo], references: [id], onDelete: Cascade, map: "fk_tipo_residuo")
   usuarios        usuarios    @relation(fields: [id_usuario], references: [id], onDelete: Cascade, map: "fk_usuario")
+}
+
+model audiencianotificaciones {
+  id              Int            @id @default(autoincrement())
+  notificacion_id Int
+  tipo_objetivo   String
+  objetivo_id     Int?
+  fecha_registro  DateTime?      @default(now()) @db.Timestamp(6)
+  notificaciones  notificaciones @relation(fields: [notificacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([notificacion_id], map: "idx_audiencianotificaciones_notificacion")
+  @@index([tipo_objetivo, objetivo_id], map: "idx_audiencianotificaciones_objeto")
 }
