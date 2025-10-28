@@ -28,7 +28,7 @@ class ClasificacionService {
    * @param {string} mimeType - Tipo MIME de la imagen
    * @returns {Promise<Object>} Resultado de la clasificación
    */
-  async clasificarImagen(filePath, mimeType,idUsuario) {
+  async clasificarImagen(filePath, mimeType, idUsuario) {
     try {
       const dataUrl = this.fileToDataURL(filePath, mimeType);
 
@@ -42,24 +42,24 @@ class ClasificacionService {
                 type: "input_text",
                 text:
                   "Eres un especialista en reciclaje y gestión de residuos. " +
-                "Tu tarea es analizar imágenes de objetos domésticos y clasificarlos en una de estas categorías:\n" +
-                "- RECICLABLE: Materiales que pueden ser reciclados (plásticos reciclables, papel, cartón, vidrio, metales)\n" +
-                "- NO_RECICLABLE: Materiales que no pueden reciclarse (plásticos no reciclables, materiales contaminados, compuestos)\n" +
-                "- ORGANICO: Residuos biodegradables de origen vegetal o animal (restos de comida, cáscaras, hojas, residuos de jardín)\n" +
-                "- INCIERTO: Cuando no puedes determinar con seguridad la categoría\n\n" +
-                "Debes identificar el material probable, el contenedor/bote apropiado, " +
-                "y los pasos de preparación (p.ej., enjuagar, retirar tapas, secar, aplastar, separar componentes). " +
-                "Si hay incertidumbre, dilo y ofrece la mejor recomendación. " +
-                "Responde SIEMPRE en español y SOLO con un JSON siguiendo exactamente este esquema:\n" +
-                "{\n" +
-                '  "categoria": "RECICLABLE|NO_RECICLABLE|ORGANICO|INCIERTO",\n' +
-                '  "material_probable": "string",\n' +
-                '  "nivel_confianza": 0.0-1.0,\n' +
-                '  "bote_sugerido": "plástico|papel-cartón|vidrio|metal|orgánico|no reciclable|punto limpio",\n' +
-                '  "instrucciones_preparacion": ["paso 1", "paso 2", "..."],\n' +
-                '  "advertencias": ["opcional"],\n' +
-                '  "notas": "opcional"\n' +
-                "}",
+                  "Tu tarea es analizar imágenes de objetos domésticos y clasificarlos en una de estas categorías:\n" +
+                  "- RECICLABLE: Materiales que pueden ser reciclados (plásticos reciclables, papel, cartón, vidrio, metales)\n" +
+                  "- NO_RECICLABLE: Materiales que no pueden reciclarse (plásticos no reciclables, materiales contaminados, compuestos)\n" +
+                  "- ORGANICO: Residuos biodegradables de origen vegetal o animal (restos de comida, cáscaras, hojas, residuos de jardín)\n" +
+                  "- INCIERTO: Cuando no puedes determinar con seguridad la categoría\n\n" +
+                  "Debes identificar el material probable, el contenedor/bote apropiado, " +
+                  "y los pasos de preparación (p.ej., enjuagar, retirar tapas, secar, aplastar, separar componentes). " +
+                  "Si hay incertidumbre, dilo y ofrece la mejor recomendación. " +
+                  "Responde SIEMPRE en español y SOLO con un JSON siguiendo exactamente este esquema:\n" +
+                  "{\n" +
+                  '  "categoria": "RECICLABLE|NO_RECICLABLE|ORGANICO|INCIERTO",\n' +
+                  '  "material_probable": "string",\n' +
+                  '  "nivel_confianza": 0.0-1.0,\n' +
+                  '  "bote_sugerido": "plástico|papel-cartón|vidrio|metal|orgánico|no reciclable|punto limpio",\n' +
+                  '  "instrucciones_preparacion": ["paso 1", "paso 2", "..."],\n' +
+                  '  "advertencias": ["opcional"],\n' +
+                  '  "notas": "opcional"\n' +
+                  "}",
               },
             ],
           },
@@ -69,9 +69,9 @@ class ClasificacionService {
               {
                 type: "input_text",
                 text:
-                   "Analiza la imagen y clasifica el objeto en una de estas categorías: RECICLABLE, NO_RECICLABLE, ORGANICO, o INCIERTO. " +
-                    "Si es un residuo orgánico (comida, cáscaras, restos vegetales), usa la categoría ORGANICO. " +
-                    "Devuelve SOLO el JSON solicitado, sin texto adicional.",
+                  "Analiza la imagen y clasifica el objeto en una de estas categorías: RECICLABLE, NO_RECICLABLE, ORGANICO, o INCIERTO. " +
+                  "Si es un residuo orgánico (comida, cáscaras, restos vegetales), usa la categoría ORGANICO. " +
+                  "Devuelve SOLO el JSON solicitado, sin texto adicional.",
               },
               {
                 type: "input_image",
@@ -98,11 +98,9 @@ class ClasificacionService {
         }
       }
 
-      if (!idUsuario) {
- await asignarPuntosUsuario(idUsuario, parsed);
+      if (idUsuario) {
+        await asignarPuntosUsuario(idUsuario, parsed);
       }
-        
-      
 
       return {
         success: true,
